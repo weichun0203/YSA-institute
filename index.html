@@ -1,0 +1,267 @@
+import React, { useState, useEffect } from 'react';
+import { 
+  User, 
+  Heart, 
+  CheckCircle2, 
+  AlertCircle,
+  Calendar,
+  Sparkles,
+  Loader2,
+  Trophy,
+  Flame,
+  Check
+} from 'lucide-react';
+
+// --- 配置區 ---
+// 請在此輸入你的 Google Apps Script 部署後的 Web App URL
+const GOOGLE_SHEET_WEBAPP_URL = ""; 
+// 請在此輸入你的 LINE LIFF ID
+const LIFF_ID = ""; 
+
+const QUOTES = [
+  "凡事都有定期，天下萬務都有定時。",
+  "你的日子如何，你的力量也必如何。",
+  "應當一無掛慮，只要凡事藉著禱告、祈求，和感謝。",
+  "忘記背後，努力面前的，向著標竿直跑。",
+  "愛是恆久忍耐，又有恩慈。",
+  "神就是愛，住在愛裡面的，就住在神裡面。",
+  "尋找，就尋見；敲門，就給你們開門。",
+  "凡勞苦擔重擔的人可以到我這裡來，我就使你們得安息。",
+  "你們要先求他的國和他的義，這些東西都要加給你們了。",
+  "靠著那加給我力量的，凡事都能做。"
+];
+
+export default function App() {
+  const [liffProfile, setLiffProfile] = useState(null);
+  const [status, setStatus] = useState('idle'); // idle, loading, success, error
+  const [errorMessage, setErrorMessage] = useState('');
+  const [quote, setQuote] = useState("");
+  const [todayDate, setTodayDate] = useState("");
+  const [stats, setStats] = useState({ yearly: 0, consecutive: 0 });
+
+  // 1. 初始化資料與載入 SDK
+  useEffect(() => {
+    const randomIdx = Math.floor(Math.random() * QUOTES.length);
+    setQuote(QUOTES[randomIdx]);
+
+    const now = new Date();
+    setTodayDate(`${now.getFullYear()}年${now.getMonth() + 1}月${now.getDate()}日`);
+
+    const loadScripts = async () => {
+      const loadScript = (src) => new Promise((resolve) => {
+        const s = document.createElement('script');
+        s.src = src;
+        s.async = true;
+        s.onload = resolve;
+        document.body.appendChild(s);
+      });
+
+      await loadScript("https://static.line-scdn.net/liff/edge/2/sdk.js");
+      await loadScript("https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js");
+
+      if (window.liff) {
+        try {
+          await window.liff.init({ liffId: LIFF_ID || "YOUR-LIFF-ID" });
+          if (!window.liff.isLoggedIn()) {
+            window.liff.login();
+          } else {
+            const profile = await window.liff.getProfile();
+            setLiffProfile(profile);
+          }
+        } catch (err) {
+          console.error("LIFF Init Error:", err);
+        }
+      }
+    };
+    loadScripts();
+  }, []);
+
+  // 2. 灑花特效
+  const fireConfetti = () => {
+    if (window.confetti) {
+      const duration = 3 * 1000;
+      const animationEnd = Date.now() + duration;
+      const defaults = { startVelocity: 30, spread: 360, ticks: 60, zIndex: 0 };
+
+      const randomInRange = (min, max) => Math.random() * (max - min) + min;
+
+      const interval = setInterval(function() {
+        const timeLeft = animationEnd - Date.now();
+        if (timeLeft <= 0) return clearInterval(interval);
+
+        const particleCount = 50 * (timeLeft / duration);
+        window.confetti({ ...defaults, particleCount, origin: { x: randomInRange(0.1, 0.3), y: Math.random() - 0.2 } });
+        window.confetti({ ...defaults, particleCount, origin: { x: randomInRange(0.7, 0.9), y: Math.random() - 0.2 } });
+      }, 250);
+    }
+  };
+
+  // 3. 簽到處理
+  const handleCheckIn = async () => {
+    if (!liffProfile || status === 'loading') return;
+    setStatus('loading');
+    
+    const now = new Date();
+    const punchData = {
+      userId: liffProfile.userId,
+      displayName: liffProfile.displayName,
+      timestamp: now.toISOString()
+    };
+
+    try {
+      if (!GOOGLE_SHEET_WEBAPP_URL) {
+        // 模擬測試模式
+        setTimeout(() => {
+          setStats({ yearly: 15, consecutive: 5 });
+          fireConfetti();
+          setStatus('success');
+        }, 2000);
+        return;
+      }
+
+      const response = await fetch(GOOGLE_SHEET_WEBAPP_URL, {
+        method: 'POST',
+        body: JSON.stringify(punchData)
+      });
+      const result = await response.json();
+      
+      if (result.status === "success") {
+        setStats({
+          yearly: result.yearlyCount || 0,
+          consecutive: result.consecutiveDays || 0
+        });
+        fireConfetti();
+        setStatus('success');
+      } else {
+        throw new Error("簽到回應異常");
+      }
+    } catch (err) {
+      console.error(err);
+      setErrorMessage('簽到成功但無法讀取回報，或網路異常');
+      setStatus('error');
+    }
+  };
+
+  return (
+    <div className="min-h-screen bg-[#FDF8F3] text-[#5D4E46] font-sans overflow-x-hidden">
+      <div className="fixed top-0 left-0 w-full h-1.5 bg-gradient-to-r from-rose-200 via-orange-200 to-amber-200 z-50" />
+      
+      {/* Header */}
+      <header className="max-w-md mx-auto pt-14 pb-8 px-6 flex flex-col items-center text-center">
+        <h1 className="text-xl font-bold tracking-[0.2em] text-[#8C7465] mb-6 drop-shadow-sm">
+          桃園支會年輕單成福音研究所
+        </h1>
+        {liffProfile?.pictureUrl ? (
+          <img 
+            src={liffProfile.pictureUrl} 
+            alt="Profile" 
+            className="w-20 h-20 rounded-full border-4 border-white shadow-lg mb-4 animate-in fade-in zoom-in duration-1000"
+          />
+        ) : (
+          <div className="w-20 h-20 rounded-full bg-rose-50 flex items-center justify-center mb-4 border-4 border-white shadow-sm">
+            <User className="w-10 h-10 text-rose-200" />
+          </div>
+        )}
+        <div className="px-4 max-w-[300px]">
+          <p className="text-sm text-[#A68F81] leading-relaxed italic font-serif">
+            「 {quote} 」
+          </p>
+        </div>
+      </header>
+
+      <main className="max-w-md mx-auto px-6 pb-20">
+        <div className="bg-white rounded-[3.5rem] p-10 shadow-[0_25px_70px_-15px_rgba(140,116,101,0.18)] border border-rose-50/50 flex flex-col items-center relative transition-all duration-500">
+          
+          <div className="flex items-center gap-2 mb-10 bg-orange-50/60 px-6 py-2.5 rounded-full border border-orange-100/50">
+            <Calendar className="w-4 h-4 text-orange-400" />
+            <span className="text-xs tracking-[0.1em] text-orange-500 font-bold uppercase">{todayDate}</span>
+          </div>
+          
+          <div className="relative mb-12 w-full flex flex-col items-center">
+            {/* 中央旋轉/狀態圓框 */}
+            <div className={`w-52 h-52 rounded-full border-[1.5px] flex flex-col items-center justify-center transition-all duration-1000 relative ${
+              status === 'loading' ? 'border-orange-300 bg-orange-50/20' : 
+              status === 'success' ? 'border-emerald-200 bg-emerald-50/30 scale-110' : 
+              'border-slate-100 bg-slate-50/20'
+            }`}>
+              {status === 'loading' ? (
+                <div className="flex flex-col items-center gap-3">
+                  <Loader2 className="w-12 h-12 text-orange-400 animate-spin" />
+                  <p className="text-[10px] text-orange-400 tracking-widest animate-pulse">簽到中...</p>
+                </div>
+              ) : status === 'success' ? (
+                <div className="text-center animate-in zoom-in duration-500 flex flex-col items-center">
+                  <div className="bg-emerald-400 rounded-full p-3 mb-3 shadow-lg shadow-emerald-100">
+                    <Check className="w-10 h-10 text-white stroke-[3]" />
+                  </div>
+                  <p className="text-base font-bold text-emerald-600 tracking-[0.2em]">簽到成功！</p>
+                </div>
+              ) : (
+                <div className="text-center px-4 animate-in fade-in duration-700">
+                  <p className="text-xs text-slate-400 mb-1 tracking-widest uppercase">Welcome</p>
+                  <p className="text-xl font-bold text-[#8C7465] break-all leading-tight">
+                    {liffProfile?.displayName || "Loading..."}
+                  </p>
+                  <Sparkles className="w-5 h-5 text-amber-300 mx-auto mt-4 animate-pulse" />
+                </div>
+              )}
+            </div>
+
+            {/* 成功後下滑出的統計數據 */}
+            {status === 'success' && (
+              <div className="mt-8 w-full flex flex-col gap-3 animate-in slide-in-from-top-8 duration-1000 ease-out">
+                <div className="bg-[#FDF8F3] border border-orange-100/50 p-4 rounded-3xl flex items-center justify-between px-8 shadow-sm">
+                  <div className="flex items-center gap-3">
+                    <Trophy className="w-5 h-5 text-amber-500" />
+                    <span className="text-sm font-medium text-slate-600">今年已簽到</span>
+                  </div>
+                  <span className="text-lg font-bold text-[#8C7465] font-serif">{stats.yearly} <small className="text-[10px] font-normal">次</small></span>
+                </div>
+                <div className="bg-[#FDF8F3] border border-orange-100/50 p-4 rounded-3xl flex items-center justify-between px-8 shadow-sm">
+                  <div className="flex items-center gap-3">
+                    <Flame className="w-5 h-5 text-orange-500" />
+                    <span className="text-sm font-medium text-slate-600">連續簽到</span>
+                  </div>
+                  <span className="text-lg font-bold text-[#8C7465] font-serif">{stats.consecutive} <small className="text-[10px] font-normal">天</small></span>
+                </div>
+              </div>
+            )}
+          </div>
+
+          {/* 簽到按鈕 */}
+          {status !== 'success' && (
+            <button
+              onClick={handleCheckIn}
+              disabled={status === 'loading'}
+              className={`w-full text-white text-lg tracking-[0.8em] font-medium py-7 rounded-[2rem] transition-all duration-500 shadow-2xl flex items-center justify-center gap-3 active:scale-[0.94] group ${
+                status === 'loading' ? 'bg-slate-300 shadow-none' : 'bg-[#8C7465] hover:bg-[#766154] hover:shadow-[#8C7465]/20'
+              }`}
+            >
+              {status === 'loading' ? (
+                <Loader2 className="w-6 h-6 animate-spin" />
+              ) : (
+                <span className="group-hover:scale-110 transition-transform duration-300">我要簽到</span>
+              )}
+            </button>
+          )}
+
+          {/* 錯誤顯示 */}
+          {status === 'error' && (
+            <div className="mt-6 bg-rose-50 text-rose-500 p-4 rounded-2xl flex items-center gap-3 border border-rose-100 w-full animate-in slide-in-from-bottom-2">
+              <AlertCircle className="w-4 h-4 shrink-0" />
+              <p className="text-[11px] font-medium">{errorMessage}</p>
+            </div>
+          )}
+        </div>
+      </main>
+
+      <footer className="py-12 text-center">
+        <div className="inline-block px-6 py-2 bg-white/50 backdrop-blur-sm rounded-full border border-white shadow-sm">
+          <p className="text-[10px] text-[#8C7465] tracking-[0.4em] uppercase font-bold opacity-60">
+            Faith • Knowledge • Friendship
+          </p>
+        </div>
+      </footer>
+    </div>
+  );
+}
