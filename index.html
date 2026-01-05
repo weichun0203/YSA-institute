@@ -339,6 +339,9 @@
                 // 如果有本地資料，先更新 UI
                 if (currentUser.name) document.getElementById('inputName').value = currentUser.name;
                 updateProfileUI();
+
+                // NEW: 如果有 ID (表示使用者已登入過)，嘗試讀取遠端資料
+                if (currentUser.lineId) fetchRemoteRecords();
             }
         }
 
@@ -390,6 +393,9 @@
 
                 // NEW: 自動記錄基本資料 (進入網頁時)
                 syncUserProfile();
+                
+                // NEW: 讀取遠端紀錄 (確保資料最新)
+                fetchRemoteRecords();
 
             } catch (err) {
                 console.error("LIFF Initialization failed", err);
@@ -525,7 +531,7 @@
             }, 100);
         }
 
-        // 動作: 發送資料到後端
+        // 動作: 發送資料到後端 (Write Only, uses no-cors to avoid blocking if CORS not set)
         function sendToGAS(payload) {
             if (!GAS_API_URL) return; 
             
@@ -538,7 +544,7 @@
               .catch(e => console.error("GAS Error", e));
         }
 
-        // 動作: 同步使用者基本資料 (新增函式)
+        // 動作: 同步使用者基本資料
         function syncUserProfile() {
             if (!currentUser.lineId) return; // 避免傳送無效資料
             
@@ -558,6 +564,75 @@
             };
             console.log("Auto Syncing Profile...", payload);
             sendToGAS(payload);
+        }
+
+        // NEW: 從後端讀取紀錄 (Read Only, requires CORS)
+        function fetchRemoteRecords() {
+            if (!GAS_API_URL || !currentUser.lineId) return;
+
+            console.log("Fetching remote records...");
+            const payload = {
+                op: "get_user_records",
+                lineId: currentUser.lineId
+            };
+
+            // 注意：GAS 端必須設定 CORS 且回傳 JSON 才能讀取
+            fetch(GAS_API_URL, {
+                method: 'POST',
+                // 使用 text/plain 避免 preflight 請求，提高成功率，但後端需解析 body
+                headers: { 'Content-Type': 'text/plain;charset=utf-8' }, 
+                body: JSON.stringify(payload)
+            })
+            .then(res => res.json())
+            .then(data => {
+                console.log("Remote records:", data);
+                if (Array.isArray(data)) {
+                    mergeRecords(data);
+                }
+            })
+            .catch(e => console.error("Fetch Error (Check CORS/Network):", e));
+        }
+
+        // NEW: 合併遠端與本地紀錄
+        function mergeRecords(remoteData) {
+            let hasChange = false;
+            remoteData.forEach(remote => {
+                const idx = records.findIndex(r => r.dateStr === remote.dateStr);
+                // 如果遠端有資料，且本地沒有，或者我們想要同步遠端的內容
+                // 這裡採用簡單策略：以遠端資料覆蓋本地 (通常遠端是 Source of Truth)
+                if (idx >= 0) {
+                    // 合併物件，保留 id 等本地資訊，但更新文字內容
+                    const local = records[idx];
+                    // 只有當遠端內容有意義時才覆蓋
+                    if (remote.reflection || remote.title) {
+                        records[idx] = { ...local, ...remote };
+                        hasChange = true;
+                    }
+                } else {
+                    records.push(remote);
+                    hasChange = true;
+                }
+            });
+
+            if (hasChange) {
+                // 簡單排序 (假設 id 是 timestamp，若遠端沒傳 id 則可能需要其他排序方式，這裡依照 dateStr 排序可能更好，但暫時用既有邏輯)
+                records.sort((a, b) => b.id - a.id); 
+
+                localStorage.setItem('spiritual_weekly_records', JSON.stringify(records));
+                
+                // 更新 UI
+                renderAttendance();
+                renderReflectionList();
+                
+                // 檢查是否需要顯示已簽到畫面
+                const todayRecord = records.find(r => r.dateStr === todayStr);
+                if (todayRecord) {
+                    showPostSignInSection();
+                    if (todayRecord.name) {
+                        document.getElementById('inputName').value = todayRecord.name;
+                    }
+                }
+            }
         }
 
         // UI: 出席狀況 (本月週三)
