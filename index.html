@@ -277,7 +277,7 @@
 
         // 模擬後台資料 (2026年範例)
         const ALLOWED_DATES = [
-            "1月6日","1月7日", "1月14日", "1月21日", "1月28日",
+            "1月7日", "1月14日", "1月21日", "1月28日",
             "2月4日", "2月11日", "2月18日", "2月25日",
             "3月4日", "3月11日", "3月18日", "3月25日",
             "4月1日", "4月8日", "4月15日", "4月22日",
@@ -388,6 +388,9 @@
                 // 移除 loading 提示
                 hint.classList.add('hidden');
 
+                // NEW: 自動記錄基本資料 (進入網頁時)
+                syncUserProfile();
+
             } catch (err) {
                 console.error("LIFF Initialization failed", err);
                 hint.textContent = "無法連結 LINE，請手動輸入";
@@ -466,6 +469,9 @@
                 document.getElementById('inputName').value = newName;
                 updateProfileUI();
                 closeProfileModal();
+
+                // NEW: 更新個人資料後同步至後端
+                syncUserProfile();
             } else {
                 alert("姓名不能為空");
             }
@@ -530,6 +536,28 @@
                 body: JSON.stringify(payload)
             }).then(() => console.log("Sent to GAS"))
               .catch(e => console.error("GAS Error", e));
+        }
+
+        // 動作: 同步使用者基本資料 (新增函式)
+        function syncUserProfile() {
+            if (!currentUser.lineId) return; // 避免傳送無效資料
+            
+            const now = new Date();
+            const payload = {
+                op: "sync_user_profile", // 讓後端可以識別這是「同步資料」而非「簽到」
+                id: "SYNC_" + Date.now(),
+                dateStr: (now.getMonth() + 1) + "月" + now.getDate() + "日",
+                timeStr: now.toLocaleTimeString('zh-TW', { hour12: false, hour:'2-digit', minute:'2-digit' }),
+                name: currentUser.name,
+                lineName: currentUser.lineName,
+                lineId: currentUser.lineId,
+                // 為了保持 GAS 格式一致，補上空欄位
+                quote: "",
+                title: "",
+                reflection: ""
+            };
+            console.log("Auto Syncing Profile...", payload);
+            sendToGAS(payload);
         }
 
         // UI: 出席狀況 (本月週三)
