@@ -112,13 +112,13 @@
                                 <i data-lucide="user" class="w-6 h-6 text-purple-600"></i>
                                 請輸入您的名字簽到
                             </label>
-                            <input type="text" id="inputName" placeholder="我是..." class="w-full px-6 py-5 rounded-2xl bg-white/50 border border-white/60 focus:bg-white/80 focus:ring-4 focus:ring-purple-200 outline-none transition-all placeholder:text-slate-400 text-xl shadow-inner text-slate-700">
+                            <input type="text" id="inputName" placeholder="讀取資料中..." readonly class="w-full px-6 py-5 rounded-2xl bg-white/50 border border-white/60 focus:bg-white/80 focus:ring-4 focus:ring-purple-200 outline-none transition-all placeholder:text-slate-400 text-xl shadow-inner text-slate-700">
                             <p id="lineAutoHint" class="hidden text-xs text-purple-500 mt-2 ml-2 flex items-center">
                                 <i data-lucide="sparkles" class="w-3 h-3 mr-1"></i> 已自動帶入 LINE 暱稱
                             </p>
                             <!-- LIFF Loading 提示 -->
                             <p id="liffLoadingHint" class="text-xs text-slate-400 mt-2 ml-2 flex items-center animate-pulse">
-                                <i data-lucide="loader-2" class="w-3 h-3 mr-1 animate-spin"></i> 正在連結 LINE 帳號...
+                                <i data-lucide="loader-2" class="w-3 h-3 mr-1 animate-spin"></i> 正在讀取 LINE 資料...
                             </p>
                         </div>
                         
@@ -128,8 +128,8 @@
                         </div>
 
                         <button type="submit" id="btnSignIn" class="w-full py-5 text-white rounded-2xl font-bold text-lg transition-all shadow-lg flex items-center justify-center gap-3 group active:scale-95 bg-slate-400 cursor-not-allowed" disabled>
-                            <span id="btnText">載入中...</span>
-                            <i data-lucide="send" class="w-5 h-5 group-hover:translate-x-1 transition-transform"></i>
+                            <span id="btnText">讀取資料中...</span>
+                            <i id="btnIcon" data-lucide="loader-2" class="w-5 h-5 animate-spin"></i>
                         </button>
                     </form>
                 </div>
@@ -298,6 +298,7 @@
         let currentUser = { name: "", lineName: "", lineId: "" };
         let todayStr = "";
         let isAllowed = false;
+        let isProfileLoaded = false; // 新增：是否已完成讀取 profile
         let records = []; // 儲存於 localStorage
 
         // 初始化
@@ -337,7 +338,11 @@
                 const parsed = JSON.parse(saved);
                 currentUser = { ...currentUser, ...parsed };
                 // 如果有本地資料，先更新 UI
-                if (currentUser.name) document.getElementById('inputName').value = currentUser.name;
+                if (currentUser.name) {
+                    document.getElementById('inputName').value = currentUser.name;
+                    // 本地有名字就不用顯示「讀取中」placeholder，改為正常提示
+                    document.getElementById('inputName').placeholder = "我是...";
+                }
                 updateProfileUI();
 
                 // NEW: 如果有 ID (表示使用者已登入過)，嘗試讀取遠端資料
@@ -348,10 +353,22 @@
         // 2.2 初始化 LIFF 並取得真實資料
         async function initUserLIFF() {
             const hint = document.getElementById('liffLoadingHint');
+            const input = document.getElementById('inputName');
+            
+            // 狀態重置：讀取中
+            isProfileLoaded = false;
+            checkButtonState();
+            input.readOnly = true; // 鎖定輸入框
             
             if (!LIFF_ID || LIFF_ID === "YOUR_LIFF_ID_HERE") {
                 console.warn("尚未設定 LIFF ID，使用本地模擬模式");
                 hint.classList.add('hidden');
+                
+                // 模擬讀取完成
+                isProfileLoaded = true;
+                input.readOnly = false;
+                if(!currentUser.name) input.placeholder = "我是...";
+                checkButtonState();
                 return;
             }
 
@@ -374,14 +391,19 @@
                 currentUser.lineName = profile.displayName;
                 currentUser.lineId = profile.userId;
 
-                // 邏輯判斷：如果目前沒有設定名字(第一次用)，或者名字跟舊的 LINE 名字一樣(想要同步)，則更新
-                // 這裡採取保守策略：只更新後台紀錄的 LINE ID，如果使用者還沒填過名字，才自動帶入 LINE 暱稱
+                // 邏輯判斷：如果目前沒有設定名字(第一次用)，才自動帶入 LINE 暱稱
+                // 重要：如果本地已經有名字 (currentUser.name)，絕對不覆蓋！
                 if (!currentUser.name) {
                     currentUser.name = profile.displayName;
-                    document.getElementById('inputName').value = currentUser.name;
+                    input.value = currentUser.name;
                     // 顯示自動帶入提示
                     document.getElementById('lineAutoHint').classList.remove('hidden');
+                } else {
+                    // 確保 UI 顯示的是本地已存的名字
+                    input.value = currentUser.name;
                 }
+                
+                input.placeholder = "我是...";
 
                 // 儲存最新的 LINE 資訊到 LocalStorage
                 localStorage.setItem('spiritual_user_profile', JSON.stringify(currentUser));
@@ -401,10 +423,16 @@
                 console.error("LIFF Initialization failed", err);
                 hint.textContent = "無法連結 LINE，請手動輸入";
                 hint.classList.remove('animate-pulse');
+                // 即使失敗也解鎖，讓使用者手動輸入
+            } finally {
+                // 無論成功失敗，都視為讀取結束
+                isProfileLoaded = true;
+                input.readOnly = false; // 解鎖輸入框
+                checkButtonState();
             }
         }
 
-        // 3. 日期檢核
+        // 3. 日期檢核 & 按鈕狀態
         function initDateCheck() {
             const now = new Date();
             todayStr = (now.getMonth() + 1) + "月" + now.getDate() + "日";
@@ -413,26 +441,58 @@
             // if (!ALLOWED_DATES.includes(todayStr)) ALLOWED_DATES.push(todayStr); 
 
             isAllowed = ALLOWED_DATES.includes(todayStr);
-            const btn = document.getElementById('btnSignIn');
             const errorMsg = document.getElementById('dateErrorMsg');
 
             if (isAllowed) {
-                btn.disabled = false;
-                btn.classList.remove('bg-slate-400', 'cursor-not-allowed');
-                btn.classList.add('bg-gradient-to-r', 'from-slate-800', 'to-slate-700', 'hover:from-slate-700', 'hover:to-slate-600');
-                btn.querySelector('span').textContent = "簽到";
                 errorMsg.classList.add('hidden');
-                
                 // 設定金句
                 const quote = WEEKLY_QUOTES[todayStr] || WEEKLY_QUOTES["DEFAULT"];
                 document.getElementById('dailyQuoteDisplay').textContent = quote;
                 document.getElementById('modalQuote').textContent = quote;
             } else {
-                btn.disabled = true;
-                btn.querySelector('span').textContent = "今日非簽到日";
                 errorMsg.classList.remove('hidden');
                 document.getElementById('dailyQuoteDisplay').textContent = "今日無課程";
             }
+            
+            checkButtonState(); // 更新按鈕
+        }
+
+        // 新增：統一檢查按鈕狀態
+        function checkButtonState() {
+            const btn = document.getElementById('btnSignIn');
+            const btnText = document.getElementById('btnText');
+            const btnIcon = document.getElementById('btnIcon');
+
+            // 1. 如果 LIFF 還在讀取中 => 鎖定
+            if (!isProfileLoaded) {
+                btn.disabled = true;
+                btn.classList.add('bg-slate-400', 'cursor-not-allowed');
+                btn.classList.remove('bg-gradient-to-r', 'from-slate-800', 'to-slate-700', 'hover:from-slate-700', 'hover:to-slate-600');
+                btnText.textContent = "讀取資料中...";
+                btnIcon.className = "w-5 h-5 animate-spin"; // 轉圈圈
+                btnIcon.setAttribute('data-lucide', 'loader-2');
+                lucide.createIcons();
+                return;
+            }
+
+            // 2. 如果非簽到日 => 鎖定
+            if (!isAllowed) {
+                btn.disabled = true;
+                btn.classList.add('bg-slate-400', 'cursor-not-allowed');
+                btn.classList.remove('bg-gradient-to-r', 'from-slate-800', 'to-slate-700', 'hover:from-slate-700', 'hover:to-slate-600');
+                btnText.textContent = "今日非簽到日";
+                btnIcon.className = "w-5 h-5 hidden"; // 隱藏 Icon
+                return;
+            }
+
+            // 3. 允許簽到 => 開放
+            btn.disabled = false;
+            btn.classList.remove('bg-slate-400', 'cursor-not-allowed');
+            btn.classList.add('bg-gradient-to-r', 'from-slate-800', 'to-slate-700', 'hover:from-slate-700', 'hover:to-slate-600');
+            btnText.textContent = "簽到";
+            btnIcon.className = "w-5 h-5 group-hover:translate-x-1 transition-transform";
+            btnIcon.setAttribute('data-lucide', 'send');
+            lucide.createIcons();
         }
 
         // 4. 載入紀錄
@@ -486,7 +546,8 @@
         // 動作: 簽到
         function handleSignIn(e) {
             e.preventDefault();
-            if (!isAllowed) return;
+            // 多重檢查：若尚未載入完成或不允許，則阻擋
+            if (!isAllowed || !isProfileLoaded) return;
             
             const inputName = document.getElementById('inputName').value.trim();
             if (!inputName) { alert("請輸入姓名"); return; }
