@@ -8,6 +8,8 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- Icons -->
     <script src="https://unpkg.com/lucide@latest"></script>
+    <!-- LINE LIFF SDK (新增) -->
+    <script src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
     <!-- Font -->
     <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+TC:wght@400;700&family=Noto+Sans+TC:wght@300;400;500;700&display=swap" rel="stylesheet">
     
@@ -105,6 +107,10 @@
                             <p id="lineAutoHint" class="hidden text-xs text-purple-500 mt-2 ml-2 flex items-center">
                                 <i data-lucide="sparkles" class="w-3 h-3 mr-1"></i> 已自動帶入 LINE 暱稱
                             </p>
+                            <!-- LIFF Loading 提示 -->
+                            <p id="liffLoadingHint" class="text-xs text-slate-400 mt-2 ml-2 flex items-center animate-pulse">
+                                <i data-lucide="loader-2" class="w-3 h-3 mr-1 animate-spin"></i> 正在連結 LINE 帳號...
+                            </p>
                         </div>
                         
                         <div id="dateErrorMsg" class="hidden flex items-center gap-2 text-red-500 bg-red-50 p-3 rounded-xl text-sm font-bold">
@@ -190,11 +196,11 @@
                     <input type="text" id="profileName" class="w-full px-4 py-3 rounded-xl bg-white border border-slate-200 focus:border-purple-500 outline-none">
                 </div>
                 <div>
-                    <label class="block text-sm font-bold text-slate-400 mb-2">LINE 名字 (系統帶入)</label>
+                    <label class="block text-sm font-bold text-slate-400 mb-2">LINE 暱稱 (LIFF 讀取)</label>
                     <input type="text" id="profileLineName" readonly disabled class="w-full px-4 py-3 rounded-xl bg-slate-100 border border-slate-200 text-slate-400 cursor-not-allowed">
                 </div>
                 <div>
-                    <label class="block text-sm font-bold text-slate-400 mb-2">LINE ID (系統帶入)</label>
+                    <label class="block text-sm font-bold text-slate-400 mb-2">LINE ID (LIFF 讀取)</label>
                     <input type="text" id="profileLineId" readonly disabled class="w-full px-4 py-3 rounded-xl bg-slate-100 border border-slate-200 text-slate-400 cursor-not-allowed">
                 </div>
                 <button onclick="saveProfile()" class="w-full bg-slate-800 text-white py-3 rounded-xl font-bold hover:bg-slate-700 transition-all shadow-lg active:scale-95">儲存設定</button>
@@ -250,8 +256,15 @@
 
     <!-- 腳本邏輯 -->
     <script>
-        // TODO: 填入 Google Apps Script 發布後的網址
+        // ==========================================
+        // CONFIGURATION
+        // ==========================================
+        // 請在此處填入您的 LINE LIFF ID (格式通常為 1234567890-AbcdEfgh)
+        const LIFF_ID = "2008232345-wujYMuj9"; 
+        
+        // Google Apps Script 發布後的網址
         const GAS_API_URL = "https://script.google.com/macros/s/AKfycbzfrhkTZrDgNlmNM-ijRWAOhAhUBgT-VWNVorPZHnC1GR86Vuv36iYPDXupfyXOHlA-uw/exec"; 
+        // ==========================================
 
         // 模擬後台資料 (2026年範例)
         const ALLOWED_DATES = [
@@ -260,8 +273,8 @@
             "3月4日", "3月11日", "3月18日", "3月25日",
             "4月1日", "4月8日", "4月15日", "4月22日",
             "5月6日", "5月13日", "5月20日", "5月27日",
-            // 測試用 (假設今日可以簽到，正式使用請移除下一行)
-            // new Date().getMonth() + 1 + "月" + new Date().getDate() + "日"
+            // 測試用: 開放今天簽到 (上線時請註解掉)
+            // (new Date().getMonth() + 1) + "月" + new Date().getDate() + "日"
         ];
 
         const WEEKLY_QUOTES = {
@@ -282,7 +295,9 @@
         document.addEventListener('DOMContentLoaded', () => {
             lucide.createIcons();
             initTime();
-            initUser();
+            // 先嘗試載入本地資料，同時啟動 LIFF
+            loadLocalUser(); 
+            initUserLIFF();
             initDateCheck();
             loadRecords();
             renderAttendance();
@@ -304,33 +319,71 @@
             setInterval(update, 1000);
         }
 
-        // 2. 使用者資料 (模擬 LINE LIFF)
-        function initUser() {
-            // 模擬 LINE 環境取得的資料
-            const mockLineData = {
-                displayName: "王小明 (LINE)",
-                userId: "U12345678"
-            };
+        // 2. 使用者資料處理 (LIFF 核心邏輯)
 
-            // 讀取本地儲存
+        // 2.1 先讀取本地暫存 (提升使用者體驗，避免等待 LIFF 載入時空白)
+        function loadLocalUser() {
             const saved = localStorage.getItem('spiritual_user_profile');
             if (saved) {
-                currentUser = JSON.parse(saved);
-                // 確保 LINE 資料是最新的 (假設每次進入都重新抓取)
-                currentUser.lineName = mockLineData.displayName;
-                currentUser.lineId = mockLineData.userId;
-            } else {
-                // 新用戶，姓名預設等於 LINE 姓名
-                currentUser = {
-                    name: mockLineData.displayName,
-                    lineName: mockLineData.displayName,
-                    lineId: mockLineData.userId
-                };
+                const parsed = JSON.parse(saved);
+                currentUser = { ...currentUser, ...parsed };
+                // 如果有本地資料，先更新 UI
+                if (currentUser.name) document.getElementById('inputName').value = currentUser.name;
+                updateProfileUI();
             }
+        }
+
+        // 2.2 初始化 LIFF 並取得真實資料
+        async function initUserLIFF() {
+            const hint = document.getElementById('liffLoadingHint');
             
-            // 更新 UI
-            document.getElementById('inputName').value = currentUser.name;
-            updateProfileUI();
+            if (!LIFF_ID || LIFF_ID === "YOUR_LIFF_ID_HERE") {
+                console.warn("尚未設定 LIFF ID，使用本地模擬模式");
+                hint.classList.add('hidden');
+                return;
+            }
+
+            try {
+                // 初始化 LIFF
+                await liff.init({ liffId: LIFF_ID });
+
+                // 檢查是否登入
+                if (!liff.isLoggedIn()) {
+                    // 若未登入，跳轉至 LINE 登入頁面
+                    liff.login();
+                    return;
+                }
+
+                // 取得使用者資料
+                const profile = await liff.getProfile();
+                console.log("LIFF Profile Loaded:", profile);
+
+                // 更新 currentUser 狀態
+                currentUser.lineName = profile.displayName;
+                currentUser.lineId = profile.userId;
+
+                // 邏輯判斷：如果目前沒有設定名字(第一次用)，或者名字跟舊的 LINE 名字一樣(想要同步)，則更新
+                // 這裡採取保守策略：只更新後台紀錄的 LINE ID，如果使用者還沒填過名字，才自動帶入 LINE 暱稱
+                if (!currentUser.name) {
+                    currentUser.name = profile.displayName;
+                    document.getElementById('inputName').value = currentUser.name;
+                    // 顯示自動帶入提示
+                    document.getElementById('lineAutoHint').classList.remove('hidden');
+                }
+
+                // 儲存最新的 LINE 資訊到 LocalStorage
+                localStorage.setItem('spiritual_user_profile', JSON.stringify(currentUser));
+                
+                updateProfileUI();
+
+                // 移除 loading 提示
+                hint.classList.add('hidden');
+
+            } catch (err) {
+                console.error("LIFF Initialization failed", err);
+                hint.textContent = "無法連結 LINE，請手動輸入";
+                hint.classList.remove('animate-pulse');
+            }
         }
 
         // 3. 日期檢核
@@ -338,8 +391,7 @@
             const now = new Date();
             todayStr = (now.getMonth() + 1) + "月" + now.getDate() + "日";
             
-            // 檢查是否在 CSV 的日期清單中
-            // 為了預覽方便，如果不包含今天，我們暫時允許簽到 (您可以註解掉下面這行來強制開啟)
+            // 檢查是否在 CSV 的日期清單中 (測試時可以解除下方註解強制允許今天)
             // if (!ALLOWED_DATES.includes(todayStr)) ALLOWED_DATES.push(todayStr); 
 
             isAllowed = ALLOWED_DATES.includes(todayStr);
@@ -382,12 +434,12 @@
 
         // UI: 更新個人資料視窗
         function updateProfileUI() {
-            document.getElementById('profileName').value = currentUser.name;
-            document.getElementById('profileLineName').value = currentUser.lineName;
-            document.getElementById('profileLineId').value = currentUser.lineId;
+            document.getElementById('profileName').value = currentUser.name || "";
+            document.getElementById('profileLineName').value = currentUser.lineName || "尚未連結";
+            document.getElementById('profileLineId').value = currentUser.lineId || "尚未連結";
             
             const hint = document.getElementById('lineAutoHint');
-            if (currentUser.name === currentUser.lineName) {
+            if (currentUser.name && currentUser.lineName && currentUser.name === currentUser.lineName) {
                 hint.classList.remove('hidden');
             } else {
                 hint.classList.add('hidden');
@@ -429,8 +481,8 @@
                 dateStr: todayStr,
                 timeStr: now.toLocaleTimeString('zh-TW', { hour12: false, hour:'2-digit', minute:'2-digit' }),
                 name: currentUser.name,
-                lineName: currentUser.lineName,
-                lineId: currentUser.lineId,
+                lineName: currentUser.lineName || "", // 傳送真實 LINE 暱稱
+                lineId: currentUser.lineId || "",     // 傳送真實 LINE ID
                 quote: WEEKLY_QUOTES[todayStr] || WEEKLY_QUOTES["DEFAULT"],
                 title: "",
                 reflection: ""
@@ -438,7 +490,7 @@
 
             // 儲存 (覆蓋今日舊紀錄或新增)
             const idx = records.findIndex(r => r.dateStr === todayStr);
-            if (idx >= 0) records[idx] = newRecord;
+            if (idx >= 0) records[idx] = { ...records[idx], ...newRecord, title: records[idx].title, reflection: records[idx].reflection }; // 保留已寫的心得
             else records.unshift(newRecord);
             
             localStorage.setItem('spiritual_weekly_records', JSON.stringify(records));
@@ -460,9 +512,8 @@
 
         // 動作: 發送資料到後端
         function sendToGAS(payload) {
-            if (!GAS_API_URL) return; // 沒有網址就不發送
+            if (!GAS_API_URL) return; 
             
-            // 使用 no-cors 避免跨域錯誤，但無法讀取回傳值
             fetch(GAS_API_URL, {
                 method: 'POST',
                 mode: 'no-cors', 
@@ -549,7 +600,6 @@
         let editingDateStr = null;
 
         function openReflectionModal(targetDateStr = null) {
-            // 如果沒指定日期，預設編輯今天
             editingDateStr = targetDateStr || todayStr;
             const record = records.find(r => r.dateStr === editingDateStr);
 
@@ -576,14 +626,12 @@
             
             if (!title || !content) { alert("請填寫完整內容"); return; }
 
-            // 更新紀錄
             const idx = records.findIndex(r => r.dateStr === editingDateStr);
             if (idx >= 0) {
                 records[idx].title = title;
                 records[idx].reflection = content;
                 localStorage.setItem('spiritual_weekly_records', JSON.stringify(records));
                 
-                // 再發送一次 GAS 更新心得
                 sendToGAS(records[idx]);
                 
                 renderReflectionList();
@@ -610,11 +658,9 @@
             const currentMonth = now.getMonth();
             const year = now.getFullYear();
 
-            // 遍歷 0 ~ currentMonth
             for (let m = 0; m <= currentMonth; m++) {
                 const monthName = (m + 1) + "月";
                 
-                // 找該月週三
                 let d = new Date(year, m, 1);
                 let wednesdays = [];
                 while(d.getMonth() === m) {
@@ -622,7 +668,6 @@
                     d.setDate(d.getDate() + 1);
                 }
 
-                // 產生 HTML
                 const monthDiv = document.createElement('div');
                 monthDiv.className = "bg-white/50 rounded-xl p-4 border border-slate-100 flex flex-col md:flex-row md:items-center gap-4";
                 
