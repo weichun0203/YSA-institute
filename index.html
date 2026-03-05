@@ -69,9 +69,31 @@
             from { opacity: 0; transform: translateY(10px); }
             to { opacity: 1; transform: translateY(0); }
         }
+
+        /* 載入中動畫 (報帳按鈕用) */
+        .spinner {
+            border: 3px solid rgba(255, 255, 255, 0.3);
+            border-radius: 50%;
+            border-top: 3px solid #fff;
+            width: 20px;
+            height: 20px;
+            animation: spin 1s linear infinite;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
     </style>
 </head>
 <body class="min-h-screen bg-gradient-to-br from-indigo-50 via-purple-50 to-pink-50 text-slate-700 relative selection:bg-purple-200">
+
+    <!-- 全域 Toast 通知容器 -->
+    <div id="toastNotification" class="fixed top-8 left-1/2 -translate-x-1/2 z-[100] transition-all duration-300 transform -translate-y-24 opacity-0 pointer-events-none w-auto min-w-[260px] max-w-[90vw]">
+        <div class="bg-slate-800/95 backdrop-blur-md text-white px-5 py-3.5 rounded-2xl shadow-2xl flex items-center gap-3 border border-slate-700/50">
+            <i id="toastIcon" data-lucide="info" class="w-5 h-5 shrink-0"></i>
+            <span id="toastMessage" class="text-sm font-bold tracking-wide"></span>
+        </div>
+    </div>
 
     <!-- 背景裝飾 -->
     <div class="blob w-72 h-72 md:w-96 md:h-96 bg-purple-300 opacity-40 top-0 left-0 mix-blend-multiply"></div>
@@ -89,7 +111,7 @@
                 </div>
                 <h1 class="text-3xl font-bold text-slate-800 tracking-wider mb-2 drop-shadow-sm">每周靈性簽到</h1>
                 
-                <!-- 新增：專屬歡迎訊息區塊 (預設隱藏) -->
+                <!-- 專屬歡迎訊息區塊 (預設隱藏) -->
                 <div id="welcomeContainer" class="hidden transition-all duration-500 mb-2">
                     <p class="text-lg font-bold text-purple-600 bg-purple-100/50 inline-block px-4 py-1.5 rounded-full shadow-sm">
                         歡迎回來，<span id="welcomeName"></span>！
@@ -223,33 +245,116 @@
 
         <!-- ==================== [區塊 3] 報帳申請 ==================== -->
         <div id="tab-finance" class="tab-content pt-4">
-            <h2 class="text-2xl font-bold text-slate-800 mb-6 flex items-center gap-2">
-                <i data-lucide="receipt" class="text-purple-600"></i> 報帳申請
+            <h2 class="text-2xl font-bold text-slate-800 mb-2 flex items-center gap-2">
+                <i data-lucide="receipt" class="text-purple-600"></i> 報帳系統
             </h2>
+            <p class="text-slate-500 text-xs font-serif italic mb-6">桃園新竹年輕單成中心 / 福音研究所專用</p>
+            
             <div class="glass rounded-3xl p-6 shadow-sm">
-                <form onsubmit="event.preventDefault(); alert('此為展示介面，報帳功能建置中');" class="space-y-5">
-                    <div>
-                        <label class="block text-sm font-bold text-slate-700 mb-2">申請項目</label>
-                        <select class="w-full px-4 py-3 rounded-xl bg-white/70 border border-white focus:ring-2 focus:ring-purple-200 outline-none text-slate-700 appearance-none">
-                            <option>活動餐費</option>
-                            <option>教材文具</option>
-                            <option>交通補助</option>
-                            <option>其他</option>
-                        </select>
-                    </div>
-                    <div>
-                        <label class="block text-sm font-bold text-slate-700 mb-2">申請金額 (NT$)</label>
-                        <input type="number" placeholder="0" class="w-full px-4 py-3 rounded-xl bg-white/70 border border-white focus:ring-2 focus:ring-purple-200 outline-none text-slate-700 font-mono text-lg">
-                    </div>
-                    <div>
-                        <label class="block text-sm font-bold text-slate-700 mb-2">上傳收據/發票</label>
-                        <div class="border-2 border-dashed border-slate-300 rounded-xl p-6 text-center bg-white/30 cursor-pointer hover:bg-white/50 transition-colors">
-                            <i data-lucide="upload-cloud" class="w-8 h-8 text-slate-400 mx-auto mb-2"></i>
-                            <span class="text-sm text-slate-500">點擊上傳圖片 (Max: 5MB)</span>
+                <form id="expense-form" class="space-y-5">
+                    
+                    <!-- 報帳者 (連動系統設定) & 活動項目 -->
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-5">
+                        <div class="space-y-1.5">
+                            <label class="block text-sm font-bold text-slate-700">報帳者 (系統帶入)</label>
+                            <input type="text" id="reporter" required readonly class="w-full px-4 py-3 rounded-xl bg-slate-100/50 border border-transparent outline-none text-slate-500 cursor-not-allowed">
+                        </div>
+                        <div class="space-y-1.5">
+                            <label class="block text-sm font-bold text-slate-700">活動項目</label>
+                            <select id="activityItem" required class="w-full px-4 py-3 rounded-xl bg-white/80 border border-white focus:ring-2 focus:ring-purple-300 outline-none text-slate-700 appearance-none">
+                                <option value="周活動Weekly Event(福研)">周活動 Weekly Event (福研)</option>
+                                <option value="例行會議Council(單成會議)">例行會議 Council (單成會議)</option>
+                                <option value="特別專案Special Event(唱詩班、交通、單成大會)">特別專案 Special Event (唱詩班、交通、單成大會)</option>
+                            </select>
                         </div>
                     </div>
-                    <button type="submit" class="w-full bg-slate-800 text-white py-4 rounded-xl font-bold mt-2 active:scale-95 transition-transform flex justify-center items-center gap-2 shadow-md">
-                        <i data-lucide="send" class="w-4 h-4"></i> 送出申請
+
+                    <hr class="border-white">
+
+                    <!-- 使用單位 & 開支類型 -->
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-5">
+                        <div class="space-y-1.5">
+                            <label class="block text-sm font-bold text-slate-700">使用單位</label>
+                            <select id="unit" required class="w-full px-4 py-3 rounded-xl bg-white/80 border border-white focus:ring-2 focus:ring-purple-300 outline-none text-slate-700 appearance-none">
+                                <option value="桃園支聯會單成中心(TY YSA)">桃園支聯會單成中心 (TY YSA)</option>
+                                <option value="新竹支聯會單成中心(HC YSA)">新竹支聯會單成中心 (HC YSA)</option>
+                                <option value="龍潭福研(LT Ward)">龍潭福研 (LT Ward)</option>
+                                <option value="桃園 x 新竹支聯會(TY x HC YSA)">桃園 x 新竹支聯會 (TY x HC YSA)</option>
+                                <option value="單成大會(YSA Conference)">單成大會 (YSA Conference)</option>
+                            </select>
+                        </div>
+                        <div class="space-y-1.5">
+                            <label class="block text-sm font-bold text-slate-700">開支類型</label>
+                            <select id="expenseType" required class="w-full px-4 py-3 rounded-xl bg-white/80 border border-white focus:ring-2 focus:ring-purple-300 outline-none text-slate-700 appearance-none">
+                                <option value="伙食(Food)">伙食 (Food)</option>
+                                <option value="活動(Activity)">活動 (Activity)</option>
+                                <option value="文宣(Publicity)">文宣 (Publicity)</option>
+                                <option value="器材(Equipment)">器材 (Equip.)</option>
+                                <option value="交通(Transportation)">交通 (Transport)</option>
+                                <option value="住宿(Accommodation)">住宿 (Accomm.)</option>
+                                <option value="會議(Meeting)">會議 (Meeting)</option>
+                                <option value="其他(Others)">其他 (Others)</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <!-- 日期 & 主/社交活動 -->
+                    <div class="grid grid-cols-1 sm:grid-cols-3 gap-5">
+                        <div class="space-y-1.5">
+                            <label class="block text-sm font-bold text-slate-700">日期</label>
+                            <input type="date" id="expenseDate" required class="w-full px-4 py-3 rounded-xl bg-white/80 border border-white focus:ring-2 focus:ring-purple-300 outline-none text-slate-700">
+                        </div>
+                        <div class="space-y-1.5 sm:col-span-1">
+                            <label class="block text-sm font-bold text-slate-700">主活動</label>
+                            <input type="text" id="mainActivity" value="福音研究所" required class="w-full px-4 py-3 rounded-xl bg-white/80 border border-white focus:ring-2 focus:ring-purple-300 outline-none text-slate-700">
+                        </div>
+                        <div class="space-y-1.5 sm:col-span-1">
+                            <label class="block text-sm font-bold text-slate-700">社交活動</label>
+                            <input type="text" id="socialActivity" placeholder="排球活動、課程..." class="w-full px-4 py-3 rounded-xl bg-white/80 border border-white focus:ring-2 focus:ring-purple-300 outline-none text-slate-700">
+                        </div>
+                    </div>
+
+                    <!-- 金額 & 實到人數 -->
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-5">
+                        <div class="space-y-1.5">
+                            <label class="block text-sm font-bold text-slate-700">金額</label>
+                            <div class="relative">
+                                <span class="absolute left-4 top-3.5 text-slate-400 font-bold">$</span>
+                                <input type="number" id="amount" required min="0" step="1" placeholder="整數金額" class="w-full pl-9 pr-4 py-3 rounded-xl bg-white/80 border border-white focus:ring-2 focus:ring-purple-300 outline-none text-slate-700 font-mono">
+                            </div>
+                        </div>
+                        <div class="space-y-1.5">
+                            <label class="block text-sm font-bold text-slate-700">實到人數</label>
+                            <input type="number" id="attendance" required min="0" step="1" placeholder="參與人數" class="w-full px-4 py-3 rounded-xl bg-white/80 border border-white focus:ring-2 focus:ring-purple-300 outline-none text-slate-700">
+                        </div>
+                    </div>
+
+                    <hr class="border-white">
+
+                    <!-- 發票類型 & 號碼 -->
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-5">
+                        <div class="space-y-1.5">
+                            <label class="block text-sm font-bold text-slate-700">發票類型</label>
+                            <select id="invoiceType" required class="w-full px-4 py-3 rounded-xl bg-white/80 border border-white focus:ring-2 focus:ring-purple-300 outline-none text-slate-700 appearance-none">
+                                <option value="統一發票">統一發票</option>
+                                <option value="收據">收據</option>
+                                <option value="其他(替代文件)">其他</option>
+                            </select>
+                        </div>
+                        <div class="space-y-1.5">
+                            <label class="block text-sm font-bold text-slate-700">發票號碼</label>
+                            <input type="text" id="invoiceNumber" placeholder="編號/末碼" class="w-full px-4 py-3 rounded-xl bg-white/80 border border-white focus:ring-2 focus:ring-purple-300 outline-none text-slate-700">
+                        </div>
+                    </div>
+
+                    <!-- 備註 -->
+                    <div class="space-y-1.5">
+                        <label class="block text-sm font-bold text-slate-700">備註</label>
+                        <textarea id="remarks" rows="2" placeholder="其他需要說明的事項..." class="w-full px-4 py-3 rounded-xl bg-white/80 border border-white focus:ring-2 focus:ring-purple-300 outline-none text-slate-700 resize-none"></textarea>
+                    </div>
+
+                    <button type="submit" class="w-full bg-gradient-to-r from-purple-600 to-indigo-600 text-white py-4 rounded-xl font-bold mt-2 active:scale-[0.98] transition-transform shadow-md flex justify-center items-center gap-2">
+                        <i data-lucide="send" class="w-5 h-5"></i> 送出預覽
                     </button>
                 </form>
             </div>
@@ -268,17 +373,17 @@
                 </div>
                 <div class="space-y-5">
                     <div>
-                        <label class="block text-sm font-bold text-slate-700 mb-2">姓名 (簽到與顯示用)</label>
+                        <label class="block text-sm font-bold text-slate-700 mb-2">姓名 (簽到與報帳顯示用)</label>
                         <input type="text" id="profileName" placeholder="請輸入您的姓名" class="w-full px-4 py-3 rounded-xl bg-white/80 border border-white focus:ring-2 focus:ring-purple-300 outline-none text-slate-800 font-medium">
                     </div>
-                    <button onclick="saveProfile()" class="w-full bg-gradient-to-r from-purple-600 to-pink-600 text-white py-4 rounded-xl font-bold mt-4 shadow-md active:scale-95 transition-transform flex justify-center items-center gap-2">
+                    <button onclick="saveProfile()" class="w-full bg-gradient-to-r from-purple-600 to-pink-600 text-white py-4 rounded-xl font-bold mt-4 shadow-md active:scale-[0.98] transition-transform flex justify-center items-center gap-2">
                         <i data-lucide="save" class="w-4 h-4"></i> 儲存設定
                     </button>
                 </div>
             </div>
             
             <div class="text-center mt-8 pb-4">
-                <p class="text-xs text-slate-400">App Version 2.0.1</p>
+                <p class="text-xs text-slate-400">App Version 2.1.0</p>
             </div>
         </div>
 
@@ -323,7 +428,7 @@
         </div>
     </nav>
 
-    <!-- ==================== Modals (保留彈出視窗) ==================== -->
+    <!-- ==================== Modals (保留與新增的彈出視窗) ==================== -->
 
     <!-- 心得 Modal -->
     <div id="reflectionModal" class="fixed inset-0 z-50 hidden flex items-end sm:items-center justify-center bg-slate-900/40 backdrop-blur-sm transition-opacity">
@@ -371,12 +476,37 @@
         </div>
     </div>
 
+    <!-- 報帳確認 Modal -->
+    <div id="confirm-finance-modal" class="fixed inset-0 z-50 hidden flex items-center justify-center p-4 bg-slate-900/40 backdrop-blur-sm transition-opacity">
+        <div class="glass-strong w-full max-w-lg rounded-3xl p-0 overflow-hidden relative flex flex-col max-h-[90vh] shadow-2xl animate-[fadeIn_0.3s_ease-out]">
+            <div class="h-20 bg-gradient-to-r from-indigo-500 to-purple-600 relative flex items-center justify-center shrink-0">
+                <i data-lucide="clipboard-check" class="text-white/90 w-8 h-8 mr-2"></i>
+                <h3 class="text-xl font-bold text-white">確認報帳資訊</h3>
+            </div>
+            <div class="p-6 sm:p-8 overflow-y-auto pb-4">
+                <div id="finance-modal-summary" class="divide-y divide-slate-100 space-y-2 text-sm text-slate-600">
+                    <!-- JS 動態插入預覽內容 -->
+                </div>
+            </div>
+            <div class="p-5 bg-slate-50/50 flex gap-4 border-t border-slate-200/50">
+                <button onclick="closeFinanceConfirmModal()" class="flex-1 px-4 py-3.5 border border-slate-300 rounded-xl font-bold text-slate-600 hover:bg-slate-100 active:scale-[0.98] transition">
+                    回頭修改
+                </button>
+                <button onclick="submitFinanceForm()" id="confirm-finance-submit" class="flex-1 px-4 py-3.5 bg-indigo-600 rounded-xl font-bold text-white hover:bg-indigo-700 shadow-md active:scale-[0.98] transition flex items-center justify-center gap-2">
+                    <span id="finance-btn-text">確定提交</span>
+                    <div id="finance-btn-spinner" class="spinner hidden"></div>
+                </button>
+            </div>
+        </div>
+    </div>
+
     <!-- 腳本邏輯 -->
     <script>
         // ==========================================
         // CONFIGURATION
         // ==========================================
         const GAS_API_URL = "https://script.google.com/macros/s/AKfycbzfrhkTZrDgNlmNM-ijRWAOhAhUBgT-VWNVorPZHnC1GR86Vuv36iYPDXupfyXOHlA-uw/exec"; 
+        const FINANCE_GAS_API_URL = 'https://script.google.com/macros/s/AKfycbwwpK1i10Ql0jjOmNnXNt6wQ71zTCoOB0z3Gp5kR8m7R9U_lCpHGhnX-IyPUbbF4RsGXw/exec'; 
         // ==========================================
 
         const WEEKLY_QUOTES = {
@@ -392,6 +522,38 @@
         let todayStr = "";
         let isProfileLoaded = false;
         let records = []; 
+        let toastTimeout;
+        let pendingExpenseData = null; // 用於儲存報帳待送出的資料
+
+        // 全域 Toast 通知函數
+        function showToast(message, type = 'info') {
+            const toast = document.getElementById('toastNotification');
+            const toastMessage = document.getElementById('toastMessage');
+            const toastIcon = document.getElementById('toastIcon');
+
+            toastMessage.textContent = message;
+
+            if (type === 'success') {
+                toastIcon.setAttribute('data-lucide', 'check-circle-2');
+                toastIcon.className = "w-5 h-5 shrink-0 text-emerald-400";
+            } else if (type === 'error') {
+                toastIcon.setAttribute('data-lucide', 'alert-circle');
+                toastIcon.className = "w-5 h-5 shrink-0 text-rose-400";
+            } else {
+                toastIcon.setAttribute('data-lucide', 'info');
+                toastIcon.className = "w-5 h-5 shrink-0 text-purple-400";
+            }
+            lucide.createIcons();
+
+            toast.classList.remove('-translate-y-24', 'opacity-0');
+            toast.classList.add('translate-y-0', 'opacity-100');
+
+            clearTimeout(toastTimeout);
+            toastTimeout = setTimeout(() => {
+                toast.classList.remove('translate-y-0', 'opacity-100');
+                toast.classList.add('-translate-y-24', 'opacity-0');
+            }, 3000);
+        }
 
         // 初始化
         document.addEventListener('DOMContentLoaded', () => {
@@ -401,22 +563,20 @@
             initDateCheck();
             loadRecords();
             renderAttendance();
+            initFinanceForm(); // 初始化報帳表單設定
         });
 
         // ==========================================
         // UI: 分頁切換 (Bottom Navigation Logic)
         // ==========================================
         function switchTab(tabId) {
-            // 1. 隱藏所有分頁內容
             document.querySelectorAll('.tab-content').forEach(el => {
                 el.classList.remove('active');
             });
             
-            // 2. 顯示目標分頁
             const targetTab = document.getElementById(`tab-${tabId}`);
             if (targetTab) targetTab.classList.add('active');
             
-            // 3. 重置所有導覽列按鈕樣式
             document.querySelectorAll('.nav-btn').forEach(btn => {
                 btn.classList.remove('text-purple-600');
                 btn.classList.add('text-slate-400');
@@ -427,7 +587,6 @@
                 }
             });
             
-            // 4. 設定當前啟動的導覽列按鈕樣式
             const activeBtn = document.getElementById(`nav-${tabId}`);
             if (activeBtn) {
                 activeBtn.classList.remove('text-slate-400');
@@ -439,12 +598,14 @@
                 }
             }
 
-            // 5. 針對特定頁面做初始化
             if (tabId === 'settings') {
-                updateProfileUI(); // 切換到設定頁時更新資料
+                updateProfileUI(); 
+            } else if (tabId === 'finance') {
+                // 若切換到報帳分頁，更新一次報帳者名稱
+                const rep = document.getElementById('reporter');
+                if (rep) rep.value = currentUser.name || "請先至設定填寫姓名";
             }
 
-            // 滾動到頂部
             window.scrollTo({ top: 0, behavior: 'smooth' });
         }
 
@@ -456,7 +617,6 @@
             if (saved) {
                 const parsed = JSON.parse(saved);
                 currentUser = { ...currentUser, ...parsed };
-                // 移除這裡直接操作 input 的程式碼，改由 updateProfileUI 統一處理
                 updateProfileUI();
                 fetchRemoteRecords();
             }
@@ -464,13 +624,9 @@
 
         function initUser() {
             const input = document.getElementById('inputName');
-            
             isProfileLoaded = true;
             input.readOnly = true; 
-            
-            // 統一呼叫 UI 更新函式，處理歡迎文字與 Placeholder
             updateProfileUI(); 
-            
             checkButtonState();
             syncUserProfile();
         }
@@ -509,8 +665,51 @@
             lucide.createIcons();
         }
 
+        function updateProfileUI() {
+            document.getElementById('profileName').value = currentUser.name || "";
+            
+            const hint = document.getElementById('lineAutoHint');
+            const welcomeContainer = document.getElementById('welcomeContainer');
+            const welcomeName = document.getElementById('welcomeName');
+            const input = document.getElementById('inputName');
+            const reporter = document.getElementById('reporter');
+
+            if (currentUser.name) {
+                hint.classList.remove('hidden');
+                welcomeContainer.classList.remove('hidden');
+                welcomeName.textContent = currentUser.name;
+                
+                input.value = currentUser.name;
+                input.placeholder = "請點擊下方按鈕簽到";
+                if(reporter) reporter.value = currentUser.name;
+            } else {
+                hint.classList.add('hidden');
+                welcomeContainer.classList.add('hidden');
+                
+                input.value = "";
+                input.placeholder = "請先至「設定」輸入姓名";
+                if(reporter) reporter.value = "請先至設定填寫姓名";
+            }
+        }
+
+        function saveProfile() {
+            const newName = document.getElementById('profileName').value.trim();
+            if(newName) {
+                currentUser.name = newName;
+                localStorage.setItem('spiritual_user_profile', JSON.stringify(currentUser));
+                
+                updateProfileUI();
+                syncUserProfile();
+                
+                showToast("設定已儲存！", "success");
+                switchTab('home'); 
+            } else {
+                showToast("姓名不能為空", "error");
+            }
+        }
+
         // ==========================================
-        // 紀錄與同步邏輯
+        // 紀錄與同步邏輯 (簽到相關)
         // ==========================================
         function loadRecords() {
             const saved = localStorage.getItem('spiritual_weekly_records');
@@ -521,10 +720,9 @@
                 showPostSignInSection();
                 document.getElementById('inputName').value = todayRecord.name;
                 
-                // 簽到過後改變按鈕樣式
                 const btn = document.getElementById('btnSignIn');
                 btn.disabled = true;
-                btn.className = "w-full py-4 text-white rounded-2xl font-bold text-lg flex items-center justify-center gap-2 bg-green-500 shadow-md";
+                btn.className = "w-full py-4 text-white rounded-2xl font-bold text-lg flex items-center justify-center gap-2 bg-emerald-500 shadow-md";
                 document.getElementById('btnText').textContent = "今日已完成簽到";
                 const btnIcon = document.getElementById('btnIcon');
                 btnIcon.className = "w-5 h-5";
@@ -540,7 +738,7 @@
             
             const inputName = document.getElementById('inputName').value.trim();
             if (!inputName) { 
-                alert("請先至「設定」頁面輸入您的姓名！"); 
+                showToast("請先至「設定」頁面輸入您的姓名！", "error"); 
                 switchTab('settings');
                 return; 
             }
@@ -563,23 +761,22 @@
             localStorage.setItem('spiritual_weekly_records', JSON.stringify(records));
             sendToGAS(newRecord);
             
-            // 變更按鈕為已簽到
             const btn = document.getElementById('btnSignIn');
             btn.disabled = true;
-            btn.className = "w-full py-4 text-white rounded-2xl font-bold text-lg flex items-center justify-center gap-2 bg-green-500 shadow-md transition-all";
+            btn.className = "w-full py-4 text-white rounded-2xl font-bold text-lg flex items-center justify-center gap-2 bg-emerald-500 shadow-md transition-all";
             document.getElementById('btnText').textContent = "簽到成功";
             const btnIcon = document.getElementById('btnIcon');
             btnIcon.className = "w-5 h-5 animate-[bounce_1s_ease-in-out]";
             btnIcon.setAttribute('data-lucide', 'check-circle-2');
             lucide.createIcons();
 
+            showToast("簽到成功！", "success");
             showPostSignInSection();
             renderAttendance(); 
         }
 
         function showPostSignInSection() {
-            const section = document.getElementById('postSignInSection');
-            section.classList.remove('hidden');
+            document.getElementById('postSignInSection').classList.remove('hidden');
         }
 
         function sendToGAS(payload) {
@@ -645,54 +842,6 @@
                     showPostSignInSection();
                     if (todayRecord.name) document.getElementById('inputName').value = todayRecord.name;
                 }
-            }
-        }
-
-        // ==========================================
-        // UI: 設定頁面處理
-        // ==========================================
-        function updateProfileUI() {
-            // 1. 更新設定頁面的輸入框
-            document.getElementById('profileName').value = currentUser.name || "";
-            
-            // 2. 首頁連動顯示：歡迎文字、簽到框、提示字
-            const hint = document.getElementById('lineAutoHint');
-            const welcomeContainer = document.getElementById('welcomeContainer');
-            const welcomeName = document.getElementById('welcomeName');
-            const input = document.getElementById('inputName');
-
-            if (currentUser.name) {
-                // 有名字的狀態：顯示歡迎詞、更新簽到框
-                hint.classList.remove('hidden');
-                welcomeContainer.classList.remove('hidden');
-                welcomeName.textContent = currentUser.name;
-                
-                input.value = currentUser.name;
-                input.placeholder = "請點擊下方按鈕簽到";
-            } else {
-                // 沒名字的狀態：隱藏歡迎詞、提示去設定
-                hint.classList.add('hidden');
-                welcomeContainer.classList.add('hidden');
-                
-                input.value = "";
-                input.placeholder = "請先至「設定」輸入姓名";
-            }
-        }
-
-        function saveProfile() {
-            const newName = document.getElementById('profileName').value.trim();
-            if(newName) {
-                currentUser.name = newName;
-                localStorage.setItem('spiritual_user_profile', JSON.stringify(currentUser));
-                
-                // 儲存後呼叫 UI 更新，首頁也會跟著改變
-                updateProfileUI();
-                syncUserProfile();
-                
-                alert("設定已儲存！");
-                switchTab('home'); // 存檔後跳回首頁
-            } else {
-                alert("姓名不能為空");
             }
         }
 
@@ -774,7 +923,7 @@
             const record = records.find(r => r.dateStr === editingDateStr);
 
             if (!record) {
-                alert("請先完成今日簽到才能撰寫心得！");
+                showToast("請先完成今日簽到才能撰寫心得！", "error");
                 return;
             }
 
@@ -782,9 +931,7 @@
             document.getElementById('refTitle').value = record.title || "";
             document.getElementById('refContent').value = record.reflection || "";
             
-            const modal = document.getElementById('reflectionModal');
-            modal.classList.remove('hidden');
-            // 防止底層滑動
+            document.getElementById('reflectionModal').classList.remove('hidden');
             document.body.style.overflow = 'hidden'; 
         }
 
@@ -797,7 +944,7 @@
             const title = document.getElementById('refTitle').value.trim();
             const content = document.getElementById('refContent').value.trim();
             
-            if (!title || !content) { alert("標題與心得不可空白"); return; }
+            if (!title || !content) { showToast("標題與心得不可空白", "error"); return; }
 
             const idx = records.findIndex(r => r.dateStr === editingDateStr);
             if (idx >= 0) {
@@ -808,6 +955,7 @@
                 sendToGAS(records[idx]);
                 renderReflectionList();
                 closeReflectionModal();
+                showToast("心得已成功封存！", "success");
             }
         }
 
@@ -865,6 +1013,113 @@
                     <div class="flex flex-wrap gap-2.5 flex-1">${wedsHtml}</div>
                 `;
                 container.appendChild(monthDiv);
+            }
+        }
+
+        // ==========================================
+        // 報帳系統邏輯
+        // ==========================================
+        function initFinanceForm() {
+            const expenseDateInput = document.getElementById('expenseDate');
+            if (expenseDateInput) expenseDateInput.valueAsDate = new Date();
+
+            const activitySelect = document.getElementById('activityItem');
+            const mainActivityInput = document.getElementById('mainActivity');
+            const form = document.getElementById('expense-form');
+
+            if (activitySelect && mainActivityInput) {
+                activitySelect.addEventListener('change', () => {
+                    const val = activitySelect.value;
+                    if (val.includes('例行會議') || val.includes('特別專案')) {
+                        mainActivityInput.value = '';
+                        mainActivityInput.placeholder = "請輸入活動名稱 (必填)...";
+                    } else {
+                        mainActivityInput.value = "福音研究所";
+                    }
+                });
+            }
+
+            if (form) {
+                form.addEventListener('submit', (e) => {
+                    e.preventDefault();
+                    
+                    const reporterName = document.getElementById('reporter').value;
+                    if (!currentUser.name || reporterName === "請先至設定填寫姓名") {
+                        showToast("請先至「設定」輸入您的姓名才能報帳", "error");
+                        switchTab('settings');
+                        return;
+                    }
+
+                    pendingExpenseData = {
+                        'timestamp': new Date().toLocaleString(),
+                        '報帳者': reporterName,
+                        '活動項目': document.getElementById('activityItem').value,
+                        '使用單位': document.getElementById('unit').value,
+                        '開支類型': document.getElementById('expenseType').value,
+                        '日期': document.getElementById('expenseDate').value,
+                        '主活動': document.getElementById('mainActivity').value,
+                        '社交活動': document.getElementById('socialActivity').value || '無',
+                        '金額': Math.floor(Number(document.getElementById('amount').value)),
+                        '實到人數': Math.floor(Number(document.getElementById('attendance').value)),
+                        '發票類型': document.getElementById('invoiceType').value,
+                        '發票號碼': document.getElementById('invoiceNumber').value || '無',
+                        '備註': document.getElementById('remarks').value || '無'
+                    };
+
+                    const modalSummary = document.getElementById('finance-modal-summary');
+                    modalSummary.innerHTML = Object.entries(pendingExpenseData).map(([key, value]) => `
+                        <div class="py-2.5 flex justify-between gap-4">
+                            <span class="font-bold text-slate-700 shrink-0">${key === 'timestamp' ? '送出時間' : key}</span>
+                            <span class="text-slate-600 text-right break-words">${key === '金額' ? '$ ' + value.toLocaleString() : value}</span>
+                        </div>
+                    `).join('');
+
+                    document.getElementById('confirm-finance-modal').classList.remove('hidden');
+                    document.body.style.overflow = 'hidden';
+                });
+            }
+        }
+
+        function closeFinanceConfirmModal() {
+            document.getElementById('confirm-finance-modal').classList.add('hidden');
+            document.body.style.overflow = '';
+        }
+
+        async function submitFinanceForm() {
+            if (!pendingExpenseData) return;
+
+            const confirmBtn = document.getElementById('confirm-finance-submit');
+            const btnText = document.getElementById('finance-btn-text');
+            const btnSpinner = document.getElementById('finance-btn-spinner');
+
+            confirmBtn.disabled = true;
+            btnText.textContent = "傳送中...";
+            btnSpinner.classList.remove('hidden');
+
+            try {
+                await fetch(FINANCE_GAS_API_URL, {
+                    method: 'POST',
+                    mode: 'no-cors', 
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(pendingExpenseData)
+                });
+
+                showToast('報帳資料已成功送出！', 'success');
+                
+                // 重設表單
+                document.getElementById('expense-form').reset();
+                document.getElementById('expenseDate').valueAsDate = new Date();
+                document.getElementById('mainActivity').value = "福音研究所";
+                document.getElementById('reporter').value = currentUser.name; // 補回名字
+                
+            } catch (error) {
+                console.error('Submit Error:', error);
+                showToast('提交失敗，請檢查網路連線', 'error');
+            } finally {
+                closeFinanceConfirmModal();
+                confirmBtn.disabled = false;
+                btnText.textContent = "確定提交";
+                btnSpinner.classList.add('hidden');
             }
         }
     </script>
