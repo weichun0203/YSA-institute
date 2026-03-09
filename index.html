@@ -106,9 +106,6 @@
         <div id="tab-home" class="tab-content active pt-2">
             <!-- 標題區 -->
             <header class="text-center mb-8">
-                <div class="inline-flex items-center justify-center p-3 glass rounded-full shadow-lg text-purple-600 mb-3 animate-bounce">
-                    <i data-lucide="wind" class="w-6 h-6"></i>
-                </div>
                 <h1 class="text-3xl font-bold text-slate-800 tracking-wider mb-2 drop-shadow-sm">每周靈性簽到</h1>
                 
                 <!-- 專屬歡迎訊息區塊 (預設隱藏) -->
@@ -139,7 +136,7 @@
 
                     <button type="submit" id="btnSignIn" class="w-full py-4 text-white rounded-2xl font-bold text-lg transition-all shadow-lg flex items-center justify-center gap-2 group active:scale-[0.98] bg-slate-400 cursor-not-allowed" disabled>
                         <span id="btnText">讀取資料中...</span>
-                        <i id="btnIcon" data-lucide="loader-2" class="w-5 h-5 animate-spin"></i>
+                        <i id="btnIcon" data-lucide="loader-2" class="w-5 h-5"></i>
                     </button>
                 </form>
             </div>
@@ -152,9 +149,14 @@
                     <h3 class="text-xs font-bold text-purple-500 tracking-widest uppercase mb-2">每周金句</h3>
                     <div class="relative p-6 md:p-8 glass rounded-2xl inline-block w-full">
                         <i data-lucide="quote" class="absolute top-4 left-4 text-purple-300 w-5 h-5 opacity-50"></i>
-                        <p id="dailyQuoteDisplay" class="text-xl md:text-2xl font-serif text-slate-800 font-medium leading-relaxed italic px-2">
-                            <!-- 金句內容 -->
-                        </p>
+                        <div class="flex flex-col gap-3">
+                            <p id="dailyQuoteDisplay" class="text-xl md:text-2xl font-serif text-slate-800 font-medium leading-relaxed italic px-2">
+                                <!-- 金句內容 -->
+                            </p>
+                            <p id="dailyQuoteAuthor" class="text-right text-sm md:text-base font-serif text-slate-600 font-bold pr-4">
+                                <!-- 作者內容 -->
+                            </p>
+                        </div>
                         <i data-lucide="quote" class="absolute bottom-4 right-4 text-purple-300 w-5 h-5 rotate-180 opacity-50"></i>
                     </div>
                 </div>
@@ -204,42 +206,8 @@
             <h2 class="text-2xl font-bold text-slate-800 mb-6 flex items-center gap-2">
                 <i data-lucide="calendar-days" class="text-purple-600"></i> 近期活動
             </h2>
-            <div class="space-y-4">
-                <!-- 活動卡片 1 -->
-                <div class="glass p-5 rounded-2xl shadow-sm flex gap-4 items-center">
-                    <div class="bg-gradient-to-br from-purple-500 to-indigo-500 text-white rounded-xl p-3 flex flex-col items-center justify-center min-w-[70px] shadow-md">
-                        <span class="text-xs font-medium opacity-80">4月</span>
-                        <span class="text-xl font-bold leading-none mt-1">15</span>
-                    </div>
-                    <div class="flex-1">
-                        <h3 class="font-bold text-slate-800 text-lg">春季靈修營</h3>
-                        <p class="text-sm text-slate-500 mt-1 flex items-center gap-1">
-                            <i data-lucide="map-pin" class="w-3 h-3"></i> 陽明山會館
-                        </p>
-                    </div>
-                    <button class="text-purple-600 bg-purple-50 p-2 rounded-full">
-                        <i data-lucide="arrow-right" class="w-5 h-5"></i>
-                    </button>
-                </div>
-                <!-- 活動卡片 2 -->
-                <div class="glass p-5 rounded-2xl shadow-sm flex gap-4 items-center">
-                    <div class="bg-gradient-to-br from-pink-400 to-rose-400 text-white rounded-xl p-3 flex flex-col items-center justify-center min-w-[70px] shadow-md">
-                        <span class="text-xs font-medium opacity-80">5月</span>
-                        <span class="text-xl font-bold leading-none mt-1">20</span>
-                    </div>
-                    <div class="flex-1">
-                        <h3 class="font-bold text-slate-800 text-lg">青年聯合聚會</h3>
-                        <p class="text-sm text-slate-500 mt-1 flex items-center gap-1">
-                            <i data-lucide="clock" class="w-3 h-3"></i> 14:00 - 17:00
-                        </p>
-                    </div>
-                    <button class="text-purple-600 bg-purple-50 p-2 rounded-full">
-                        <i data-lucide="arrow-right" class="w-5 h-5"></i>
-                    </button>
-                </div>
-                <div class="text-center mt-8">
-                    <p class="text-slate-400 text-sm">目前沒有更多活動囉！</p>
-                </div>
+            <div id="eventsList" class="space-y-4">
+                <!-- 活動卡片將由 JavaScript 動態生成 -->
             </div>
         </div>
 
@@ -257,11 +225,11 @@
                     <div class="grid grid-cols-1 sm:grid-cols-2 gap-5">
                         <div class="space-y-1.5">
                             <label class="block text-sm font-bold text-slate-700">報帳者 (系統帶入)</label>
-                            <input type="text" id="reporter" required readonly class="w-full px-4 py-3 rounded-xl bg-slate-100/50 border border-transparent outline-none text-slate-500 cursor-not-allowed">
+                            <input type="text" id="reporter" required readonly class="w-full px-4 py-3 rounded-xl bg-slate-50 border border-slate-200 shadow-sm outline-none text-slate-500 cursor-not-allowed">
                         </div>
                         <div class="space-y-1.5">
                             <label class="block text-sm font-bold text-slate-700">活動項目</label>
-                            <select id="activityItem" required class="w-full px-4 py-3 rounded-xl bg-white/80 border border-white focus:ring-2 focus:ring-purple-300 outline-none text-slate-700 appearance-none">
+                            <select id="activityItem" required class="w-full px-4 py-3 rounded-xl bg-white border border-slate-200 shadow-sm focus:border-transparent focus:ring-2 focus:ring-purple-400 outline-none text-slate-700 appearance-none">
                                 <option value="周活動Weekly Event(福研)">周活動 Weekly Event (福研)</option>
                                 <option value="例行會議Council(單成會議)">例行會議 Council (單成會議)</option>
                                 <option value="特別專案Special Event(唱詩班、交通、單成大會)">特別專案 Special Event (唱詩班、交通、單成大會)</option>
@@ -275,7 +243,7 @@
                     <div class="grid grid-cols-1 sm:grid-cols-2 gap-5">
                         <div class="space-y-1.5">
                             <label class="block text-sm font-bold text-slate-700">使用單位</label>
-                            <select id="unit" required class="w-full px-4 py-3 rounded-xl bg-white/80 border border-white focus:ring-2 focus:ring-purple-300 outline-none text-slate-700 appearance-none">
+                            <select id="unit" required class="w-full px-4 py-3 rounded-xl bg-white border border-slate-200 shadow-sm focus:border-transparent focus:ring-2 focus:ring-purple-400 outline-none text-slate-700 appearance-none">
                                 <option value="桃園支聯會單成中心(TY YSA)">桃園支聯會單成中心 (TY YSA)</option>
                                 <option value="新竹支聯會單成中心(HC YSA)">新竹支聯會單成中心 (HC YSA)</option>
                                 <option value="龍潭福研(LT Ward)">龍潭福研 (LT Ward)</option>
@@ -285,7 +253,7 @@
                         </div>
                         <div class="space-y-1.5">
                             <label class="block text-sm font-bold text-slate-700">開支類型</label>
-                            <select id="expenseType" required class="w-full px-4 py-3 rounded-xl bg-white/80 border border-white focus:ring-2 focus:ring-purple-300 outline-none text-slate-700 appearance-none">
+                            <select id="expenseType" required class="w-full px-4 py-3 rounded-xl bg-white border border-slate-200 shadow-sm focus:border-transparent focus:ring-2 focus:ring-purple-400 outline-none text-slate-700 appearance-none">
                                 <option value="伙食(Food)">伙食 (Food)</option>
                                 <option value="活動(Activity)">活動 (Activity)</option>
                                 <option value="文宣(Publicity)">文宣 (Publicity)</option>
@@ -302,15 +270,18 @@
                     <div class="grid grid-cols-1 sm:grid-cols-3 gap-5">
                         <div class="space-y-1.5">
                             <label class="block text-sm font-bold text-slate-700">日期</label>
-                            <input type="date" id="expenseDate" required class="w-full px-4 py-3 rounded-xl bg-white/80 border border-white focus:ring-2 focus:ring-purple-300 outline-none text-slate-700">
+                            <input type="date" id="expenseDate" required class="w-full px-4 py-3 rounded-xl bg-white border border-slate-200 shadow-sm focus:border-transparent focus:ring-2 focus:ring-purple-400 outline-none text-slate-700">
                         </div>
                         <div class="space-y-1.5 sm:col-span-1">
-                            <label class="block text-sm font-bold text-slate-700">主活動</label>
-                            <input type="text" id="mainActivity" value="福音研究所" required class="w-full px-4 py-3 rounded-xl bg-white/80 border border-white focus:ring-2 focus:ring-purple-300 outline-none text-slate-700">
+                            <div class="flex items-center justify-between">
+                                <label class="block text-sm font-bold text-slate-700">主活動</label>
+                                <button type="button" onclick="document.getElementById('mainActivity').value='福音研究所'" class="text-[10px] font-bold text-purple-600 bg-purple-100 hover:bg-purple-200 px-2 py-0.5 rounded transition shadow-sm active:scale-95">填入福研</button>
+                            </div>
+                            <input type="text" id="mainActivity" value="" required placeholder="請輸入活動名稱" class="w-full px-4 py-3 rounded-xl bg-white border border-slate-200 shadow-sm focus:border-transparent focus:ring-2 focus:ring-purple-400 outline-none text-slate-700">
                         </div>
                         <div class="space-y-1.5 sm:col-span-1">
                             <label class="block text-sm font-bold text-slate-700">社交活動</label>
-                            <input type="text" id="socialActivity" placeholder="排球活動、課程..." class="w-full px-4 py-3 rounded-xl bg-white/80 border border-white focus:ring-2 focus:ring-purple-300 outline-none text-slate-700">
+                            <input type="text" id="socialActivity" placeholder="排球活動、課程..." class="w-full px-4 py-3 rounded-xl bg-white border border-slate-200 shadow-sm focus:border-transparent focus:ring-2 focus:ring-purple-400 outline-none text-slate-700">
                         </div>
                     </div>
 
@@ -320,12 +291,12 @@
                             <label class="block text-sm font-bold text-slate-700">金額</label>
                             <div class="relative">
                                 <span class="absolute left-4 top-3.5 text-slate-400 font-bold">$</span>
-                                <input type="number" id="amount" required min="0" step="1" placeholder="整數金額" class="w-full pl-9 pr-4 py-3 rounded-xl bg-white/80 border border-white focus:ring-2 focus:ring-purple-300 outline-none text-slate-700 font-mono">
+                                <input type="number" id="amount" required min="0" step="1" placeholder="整數金額" class="w-full pl-9 pr-4 py-3 rounded-xl bg-white border border-slate-200 shadow-sm focus:border-transparent focus:ring-2 focus:ring-purple-400 outline-none text-slate-700 font-mono">
                             </div>
                         </div>
                         <div class="space-y-1.5">
                             <label class="block text-sm font-bold text-slate-700">實到人數</label>
-                            <input type="number" id="attendance" required min="0" step="1" placeholder="參與人數" class="w-full px-4 py-3 rounded-xl bg-white/80 border border-white focus:ring-2 focus:ring-purple-300 outline-none text-slate-700">
+                            <input type="number" id="attendance" required min="0" step="1" placeholder="參與人數" class="w-full px-4 py-3 rounded-xl bg-white border border-slate-200 shadow-sm focus:border-transparent focus:ring-2 focus:ring-purple-400 outline-none text-slate-700">
                         </div>
                     </div>
 
@@ -335,7 +306,7 @@
                     <div class="grid grid-cols-1 sm:grid-cols-2 gap-5">
                         <div class="space-y-1.5">
                             <label class="block text-sm font-bold text-slate-700">發票類型</label>
-                            <select id="invoiceType" required class="w-full px-4 py-3 rounded-xl bg-white/80 border border-white focus:ring-2 focus:ring-purple-300 outline-none text-slate-700 appearance-none">
+                            <select id="invoiceType" required class="w-full px-4 py-3 rounded-xl bg-white border border-slate-200 shadow-sm focus:border-transparent focus:ring-2 focus:ring-purple-400 outline-none text-slate-700 appearance-none">
                                 <option value="統一發票">統一發票</option>
                                 <option value="收據">收據</option>
                                 <option value="其他(替代文件)">其他</option>
@@ -343,14 +314,14 @@
                         </div>
                         <div class="space-y-1.5">
                             <label class="block text-sm font-bold text-slate-700">發票號碼</label>
-                            <input type="text" id="invoiceNumber" placeholder="編號/末碼" class="w-full px-4 py-3 rounded-xl bg-white/80 border border-white focus:ring-2 focus:ring-purple-300 outline-none text-slate-700">
+                            <input type="text" id="invoiceNumber" placeholder="編號/末碼" class="w-full px-4 py-3 rounded-xl bg-white border border-slate-200 shadow-sm focus:border-transparent focus:ring-2 focus:ring-purple-400 outline-none text-slate-700">
                         </div>
                     </div>
 
                     <!-- 備註 -->
                     <div class="space-y-1.5">
                         <label class="block text-sm font-bold text-slate-700">備註</label>
-                        <textarea id="remarks" rows="2" placeholder="其他需要說明的事項..." class="w-full px-4 py-3 rounded-xl bg-white/80 border border-white focus:ring-2 focus:ring-purple-300 outline-none text-slate-700 resize-none"></textarea>
+                        <textarea id="remarks" rows="2" placeholder="其他需要說明的事項..." class="w-full px-4 py-3 rounded-xl bg-white border border-slate-200 shadow-sm focus:border-transparent focus:ring-2 focus:ring-purple-400 outline-none text-slate-700 resize-none"></textarea>
                     </div>
 
                     <button type="submit" class="w-full bg-gradient-to-r from-purple-600 to-indigo-600 text-white py-4 rounded-xl font-bold mt-2 active:scale-[0.98] transition-transform shadow-md flex justify-center items-center gap-2">
@@ -433,11 +404,11 @@
     <!-- 心得 Modal -->
     <div id="reflectionModal" class="fixed inset-0 z-50 hidden flex items-end sm:items-center justify-center bg-slate-900/40 backdrop-blur-sm transition-opacity">
         <div class="glass-strong w-full sm:max-w-lg rounded-t-3xl sm:rounded-3xl p-0 overflow-hidden relative flex flex-col max-h-[90vh] shadow-2xl animate-[fadeIn_0.3s_ease-out]">
-            <div class="h-24 sm:h-32 bg-gradient-to-r from-purple-500 to-pink-500 relative flex items-center justify-center shrink-0">
+            <div class="h-16 sm:h-20 bg-gradient-to-r from-purple-500 to-pink-500 relative flex items-center justify-center shrink-0">
                 <div class="absolute inset-0 bg-white opacity-10" style="background-image: radial-gradient(circle, #fff 2px, transparent 2.5px); background-size: 20px 20px;"></div>
-                <i data-lucide="pen-tool" class="text-white/90 w-10 h-10 animate-bounce mt-4"></i>
-                <button onclick="closeReflectionModal()" class="absolute top-4 right-4 p-2 bg-black/10 hover:bg-black/20 rounded-full text-white transition-colors">
-                    <i data-lucide="x" class="w-5 h-5"></i>
+                <i data-lucide="pen-tool" class="text-white/90 w-8 h-8 animate-bounce mt-2"></i>
+                <button onclick="closeReflectionModal()" class="absolute top-1/2 -translate-y-1/2 right-4 p-2 bg-black/10 hover:bg-black/20 rounded-full text-white transition-colors">
+                    <i data-lucide="x" class="w-4 h-4"></i>
                 </button>
             </div>
             <div class="p-6 sm:p-8 overflow-y-auto pb-[env(safe-area-inset-bottom)] mb-4">
@@ -510,12 +481,25 @@
         // ==========================================
 
         const WEEKLY_QUOTES = {
-            "1月7日": "新的開始，是靈魂對未來的承諾。",
-            "1月14日": "放下控制，允許生命自然的流動。",
-            "1月21日": "你被深深地愛著，即使在你看不見的地方。",
-            "1月28日": "相信直覺，那是靈魂在對你說話。",
-            "DEFAULT": "願你今天充滿平靜與喜悅。"
+            "1月7日": { text: "新的開始，是靈魂對未來的承諾。", author: "佚名" },
+            "1月14日": { text: "放下控制，允許生命自然的流動。", author: "佚名" },
+            "1月21日": { text: "你被深深地愛著，即使在你看不見的地方。", author: "佚名" },
+            "1月28日": { text: "相信直覺，那是靈魂在對你說話。", author: "佚名" },
+            "DEFAULT": { text: "願你今天充滿平靜與喜悅。", author: "佚名" }
         };
+
+        // 活動資料陣列 (年份請設定為當前活動年份，以利精準判斷)
+        const UPCOMING_EVENTS = [
+            { date: '2026-03-04', title: '吃湯圓猜燈謎', desc: '福音研究所' },
+            { date: '2026-03-11', title: '桌球', desc: '福音研究所' },
+            { date: '2026-03-18', title: '自立課程 + 排球', desc: '福音研究所' },
+            { date: '2026-03-25', title: '冰島毛線', desc: '福音研究所' },
+            { date: '2026-04-01', title: '冰島毛線', desc: '福音研究所' },
+            { date: '2026-04-08', title: '排球 OR 毛線', desc: '福音研究所' },
+            { date: '2026-04-15', title: '理財小撇步', desc: '福音研究所' },
+            { date: '2026-04-22', title: '職業分享', desc: '福音研究所' },
+            { date: '2026-04-29', title: '職業分享', desc: '福音研究所' }
+        ];
 
         // 狀態變數
         let currentUser = { name: "" };
@@ -524,9 +508,10 @@
         let records = []; 
         let toastTimeout;
         let pendingExpenseData = null; // 用於儲存報帳待送出的資料
+        let editingDateStr = null;
 
         // 全域 Toast 通知函數
-        function showToast(message, type = 'info') {
+        function showToast(message, type = 'info', duration = 3000) {
             const toast = document.getElementById('toastNotification');
             const toastMessage = document.getElementById('toastMessage');
             const toastIcon = document.getElementById('toastIcon');
@@ -552,7 +537,7 @@
             toastTimeout = setTimeout(() => {
                 toast.classList.remove('translate-y-0', 'opacity-100');
                 toast.classList.add('-translate-y-24', 'opacity-0');
-            }, 3000);
+            }, duration);
         }
 
         // 初始化
@@ -564,6 +549,7 @@
             loadRecords();
             renderAttendance();
             initFinanceForm(); // 初始化報帳表單設定
+            renderEvents(); // 渲染活動列表
         });
 
         // ==========================================
@@ -635,9 +621,12 @@
             const now = new Date();
             todayStr = (now.getMonth() + 1) + "月" + now.getDate() + "日";
 
-            const quote = WEEKLY_QUOTES[todayStr] || WEEKLY_QUOTES["DEFAULT"];
-            document.getElementById('dailyQuoteDisplay').textContent = quote;
-            document.getElementById('modalQuote').textContent = quote;
+            const quoteObj = WEEKLY_QUOTES[todayStr] || WEEKLY_QUOTES["DEFAULT"];
+            const fullQuote = `${quoteObj.text} —— ${quoteObj.author}`;
+            
+            document.getElementById('dailyQuoteDisplay').textContent = quoteObj.text;
+            document.getElementById('dailyQuoteAuthor').textContent = "—— " + quoteObj.author;
+            document.getElementById('modalQuote').textContent = fullQuote;
             
             checkButtonState(); 
         }
@@ -651,7 +640,7 @@
                 btn.disabled = true;
                 btn.className = "w-full py-4 text-white rounded-2xl font-bold text-lg shadow-lg flex items-center justify-center gap-2 bg-slate-400 cursor-not-allowed";
                 btnText.textContent = "讀取資料中...";
-                btnIcon.className = "w-5 h-5 animate-spin";
+                btnIcon.className = "w-5 h-5";
                 btnIcon.setAttribute('data-lucide', 'loader-2');
                 lucide.createIcons();
                 return;
@@ -660,7 +649,7 @@
             btn.disabled = false;
             btn.className = "w-full py-4 text-white rounded-2xl font-bold text-lg transition-all shadow-lg flex items-center justify-center gap-2 group active:scale-[0.98] bg-gradient-to-r from-purple-600 to-indigo-600";
             btnText.textContent = "立即簽到";
-            btnIcon.className = "w-5 h-5 group-active:translate-x-1 transition-transform";
+            btnIcon.className = "w-5 h-5";
             btnIcon.setAttribute('data-lucide', 'send');
             lucide.createIcons();
         }
@@ -744,12 +733,15 @@
             }
 
             const now = new Date();
+            const quoteObj = WEEKLY_QUOTES[todayStr] || WEEKLY_QUOTES["DEFAULT"];
+            const fullQuote = `${quoteObj.text} —— ${quoteObj.author}`;
+
             const newRecord = {
                 id: Date.now(),
                 dateStr: todayStr,
                 timeStr: now.toLocaleTimeString('zh-TW', { hour12: false, hour:'2-digit', minute:'2-digit' }),
                 name: currentUser.name,
-                quote: WEEKLY_QUOTES[todayStr] || WEEKLY_QUOTES["DEFAULT"],
+                quote: fullQuote,
                 title: "",
                 reflection: ""
             };
@@ -766,7 +758,7 @@
             btn.className = "w-full py-4 text-white rounded-2xl font-bold text-lg flex items-center justify-center gap-2 bg-emerald-500 shadow-md transition-all";
             document.getElementById('btnText').textContent = "簽到成功";
             const btnIcon = document.getElementById('btnIcon');
-            btnIcon.className = "w-5 h-5 animate-[bounce_1s_ease-in-out]";
+            btnIcon.className = "w-5 h-5";
             btnIcon.setAttribute('data-lucide', 'check-circle-2');
             lucide.createIcons();
 
@@ -916,8 +908,6 @@
             });
         }
 
-        let editingDateStr = null;
-
         function openReflectionModal(targetDateStr = null) {
             editingDateStr = targetDateStr || todayStr;
             const record = records.find(r => r.dateStr === editingDateStr);
@@ -1017,6 +1007,75 @@
         }
 
         // ==========================================
+        // UI: 活動一覽渲染邏輯
+        // ==========================================
+        function renderEvents() {
+            const container = document.getElementById('eventsList');
+            container.innerHTML = '';
+
+            const today = new Date();
+            today.setHours(0, 0, 0, 0);
+
+            // 過濾出「今天以後 (含今天)」的活動
+            const filteredEvents = UPCOMING_EVENTS.filter(ev => {
+                const evDate = new Date(ev.date);
+                evDate.setHours(0, 0, 0, 0);
+                return evDate >= today;
+            });
+
+            if (filteredEvents.length === 0) {
+                container.innerHTML = `
+                    <div class="text-center mt-8 pb-4">
+                        <p class="text-slate-400 text-sm">目前沒有更多活動囉！</p>
+                    </div>
+                `;
+                return;
+            }
+
+            // 三種卡片顏色主題輪替
+            const themes = [
+                { grad: 'from-purple-500 to-indigo-500', text: 'text-purple-600', bg: 'bg-purple-50' },
+                { grad: 'from-pink-400 to-rose-400', text: 'text-pink-600', bg: 'bg-pink-50' },
+                { grad: 'from-blue-400 to-cyan-500', text: 'text-blue-600', bg: 'bg-blue-50' }
+            ];
+
+            filteredEvents.forEach((ev, index) => {
+                const dateObj = new Date(ev.date);
+                const monthStr = (dateObj.getMonth() + 1) + '月';
+                const dayStr = dateObj.getDate();
+                const theme = themes[index % themes.length];
+
+                const cardHTML = `
+                    <div class="glass p-5 rounded-2xl shadow-sm flex gap-4 items-center">
+                        <div class="bg-gradient-to-br ${theme.grad} text-white rounded-xl p-3 flex flex-col items-center justify-center min-w-[70px] shadow-md">
+                            <span class="text-xs font-medium opacity-80">${monthStr}</span>
+                            <span class="text-xl font-bold leading-none mt-1">${dayStr}</span>
+                        </div>
+                        <div class="flex-1">
+                            <h3 class="font-bold text-slate-800 text-lg">${ev.title}</h3>
+                            <p class="text-sm text-slate-500 mt-1 flex items-center gap-1">
+                                <i data-lucide="sparkles" class="w-3 h-3"></i> ${ev.desc}
+                            </p>
+                        </div>
+                        <button class="${theme.text} ${theme.bg} p-2 rounded-full">
+                            <i data-lucide="arrow-right" class="w-5 h-5"></i>
+                        </button>
+                    </div>
+                `;
+                container.insertAdjacentHTML('beforeend', cardHTML);
+            });
+
+            container.insertAdjacentHTML('beforeend', `
+                <div class="text-center mt-8 pb-4">
+                    <p class="text-slate-400 text-sm">期待您的參與！</p>
+                </div>
+            `);
+
+            // 重新渲染新加入的 Lucide icons
+            lucide.createIcons();
+        }
+
+        // ==========================================
         // 報帳系統邏輯
         // ==========================================
         function initFinanceForm() {
@@ -1029,13 +1088,8 @@
 
             if (activitySelect && mainActivityInput) {
                 activitySelect.addEventListener('change', () => {
-                    const val = activitySelect.value;
-                    if (val.includes('例行會議') || val.includes('特別專案')) {
-                        mainActivityInput.value = '';
-                        mainActivityInput.placeholder = "請輸入活動名稱 (必填)...";
-                    } else {
-                        mainActivityInput.value = "福音研究所";
-                    }
+                    mainActivityInput.value = '';
+                    mainActivityInput.placeholder = "請輸入活動名稱 (必填)...";
                 });
             }
 
@@ -1104,12 +1158,12 @@
                     body: JSON.stringify(pendingExpenseData)
                 });
 
-                showToast('報帳資料已成功送出！', 'success');
+                showToast('報帳已送出！請記得將發票與匯款帳號交給廖瑋群弟兄以利後續作業', 'success', 6000);
                 
                 // 重設表單
                 document.getElementById('expense-form').reset();
                 document.getElementById('expenseDate').valueAsDate = new Date();
-                document.getElementById('mainActivity').value = "福音研究所";
+                document.getElementById('mainActivity').value = "";
                 document.getElementById('reporter').value = currentUser.name; // 補回名字
                 
             } catch (error) {
