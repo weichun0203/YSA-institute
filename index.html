@@ -18,18 +18,19 @@
             width: 100%;
             max-width: 100vw;
             touch-action: pan-y;
-            -webkit-tap-highlight-color: transparent; /* 移除 iOS 點擊高光 */
+            -webkit-tap-highlight-color: transparent;
+            scroll-behavior: smooth;
         }
 
         body {
             font-family: 'Noto Sans TC', sans-serif;
-            /* 為底部導覽列預留空間，包含 iOS Safe Area */
             padding-bottom: calc(80px + env(safe-area-inset-bottom)); 
         }
         .font-serif {
             font-family: 'Noto Serif TC', serif;
         }
-        /* 毛玻璃效果與動畫 */
+        
+        /* 毛玻璃與各類裝飾 */
         .glass {
             background: rgba(255, 255, 255, 0.5);
             backdrop-filter: blur(16px);
@@ -53,7 +54,6 @@
             0% { transform: translate(0, 0) scale(1); }
             100% { transform: translate(20px, 30px) scale(1.1); }
         }
-        /* 隱藏捲軸但保留功能 */
         .no-scrollbar::-webkit-scrollbar { display: none; }
         .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
         
@@ -66,11 +66,38 @@
             display: block;
         }
         @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(10px); }
-            to { opacity: 1; transform: translateY(0); }
+            from { opacity: 0; margin-top: 15px; }
+            to { opacity: 1; margin-top: 0; }
         }
 
-        /* 載入中動畫 (報帳按鈕用) */
+        /* 置頂標題專用樣式 (優化：無邊界漸層淡出毛玻璃) */
+        .sticky-header {
+            position: sticky;
+            top: 0;
+            z-index: 40;
+            background: rgba(255, 255, 255, 0.15); 
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            mask-image: linear-gradient(to bottom, black 65%, transparent 100%);
+            -webkit-mask-image: linear-gradient(to bottom, black 65%, transparent 100%);
+            
+            margin-left: -1.25rem;
+            margin-right: -1.25rem;
+            padding-left: 1.25rem;
+            padding-right: 1.25rem;
+            padding-top: max(1rem, env(safe-area-inset-top));
+            padding-bottom: 2rem; 
+            margin-bottom: -1rem; 
+        }
+        @media (min-width: 768px) {
+            .sticky-header {
+                margin-left: -1.5rem;
+                margin-right: -1.5rem;
+                padding-left: 1.5rem;
+                padding-right: 1.5rem;
+            }
+        }
+
         .spinner {
             border: 3px solid rgba(255, 255, 255, 0.3);
             border-radius: 50%;
@@ -84,7 +111,6 @@
             100% { transform: rotate(360deg); }
         }
 
-        /* 抽籤特效 */
         .slot-machine {
             animation: shake 0.5s ease-in-out infinite alternate;
         }
@@ -112,42 +138,15 @@
     <div class="max-w-xl mx-auto p-5 md:p-6 relative z-10">
         
         <!-- ==================== [區塊 1] 首頁 (簽到) ==================== -->
-        <div id="tab-home" class="tab-content active pt-2">
-            <!-- 標題區 -->
-            <header class="text-center mb-8">
-                <h1 class="text-3xl font-bold text-slate-800 tracking-wider mb-2 drop-shadow-sm">每周靈性簽到</h1>
-                
-                <!-- 專屬歡迎訊息區塊 (預設隱藏) -->
-                <div id="welcomeContainer" class="hidden transition-all duration-500 mb-2">
-                    <p class="text-lg font-bold text-purple-600 bg-purple-100/50 inline-block px-4 py-1.5 rounded-full shadow-sm">
-                        歡迎回來，<span id="welcomeName"></span>！
-                    </p>
-                </div>
-
-                <p class="text-slate-500 text-sm md:text-base font-serif italic mt-1">「藉著微小而簡單的事能成就偉大的事」</p>
-            </header>
-
-            <!-- 首頁介紹前言 -->
-            <div class="glass rounded-2xl p-4 mb-6 relative overflow-hidden group">
-                <div class="flex items-start gap-3 relative z-10">
-                    <i data-lucide="info" class="w-5 h-5 text-purple-500 shrink-0 mt-0.5"></i>
-                    <div>
-                        <h3 class="font-bold text-slate-700 text-sm mb-1">如何使用這個 App？</h3>
-                        <p class="text-xs text-slate-500 leading-relaxed">
-                            1. 首次使用請先至<span class="font-bold text-purple-500">「設定」</span>填寫您的姓名。<br>
-                            2. 每天於<span class="font-bold text-purple-500">「首頁」</span>進行靈性簽到與撰寫心得。<br>
-                            3. 參加聚會時，請至<span class="font-bold text-purple-500">「活動」</span>頁面點擊姓名簽到，並可進行值日生抽籤。<br>
-                            4. 若有採買需求，請使用<span class="font-bold text-purple-500">「報帳」</span>系統提交單據與檢視預算。
-                        </p>
-                    </div>
-                </div>
-                <div class="absolute -right-4 -bottom-4 opacity-10 group-hover:scale-110 transition-transform">
-                    <i data-lucide="book-heart" class="w-24 h-24"></i>
-                </div>
+        <div id="tab-home" class="tab-content active pt-0">
+            <!-- 標題區 (置頂) -->
+            <div class="sticky-header flex flex-col items-center">
+                <h1 class="text-2xl font-bold text-slate-800 tracking-wider mb-1 drop-shadow-sm">每周靈性簽到</h1>
+                <p class="text-slate-500 text-xs font-serif italic">「藉著微小而簡單的事能成就偉大的事」</p>
             </div>
 
             <!-- 簽到輸入框 -->
-            <div class="glass rounded-3xl p-6 md:p-8 flex flex-col justify-center relative shadow-xl mb-8">
+            <div class="glass rounded-3xl p-6 md:p-8 flex flex-col justify-center relative shadow-xl mb-8 mt-2">
                 <form id="signInForm" onsubmit="handleSignIn(event)" class="flex flex-col gap-5">
                     <div>
                         <label class="text-lg font-bold text-slate-700 flex items-center gap-2 mb-3">
@@ -155,25 +154,22 @@
                             今日靈性簽到
                         </label>
                         <div class="relative">
-                            <input type="text" id="inputName" placeholder="讀取資料中..." readonly class="w-full pl-5 pr-4 py-4 rounded-2xl bg-white/70 border border-white focus:bg-white focus:ring-4 focus:ring-purple-200 outline-none transition-all placeholder:text-slate-400 text-lg shadow-inner text-slate-700">
+                            <input type="text" id="inputName" placeholder="請輸入您的姓名..." oninput="checkSignInButtonState()" class="w-full pl-5 pr-4 py-4 rounded-2xl bg-white/70 border border-white focus:bg-white focus:ring-4 focus:ring-purple-200 outline-none transition-all placeholder:text-slate-400 text-lg shadow-inner text-slate-700">
                         </div>
-                        <p id="lineAutoHint" class="hidden text-xs text-purple-500 mt-2 ml-2 flex items-center">
-                            <i data-lucide="sparkles" class="w-3 h-3 mr-1"></i> 已帶入設定姓名
-                        </p>
                     </div>
 
                     <button type="submit" id="btnSignIn" class="w-full py-4 text-white rounded-2xl font-bold text-lg transition-all shadow-lg flex items-center justify-center gap-2 group active:scale-[0.98] bg-slate-400 cursor-not-allowed" disabled>
-                        <span id="btnText">讀取資料中...</span>
-                        <i id="btnIcon" data-lucide="loader-2" class="w-5 h-5"></i>
+                        <span id="btnText">請輸入姓名</span>
+                        <i id="btnIcon" data-lucide="edit-3" class="w-5 h-5"></i>
                     </button>
                 </form>
             </div>
 
-            <!-- 簽到後顯示區域 (預設隱藏) -->
+            <!-- 簽到後顯示區域 -->
             <div id="postSignInSection" class="hidden transition-all duration-700 ease-in-out">
                 
                 <!-- 每周金句 -->
-                <div class="mb-8 text-center animate-pulse">
+                <div id="quoteSection" class="mb-8 text-center animate-pulse pt-2">
                     <h3 class="text-xs font-bold text-purple-500 tracking-widest uppercase mb-2">每周金句</h3>
                     <div class="relative p-6 md:p-8 glass rounded-2xl inline-block w-full">
                         <i data-lucide="quote" class="absolute top-4 left-4 text-purple-300 w-5 h-5 opacity-50"></i>
@@ -189,121 +185,69 @@
                     </div>
                 </div>
 
-                <!-- 本月出席狀況 -->
-                <div class="glass rounded-2xl p-4 mb-8 cursor-pointer active:bg-white/50 transition-colors group relative" onclick="toggleHistoryModal(true)">
-                    <div class="flex items-center justify-between mb-4 px-1">
+                <!-- 課程出席進度 (16堂) -->
+                <div class="glass rounded-2xl p-5 mb-8">
+                    <div class="flex items-center justify-between mb-4">
                         <div class="flex items-center gap-2">
                             <div class="p-1.5 bg-purple-100 rounded-lg text-purple-600">
-                                <i data-lucide="calendar-check" class="w-4 h-4"></i>
+                                <i data-lucide="graduation-cap" class="w-5 h-5"></i>
                             </div>
-                            <span class="text-sm font-bold text-slate-700">本月出席</span>
+                            <span class="text-base font-bold text-slate-700">靈性簽到與進度 (共 16 堂)</span>
                         </div>
-                        <span class="text-xs text-purple-500 font-bold flex items-center">
-                            年度紀錄 <i data-lucide="chevron-right" class="w-4 h-4 ml-0.5"></i>
-                        </span>
                     </div>
-                    <div id="monthlyAttendanceWidget" class="flex justify-around items-center">
-                        <!-- JS 產生圓圈 -->
+                    <!-- 橫向卷軸的圓圈區域 -->
+                    <div id="monthlyAttendanceWidget" class="flex gap-4 overflow-x-auto no-scrollbar pb-2 px-1 items-center">
+                        <!-- JS 動態產生 16 個圓圈 -->
                     </div>
-                </div>
-
-                <!-- 心得紀錄列表 -->
-                <div class="flex items-center gap-2 mb-4 px-1 mt-4">
-                    <div class="p-1.5 bg-pink-100 rounded-lg text-pink-500">
-                        <i data-lucide="heart" class="w-5 h-5 fill-pink-500/20"></i>
-                    </div>
-                    <h2 class="text-xl font-bold text-slate-800">心得紀錄</h2>
-                </div>
-
-                <div id="reflectionList" class="grid gap-4">
-                    <!-- 新增按鈕 -->
-                    <div onclick="openReflectionModal()" class="group py-8 bg-white/40 backdrop-blur-md rounded-2xl border-2 border-dashed border-purple-300 hover:border-purple-500 active:bg-white/60 transition-all cursor-pointer flex flex-col items-center justify-center text-purple-500">
-                        <div class="p-2 bg-purple-100 rounded-full mb-2 group-active:scale-95 transition-transform">
-                            <i data-lucide="plus" class="w-6 h-6"></i>
-                        </div>
-                        <span class="font-bold">撰寫今日心得</span>
-                        <span class="text-xs text-purple-400 mt-1">記錄當下的感動</span>
-                    </div>
-                    <!-- 紀錄會動態插入這裡 -->
+                    <p class="text-[10px] text-slate-400 mt-2 text-right">左右滑動查看完整進度</p>
                 </div>
             </div>
         </div>
 
-        <!-- ==================== [區塊 2] 活動一覽與活動簽到 ==================== -->
-        <div id="tab-events" class="tab-content pt-4">
-            
-            <!-- 活動簽到與抽籤區塊 -->
-            <div class="mb-8">
-                <div class="flex justify-between items-center mb-4">
-                    <h2 class="text-2xl font-bold text-slate-800 flex items-center gap-2">
-                        <i data-lucide="users" class="text-purple-600"></i> 今日活動簽到
-                    </h2>
-                    <button onclick="openDutyHistoryModal()" class="text-xs font-bold text-slate-500 hover:text-purple-600 transition-colors flex items-center gap-1 bg-white/50 px-2 py-1.5 rounded-lg border border-slate-200">
-                        <i data-lucide="history" class="w-3.5 h-3.5"></i> 抽籤紀錄
-                    </button>
-                </div>
-                
-                <div class="glass rounded-3xl p-5 shadow-sm mb-4">
-                    <p class="text-xs text-slate-500 mb-3 text-center">點擊姓名即可完成簽到</p>
-                    <div id="nameGrid" class="flex flex-wrap gap-2 justify-center mb-4">
-                        <!-- 姓名按鈕將由 JavaScript 動態生成 -->
-                    </div>
-                    
-                    <!-- 新增：動態新增簽到人員 -->
-                    <div class="flex gap-2 mt-2 mb-4">
-                        <input type="text" id="newPersonInput" placeholder="輸入新朋友姓名..." class="flex-1 px-4 py-2 rounded-xl bg-white border border-slate-200 shadow-sm focus:ring-2 focus:ring-purple-300 outline-none text-sm text-slate-700">
-                        <button onclick="addNewPerson()" class="bg-purple-100 text-purple-600 px-4 py-2 rounded-xl font-bold text-sm hover:bg-purple-200 active:scale-95 transition-transform flex items-center gap-1 shrink-0">
-                            <i data-lucide="user-plus" class="w-4 h-4"></i> 加入
-                        </button>
-                    </div>
-
-                    <div class="pt-4 border-t border-slate-200/50 flex justify-between items-center">
-                        <span class="text-sm font-bold text-slate-600">
-                            已簽到：<span id="signInCount" class="text-purple-600 text-lg mx-1">0</span> 人
-                        </span>
-                        <button onclick="drawDuty()" id="drawDutyBtn" class="bg-gradient-to-r from-orange-400 to-rose-500 text-white px-5 py-2.5 rounded-xl font-bold text-sm shadow-md active:scale-95 transition-transform flex items-center gap-1.5">
-                            <i data-lucide="dices" class="w-4 h-4"></i> 抽值日生
-                        </button>
-                    </div>
-                </div>
-
-                <!-- 值日生結果顯示 -->
-                <div id="dutyResultSection" class="hidden glass rounded-3xl p-6 shadow-sm bg-gradient-to-br from-orange-50 to-yellow-50 border border-orange-200 mb-4 transition-all">
-                    <div class="flex items-center justify-center gap-2 mb-3">
-                        <i data-lucide="star" class="w-5 h-5 text-orange-500 fill-orange-500/20"></i>
-                        <h3 class="text-center text-sm font-bold text-orange-600">今日值日生</h3>
-                        <i data-lucide="star" class="w-5 h-5 text-orange-500 fill-orange-500/20"></i>
-                    </div>
-                    <div id="dutyNamesDisplay" class="text-center text-3xl font-bold text-slate-800 tracking-widest py-2">
-                        <!-- 動態顯示 -->
-                    </div>
-                </div>
+        <!-- ==================== [區塊 2] 課程與心得整合頁面 ==================== -->
+        <div id="tab-reflection" class="tab-content pt-0">
+            <!-- 標題區 (置頂) -->
+            <div class="sticky-header flex justify-between items-center">
+                <h2 class="text-xl font-bold text-slate-800 flex items-center gap-2">
+                    <i data-lucide="book-heart" class="text-purple-600"></i> 課程與心得
+                </h2>
+                <p class="text-slate-500 text-[10px]">點擊卡片撰寫</p>
             </div>
 
-            <hr class="border-slate-200/50 mb-6">
+            <!-- 課程與心得整合列表 -->
+            <div id="integratedCourseList" class="space-y-4 pb-4">
+                <!-- JS 動態產生 16 堂課程卡片 -->
+            </div>
+        </div>
 
-            <div class="flex justify-between items-end mb-4">
-                <h2 class="text-2xl font-bold text-slate-800 flex items-center gap-2">
+        <!-- ==================== [區塊 3] 近期活動一覽 ==================== -->
+        <div id="tab-events" class="tab-content pt-0">
+            <!-- 標題區 (置頂) -->
+            <div class="sticky-header flex justify-between items-center">
+                <h2 class="text-xl font-bold text-slate-800 flex items-center gap-2">
                     <i data-lucide="calendar-days" class="text-purple-600"></i> 近期活動
                 </h2>
-                <button onclick="openPastEventsModal()" class="text-xs font-bold text-slate-500 hover:text-purple-600 transition-colors flex items-center gap-1 bg-white/50 px-2 py-1.5 rounded-lg border border-slate-200 mb-1">
+                <button onclick="openPastEventsModal()" class="text-xs font-bold text-slate-500 hover:text-purple-600 transition-colors flex items-center gap-1 bg-white/50 px-3 py-1.5 rounded-lg border border-slate-200 shadow-sm active:scale-95">
                     <i data-lucide="archive" class="w-3.5 h-3.5"></i> 過去歷程
                 </button>
             </div>
+            
             <div id="eventsList" class="space-y-4">
                 <!-- 活動卡片將由 JavaScript 動態生成 -->
             </div>
         </div>
 
-        <!-- ==================== [區塊 3] 報帳申請 ==================== -->
-        <div id="tab-finance" class="tab-content pt-4">
-            <h2 class="text-2xl font-bold text-slate-800 mb-2 flex items-center gap-2">
-                <i data-lucide="receipt" class="text-purple-600"></i> 財務與報帳
-            </h2>
-            <p class="text-slate-500 text-xs font-serif italic mb-6">桃園新竹年輕單成中心 / 福音研究所專用</p>
+        <!-- ==================== [區塊 4] 報帳申請 ==================== -->
+        <div id="tab-finance" class="tab-content pt-0">
+            <!-- 標題區 (置頂) -->
+            <div class="sticky-header flex flex-col justify-center">
+                <h2 class="text-xl font-bold text-slate-800 flex items-center gap-2 mb-1">
+                    <i data-lucide="receipt" class="text-purple-600"></i> 財務與報帳
+                </h2>
+                <p class="text-slate-500 text-[10px] font-serif italic">桃園新竹年輕單成中心 / 福音研究所專用</p>
+            </div>
             
-            <!-- 新增：財務子分頁切換 -->
-            <div class="flex bg-slate-200/50 p-1 rounded-xl mb-6">
+            <div class="flex bg-slate-200/50 p-1 rounded-xl mb-6 mt-2">
                 <button id="tab-btn-finance-form" onclick="switchFinanceTab('form')" class="flex-1 py-2.5 text-sm font-bold bg-white text-purple-600 rounded-lg shadow-sm transition-all">新增報帳</button>
                 <button id="tab-btn-finance-view" onclick="switchFinanceTab('view')" class="flex-1 py-2.5 text-sm font-bold text-slate-500 rounded-lg transition-all hover:text-purple-500">預算與支出檢視</button>
             </div>
@@ -311,12 +255,11 @@
             <!-- 報帳表單區塊 -->
             <div id="finance-form-section" class="glass rounded-3xl p-6 shadow-sm block animate-[fadeIn_0.3s_ease-out]">
                 <form id="expense-form" class="space-y-5">
-                    
-                    <!-- 報帳者 (連動系統設定) & 活動項目 -->
-                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-5">
+                    <!-- 報帳者 & 活動項目 -->
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                         <div class="space-y-1.5">
-                            <label class="block text-sm font-bold text-slate-700">報帳者 (系統帶入)</label>
-                            <input type="text" id="reporter" required readonly class="w-full px-4 py-3 rounded-xl bg-slate-50 border border-slate-200 shadow-sm outline-none text-slate-500 cursor-not-allowed">
+                            <label class="block text-sm font-bold text-slate-700">報帳者</label>
+                            <input type="text" id="reporter" required placeholder="請輸入您的姓名" class="w-full px-4 py-3 rounded-xl bg-white border border-slate-200 shadow-sm focus:border-transparent focus:ring-2 focus:ring-purple-400 outline-none text-slate-700">
                         </div>
                         <div class="space-y-1.5">
                             <label class="block text-sm font-bold text-slate-700">活動項目</label>
@@ -331,7 +274,7 @@
                     <hr class="border-white">
 
                     <!-- 使用單位 & 開支類型 -->
-                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-5">
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                         <div class="space-y-1.5">
                             <label class="block text-sm font-bold text-slate-700">使用單位</label>
                             <select id="unit" required class="w-full px-4 py-3 rounded-xl bg-white border border-slate-200 shadow-sm focus:border-transparent focus:ring-2 focus:ring-purple-400 outline-none text-slate-700 appearance-none">
@@ -358,7 +301,7 @@
                     </div>
 
                     <!-- 日期 & 主/社交活動 -->
-                    <div class="grid grid-cols-1 sm:grid-cols-3 gap-5">
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
                         <div class="space-y-1.5">
                             <label class="block text-sm font-bold text-slate-700">日期</label>
                             <input type="date" id="expenseDate" required class="w-full px-4 py-3 rounded-xl bg-white border border-slate-200 shadow-sm focus:border-transparent focus:ring-2 focus:ring-purple-400 outline-none text-slate-700">
@@ -377,7 +320,7 @@
                     </div>
 
                     <!-- 金額 & 訂購份/個數 -->
-                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-5">
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                         <div class="space-y-1.5">
                             <label class="block text-sm font-bold text-slate-700">金額</label>
                             <div class="relative">
@@ -394,7 +337,7 @@
                     <hr class="border-white">
 
                     <!-- 發票類型 & 號碼 -->
-                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-5">
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                         <div class="space-y-1.5">
                             <label class="block text-sm font-bold text-slate-700">發票類型</label>
                             <select id="invoiceType" required class="w-full px-4 py-3 rounded-xl bg-white border border-slate-200 shadow-sm focus:border-transparent focus:ring-2 focus:ring-purple-400 outline-none text-slate-700 appearance-none">
@@ -421,7 +364,7 @@
                 </form>
             </div>
 
-            <!-- 新增：預算與支出檢視區塊 -->
+            <!-- 預算與支出檢視區塊 (優化版無邊框) -->
             <div id="finance-view-section" class="hidden animate-[fadeIn_0.3s_ease-out] space-y-6">
 
                 <!-- 預算概況卡片 -->
@@ -429,64 +372,116 @@
                     <h3 class="text-sm font-bold text-slate-500 mb-4 flex items-center gap-2">
                         <i data-lucide="pie-chart" class="w-4 h-4"></i> 本年度預算概況
                     </h3>
-                    <div class="flex items-center justify-between mb-2">
-                        <span class="text-slate-600 font-medium">總預算</span>
-                        <span class="text-lg font-bold text-slate-800">$ 50,000</span>
+                    
+                    <div class="flex items-center justify-between mb-4 pb-4 border-b border-indigo-100/50">
+                        <span class="text-slate-600 font-bold">總預算</span>
+                        <span class="text-xl font-bold text-slate-800">$ 500,000</span>
                     </div>
-                    <div class="flex items-center justify-between mb-4">
-                        <span class="text-slate-600 font-medium">已支出</span>
-                        <span id="budget-spent" class="text-lg font-bold text-rose-500">$ 0</span>
+
+                    <!-- 逐列顯示各單位支出 (無邊框設計) -->
+                    <div id="budget-breakdown" class="mb-5">
+                        <!-- JS 動態插入大於 0 的支出列 -->
                     </div>
-                    <div class="w-full bg-slate-200 rounded-full h-3 mb-2 overflow-hidden shadow-inner">
+
+                    <div class="w-full bg-slate-200 rounded-full h-2 mb-2 overflow-hidden shadow-inner mt-4">
                         <div id="budget-progress" class="bg-gradient-to-r from-purple-500 to-pink-500 h-full rounded-full transition-all duration-500" style="width: 0%"></div>
                     </div>
-                    <p id="budget-remaining" class="text-xs text-right text-slate-500 font-medium">剩餘額度: $ 50,000</p>
+                    <p id="budget-remaining" class="text-sm text-right text-slate-600 font-bold mt-2">總剩餘額度: $ 500,000</p>
                 </div>
 
                 <!-- 近期支出列表 -->
                 <div class="glass rounded-3xl p-6 shadow-sm">
-                    <div class="flex justify-between items-center mb-4">
+                    <div class="flex flex-col sm:flex-row justify-between sm:items-center gap-3 mb-4">
                         <h3 class="text-sm font-bold text-slate-500 flex items-center gap-2">
                             <i data-lucide="list-collapse" class="w-4 h-4"></i> 近期支出紀錄
                         </h3>
-                        <!-- 新增：桃園 / 新竹 預算切換 (文字樣式) -->
-                        <div class="text-sm font-bold flex items-center bg-white/50 px-3 py-1.5 rounded-lg border border-white shadow-sm">
-                            <button id="finance-unit-ty" onclick="setFinanceUnit('TY')" class="text-purple-600 transition-all transform scale-105 drop-shadow-sm">桃園</button>
-                            <span class="mx-2 text-slate-300 font-normal">|</span>
-                            <button id="finance-unit-hc" onclick="setFinanceUnit('HC')" class="text-slate-400 hover:text-purple-500 transition-all">新竹</button>
+                        <!-- 過濾按鈕 -->
+                        <div class="text-xs font-bold flex flex-wrap items-center bg-white/50 p-1.5 rounded-xl border border-white shadow-sm gap-1">
+                            <button id="finance-unit-ty" onclick="setFinanceUnit('TY')" class="px-3 py-1.5 rounded-lg text-purple-600 bg-white shadow-sm transition-all transform">桃園</button>
+                            <button id="finance-unit-hc" onclick="setFinanceUnit('HC')" class="px-3 py-1.5 rounded-lg text-slate-400 hover:text-purple-500 transition-all">新竹</button>
+                            <button id="finance-unit-other" onclick="setFinanceUnit('OTHER')" class="px-3 py-1.5 rounded-lg text-slate-400 hover:text-purple-500 transition-all">其他</button>
                         </div>
                     </div>
-                    <div id="recent-expenses-list" class="space-y-3">
+                    <!-- 列表無邊框設計 -->
+                    <div id="recent-expenses-list">
                         <!-- JS 動態插入 -->
                     </div>
                 </div>
             </div>
         </div>
 
-        <!-- ==================== [區塊 4] 設定 ==================== -->
-        <div id="tab-settings" class="tab-content pt-4">
-            <h2 class="text-2xl font-bold text-slate-800 mb-6 flex items-center gap-2">
-                <i data-lucide="settings" class="text-purple-600"></i> 個人設定
-            </h2>
-            <div class="glass rounded-3xl p-6 shadow-sm">
-                <div class="flex items-center justify-center mb-6">
-                    <div class="w-20 h-20 bg-gradient-to-tr from-purple-200 to-pink-200 rounded-full flex items-center justify-center text-purple-600 border-4 border-white shadow-sm">
-                        <i data-lucide="user" class="w-8 h-8"></i>
+        <!-- ==================== [區塊 5] 管理頁面 (活動簽到與抽籤) ==================== -->
+        <div id="tab-settings" class="tab-content pt-0">
+            <!-- 標題區 (置頂) -->
+            <div class="sticky-header flex items-center gap-2">
+                <h2 class="text-xl font-bold text-slate-800 flex items-center gap-2">
+                    <i data-lucide="clipboard-list" class="text-purple-600"></i> 活動管理
+                </h2>
+            </div>
+            
+            <!-- 值日生抽籤功能 -->
+            <div class="glass rounded-3xl p-6 shadow-sm border border-orange-100 mb-6 mt-2">
+                <div class="flex justify-between items-center mb-4">
+                    <h3 class="text-lg font-bold text-slate-800 flex items-center gap-2">
+                        <i data-lucide="star" class="text-orange-500"></i> 值日生抽籤
+                    </h3>
+                    <button onclick="openDutyHistoryModal()" class="text-xs font-bold text-slate-500 hover:text-orange-600 transition-colors flex items-center gap-1 bg-white/50 px-3 py-1.5 rounded-lg border border-slate-200 shadow-sm">
+                        <i data-lucide="history" class="w-3.5 h-3.5"></i> 抽籤紀錄
+                    </button>
+                </div>
+                
+                <p class="text-xs text-slate-500 mb-5">系統將從下方「今日活動名單」中隨機抽取兩位。</p>
+
+                <button onclick="drawDuty()" id="drawDutyBtn" class="w-full bg-gradient-to-r from-orange-400 to-rose-500 text-white px-5 py-3.5 rounded-xl font-bold shadow-md active:scale-95 transition-transform flex items-center justify-center gap-2 mb-4">
+                    <i data-lucide="dices" class="w-5 h-5"></i> 開始抽取今日值日生
+                </button>
+
+                <!-- 值日生結果顯示 -->
+                <div id="dutyResultSection" class="hidden rounded-2xl p-6 bg-gradient-to-br from-orange-50 to-yellow-50 border border-orange-200 transition-all shadow-inner">
+                    <div class="flex items-center justify-center gap-2 mb-3">
+                        <i data-lucide="sparkles" class="w-4 h-4 text-orange-500"></i>
+                        <h4 class="text-center text-sm font-bold text-orange-600">今日值日生</h4>
+                        <i data-lucide="sparkles" class="w-4 h-4 text-orange-500"></i>
+                    </div>
+                    <div id="dutyNamesDisplay" class="text-center text-3xl font-bold text-slate-800 tracking-widest py-1">
+                        <!-- 動態顯示 -->
                     </div>
                 </div>
-                <div class="space-y-5">
-                    <div>
-                        <label class="block text-sm font-bold text-slate-700 mb-2">姓名 (簽到與報帳顯示用)</label>
-                        <input type="text" id="profileName" placeholder="請輸入您的姓名" class="w-full px-4 py-3 rounded-xl bg-white/80 border border-white focus:ring-2 focus:ring-purple-300 outline-none text-slate-800 font-medium">
-                    </div>
-                    <button onclick="saveProfile()" class="w-full bg-gradient-to-r from-purple-600 to-pink-600 text-white py-4 rounded-xl font-bold mt-4 shadow-md active:scale-[0.98] transition-transform flex justify-center items-center gap-2">
-                        <i data-lucide="save" class="w-4 h-4"></i> 儲存設定
+            </div>
+
+            <!-- 活動簽到區塊 -->
+            <div class="glass rounded-3xl p-6 shadow-sm border border-purple-100 mb-6">
+                <div class="flex justify-between items-center mb-4">
+                    <h3 class="text-lg font-bold text-slate-800 flex items-center gap-2">
+                        <i data-lucide="users" class="text-purple-500"></i> 今日活動名單
+                    </h3>
+                    <button onclick="toggleEditMode()" id="editModeBtn" class="text-xs font-bold text-slate-500 hover:text-purple-600 transition-colors flex items-center gap-1 bg-white/50 px-3 py-1.5 rounded-lg border border-slate-200 shadow-sm active:scale-95">
+                        <i data-lucide="edit-2" class="w-3.5 h-3.5"></i> 編輯名單
                     </button>
+                </div>
+                
+                <p class="text-xs text-slate-500 mb-4">點擊姓名即可完成簽到。</p>
+                
+                <div id="nameGrid" class="flex flex-wrap gap-2 justify-start mb-5">
+                    <!-- 姓名按鈕將由 JavaScript 動態生成 -->
+                </div>
+                
+                <div class="flex gap-2 mt-2 mb-4">
+                    <input type="text" id="newPersonInput" placeholder="輸入新朋友姓名..." class="flex-1 px-4 py-2.5 rounded-xl bg-white border border-slate-200 shadow-sm focus:ring-2 focus:ring-purple-300 outline-none text-sm text-slate-700">
+                    <button onclick="addNewPerson()" class="bg-purple-100 text-purple-600 px-5 py-2.5 rounded-xl font-bold text-sm hover:bg-purple-200 active:scale-95 transition-transform flex items-center gap-1 shrink-0 shadow-sm">
+                        <i data-lucide="user-plus" class="w-4 h-4"></i> 加入
+                    </button>
+                </div>
+
+                <div class="pt-4 border-t border-slate-200/50 flex justify-between items-center">
+                    <span class="text-sm font-bold text-slate-600">
+                        今日已簽到：<span id="signInCount" class="text-purple-600 text-xl mx-1.5 font-black">0</span> 人
+                    </span>
                 </div>
             </div>
             
             <div class="text-center mt-8 pb-4">
-                <p class="text-xs text-slate-400">App Version 2.2.0 (包含活動簽到)</p>
+                <p class="text-xs text-slate-400">App Version 2.7.0</p>
             </div>
         </div>
 
@@ -494,87 +489,67 @@
 
     <!-- ==================== 底部導覽列 (Bottom Navigation) ==================== -->
     <nav class="fixed bottom-0 left-0 w-full glass-strong border-t border-white/50 z-40 pb-[env(safe-area-inset-bottom)] shadow-[0_-4px_20px_rgba(0,0,0,0.05)]">
-        <div class="max-w-xl mx-auto px-6 py-3 flex justify-between items-center relative">
+        <div class="max-w-xl mx-auto px-2 py-3 flex justify-between items-center relative">
             
-            <!-- 選項 1: 首頁 -->
-            <button onclick="switchTab('home')" id="nav-home" class="nav-btn active flex flex-col items-center gap-1 w-16 text-purple-600 transition-colors">
+            <button onclick="switchTab('home')" id="nav-home" class="nav-btn active flex-1 flex flex-col items-center gap-1 text-purple-600 transition-colors">
                 <div class="nav-icon-wrapper p-1.5 rounded-xl transition-all duration-300 bg-purple-100">
                     <i data-lucide="home" class="w-6 h-6"></i>
                 </div>
                 <span class="text-[10px] font-bold">首頁</span>
             </button>
+
+            <button onclick="switchTab('reflection')" id="nav-reflection" class="nav-btn flex-1 flex flex-col items-center gap-1 text-slate-400 hover:text-purple-500 transition-colors">
+                <div class="nav-icon-wrapper p-1.5 rounded-xl transition-all duration-300 bg-transparent">
+                    <i data-lucide="book-heart" class="w-6 h-6"></i>
+                </div>
+                <span class="text-[10px] font-bold">心得</span>
+            </button>
             
-            <!-- 選項 2: 活動一覽 -->
-            <button onclick="switchTab('events')" id="nav-events" class="nav-btn flex flex-col items-center gap-1 w-16 text-slate-400 hover:text-purple-500 transition-colors">
+            <button onclick="switchTab('events')" id="nav-events" class="nav-btn flex-1 flex flex-col items-center gap-1 text-slate-400 hover:text-purple-500 transition-colors">
                 <div class="nav-icon-wrapper p-1.5 rounded-xl transition-all duration-300 bg-transparent">
                     <i data-lucide="calendar-days" class="w-6 h-6"></i>
                 </div>
                 <span class="text-[10px] font-bold">活動</span>
             </button>
             
-            <!-- 選項 3: 報帳申請 -->
-            <button onclick="switchTab('finance')" id="nav-finance" class="nav-btn flex flex-col items-center gap-1 w-16 text-slate-400 hover:text-purple-500 transition-colors">
+            <button onclick="switchTab('finance')" id="nav-finance" class="nav-btn flex-1 flex flex-col items-center gap-1 text-slate-400 hover:text-purple-500 transition-colors">
                 <div class="nav-icon-wrapper p-1.5 rounded-xl transition-all duration-300 bg-transparent">
                     <i data-lucide="receipt" class="w-6 h-6"></i>
                 </div>
                 <span class="text-[10px] font-bold">報帳</span>
             </button>
 
-            <!-- 選項 4: 設定 -->
-            <button onclick="switchTab('settings')" id="nav-settings" class="nav-btn flex flex-col items-center gap-1 w-16 text-slate-400 hover:text-purple-500 transition-colors">
+            <button onclick="switchTab('settings')" id="nav-settings" class="nav-btn flex-1 flex flex-col items-center gap-1 text-slate-400 hover:text-purple-500 transition-colors">
                 <div class="nav-icon-wrapper p-1.5 rounded-xl transition-all duration-300 bg-transparent">
-                    <i data-lucide="settings" class="w-6 h-6"></i>
+                    <i data-lucide="clipboard-list" class="w-6 h-6"></i>
                 </div>
-                <span class="text-[10px] font-bold">設定</span>
+                <span class="text-[10px] font-bold">管理</span>
             </button>
 
         </div>
     </nav>
 
-    <!-- ==================== Modals (保留與新增的彈出視窗) ==================== -->
+    <!-- ==================== Modals ==================== -->
 
-    <!-- 心得 Modal -->
+    <!-- 心得 Modal (與課程整合) -->
     <div id="reflectionModal" class="fixed inset-0 z-50 hidden flex items-end sm:items-center justify-center bg-slate-900/40 backdrop-blur-sm transition-opacity">
         <div class="glass-strong w-full sm:max-w-lg rounded-t-3xl sm:rounded-3xl p-0 overflow-hidden relative flex flex-col max-h-[90vh] shadow-2xl animate-[fadeIn_0.3s_ease-out]">
-            <div class="h-16 sm:h-20 bg-gradient-to-r from-purple-500 to-pink-500 relative flex items-center justify-center shrink-0">
+            <div class="h-20 bg-gradient-to-r from-purple-500 to-pink-500 relative flex flex-col items-center justify-center shrink-0">
                 <div class="absolute inset-0 bg-white opacity-10" style="background-image: radial-gradient(circle, #fff 2px, transparent 2.5px); background-size: 20px 20px;"></div>
-                <i data-lucide="pen-tool" class="text-white/90 w-8 h-8 animate-bounce mt-2"></i>
-                <button onclick="closeReflectionModal()" class="absolute top-1/2 -translate-y-1/2 right-4 p-2 bg-black/10 hover:bg-black/20 rounded-full text-white transition-colors">
+                <h3 id="refCourseTitleDisplay" class="text-white font-bold text-lg relative z-10 truncate px-10">課程標題</h3>
+                <p id="refCourseDateDisplay" class="text-purple-100 text-xs mt-0.5 relative z-10">日期</p>
+                <button onclick="closeReflectionModal()" class="absolute top-1/2 -translate-y-1/2 right-4 p-2 bg-black/10 hover:bg-black/20 rounded-full text-white transition-colors z-20">
                     <i data-lucide="x" class="w-4 h-4"></i>
                 </button>
             </div>
-            <div class="p-6 sm:p-8 overflow-y-auto pb-[env(safe-area-inset-bottom)] mb-4">
-                <div class="text-center mb-6">
-                    <p class="text-slate-500 text-xs font-bold tracking-widest uppercase mb-1">今日經文分享</p>
-                    <p id="modalQuote" class="text-base sm:text-lg font-serif text-slate-800 font-medium italic">"..."</p>
-                </div>
+            <div class="p-6 sm:p-8 overflow-y-auto pb-[env(safe-area-inset-bottom)] mb-2">
                 <div class="space-y-5">
                     <div>
-                        <label class="block text-sm font-bold text-slate-700 mb-2 ml-1">給今天的學習下個標題</label>
-                        <input type="text" id="refTitle" placeholder="例如：尋找內心的平靜" class="w-full px-4 py-3.5 rounded-xl bg-white/80 border border-slate-200 focus:ring-2 focus:ring-purple-300 outline-none">
-                    </div>
-                    <div>
                         <label class="block text-sm font-bold text-slate-700 mb-2 ml-1">心得與覺察</label>
-                        <textarea id="refContent" placeholder="寫下您當下最真實的感受..." class="w-full px-4 py-3.5 rounded-xl bg-white/80 border border-slate-200 focus:ring-2 focus:ring-purple-300 outline-none min-h-[140px] resize-none leading-relaxed"></textarea>
+                        <textarea id="refContent" placeholder="寫下您當下最真實的感受..." class="w-full px-4 py-3.5 rounded-xl bg-white/80 border border-slate-200 focus:ring-2 focus:ring-purple-300 outline-none min-h-[160px] resize-none leading-relaxed shadow-sm"></textarea>
                     </div>
-                    <button onclick="submitReflection()" class="w-full bg-slate-800 text-white py-4 rounded-xl font-bold active:scale-[0.98] transition-transform shadow-lg mt-2">封存紀錄</button>
+                    <button onclick="submitReflection()" class="w-full bg-slate-800 text-white py-4 rounded-xl font-bold active:scale-[0.98] transition-transform shadow-lg mt-2">儲存心得紀錄</button>
                 </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- 年度紀錄 Modal -->
-    <div id="historyModal" class="fixed inset-0 z-50 hidden flex items-center justify-center p-4 bg-slate-900/40 backdrop-blur-sm">
-        <div class="glass-strong w-full max-w-lg rounded-3xl p-6 sm:p-8 relative flex flex-col max-h-[85vh] shadow-2xl animate-[fadeIn_0.3s_ease-out]">
-            <button onclick="toggleHistoryModal(false)" class="absolute top-4 right-4 p-2 bg-slate-100 hover:bg-slate-200 rounded-full text-slate-600 transition-colors">
-                <i data-lucide="x" class="w-5 h-5"></i>
-            </button>
-            <h2 class="text-xl sm:text-2xl font-bold text-slate-800 mb-1 flex items-center gap-2">
-                <i data-lucide="book-open" class="text-purple-600 w-6 h-6"></i> 年度學習足跡
-            </h2>
-            <p class="text-xs text-slate-500 mb-5 pl-8">僅顯示每週三課程日</p>
-            <div id="annualHistoryContent" class="overflow-y-auto flex-1 pr-2 space-y-4 no-scrollbar pb-4">
-                <!-- JS 產生內容 -->
             </div>
         </div>
     </div>
@@ -643,13 +618,30 @@
         // ==========================================
 
         const WEEKLY_QUOTES = {
-            // 3月
             "3月11日": { text: "藉著微小而簡單的事能成就偉大的事。", author: "阿爾瑪書 37:6" },
             "3月18日": { text: "主需要你們改變世界。只要你們接受祂的旨意，祂就會幫助你們。", author: "羅素·納爾遜會長" },
             "3月25日": { text: "神賜給我們的不只是生命，還有目的。", author: "多馬·孟蓀會長" },
-            // ... 其他月份省略以節省空間，與您原先設定一致
             "DEFAULT": { text: "願主耶穌基督的平安與愛，今天與你同在。", author: "耶穌基督後期聖徒教會" }
         };
+
+        const INSTITUTE_COURSES = [
+            { date: '2月25日', title: '課程簡介與迎新' },
+            { date: '3月4日', title: '神組' },
+            { date: '3月11日', title: '救恩計畫' },
+            { date: '3月18日', title: '耶穌基督的贖罪' },
+            { date: '3月25日', title: '復興' },
+            { date: '4月1日', title: '先知與啟示' },
+            { date: '4月8日', title: '教儀與聖約' },
+            { date: '4月15日', title: '婚姻與家庭' },
+            { date: '4月22日', title: '誡命' },
+            { date: '4月29日', title: '安息日與洗禮' },
+            { date: '5月6日', title: '什一奉獻與禁食' },
+            { date: '5月13日', title: '貞潔律法' },
+            { date: '5月20日', title: '智慧語' },
+            { date: '5月27日', title: '服從' },
+            { date: '6月3日', title: '為主服務' },
+            { date: '6月10日', title: '期末分享與見證' }
+        ];
 
         const UPCOMING_EVENTS = [
             { date: '2026-03-04', title: '吃湯圓猜燈謎', desc: '福音研究所' },
@@ -671,33 +663,22 @@
             { date: '2026-05-30', title: '社區服務', desc: '福音研究所' }
         ];
 
-        // ===== 新增：活動簽到預設名單 =====
-        const PRESET_NAMES = [
-            "黃湘", "威廉", "庭希", "彥中", "黛娜", 
-            "小平", "銘霖", "畯紳", "佳晨", "鈺茹", 
-            "唯甄", "瑋群", "韋樵", "名煌", "利亞", 
-            "修儀", "昕玥", "人豪", "雅文", "蕭惟哲", 
-            "若雲", "奇穎", "紫嫺", "米斯卡", "雅聖"
-        ];
-        
         // 狀態變數
-        let currentUser = { name: "" };
         let todayStr = "";
-        let isProfileLoaded = false;
         let records = []; 
         let toastTimeout;
         let pendingExpenseData = null;
         let editingDateStr = null;
-        let customNamesList = []; // 新增：自定義簽到名單
+        let editingCourseTitle = null;
+        let allNamesList = []; 
+        let isEditMode = false;
         
-        let localExpenses = []; // 新增：預算與支出紀錄
-        let currentFinanceUnit = 'TY'; // 新增：當前檢視的預算單位 ('TY' 或 'HC')
+        let localExpenses = []; 
+        let currentFinanceUnit = 'TY'; 
 
-        // 活動簽到與抽籤狀態
-        let eventAttendances = {}; // { "3月11日": ["name1", "name2"] }
-        let dutyHistory = []; // [ { date: "3月11日", duties: ["name1", "name2"] } ]
+        let eventAttendances = {}; 
+        let dutyHistory = []; 
 
-        // 全域 Toast 通知函數
         function showToast(message, type = 'info', duration = 3000) {
             const toast = document.getElementById('toastNotification');
             const toastMessage = document.getElementById('toastMessage');
@@ -731,32 +712,36 @@
         document.addEventListener('DOMContentLoaded', () => {
             lucide.createIcons();
             initDateCheck();
-            loadLocalUser(); 
-            initUser();
+            initNamesFromStorage(); 
             loadRecords();
             renderAttendance();
+            renderIntegratedCourseList();
             initFinanceForm(); 
             renderEvents(); 
             
-            // 初始化活動簽到與抽籤
-            const storedCustomNames = localStorage.getItem('spiritual_custom_names');
-            if(storedCustomNames) customNamesList = JSON.parse(storedCustomNames);
+            // 載入或初始化名單
+            const storedNames = localStorage.getItem('spiritual_all_names_v2');
+            if(storedNames) {
+                allNamesList = JSON.parse(storedNames);
+            } else {
+                const legacyCustom = JSON.parse(localStorage.getItem('spiritual_custom_names') || '[]');
+                const defaultNames = ["黃湘", "威廉", "庭希", "彥中", "黛娜", "小平", "銘霖", "畯紳", "佳晨", "鈺茹", "唯甄", "瑋群", "韋樵", "名煌", "利亞", "修儀", "昕玥", "人豪", "雅文", "蕭惟哲", "若雲", "奇穎", "紫嫺", "米斯卡", "雅聖"];
+                allNamesList = [...new Set([...defaultNames, ...legacyCustom])];
+                localStorage.setItem('spiritual_all_names_v2', JSON.stringify(allNamesList));
+            }
 
             loadEventAttendanceData();
             renderEventNameGrid();
             renderDutyHistory();
 
-            loadLocalExpenses(); // 載入預算紀錄
+            loadLocalExpenses(); 
         });
 
         // ==========================================
-        // UI: 分頁切換 (Bottom Navigation Logic)
+        // UI: 分頁切換與捲動邏輯
         // ==========================================
         function switchTab(tabId) {
-            document.querySelectorAll('.tab-content').forEach(el => {
-                el.classList.remove('active');
-            });
-            
+            document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
             const targetTab = document.getElementById(`tab-${tabId}`);
             if (targetTab) targetTab.classList.add('active');
             
@@ -782,37 +767,55 @@
             }
 
             if (tabId === 'settings') {
-                updateProfileUI(); 
-            } else if (tabId === 'finance') {
-                const rep = document.getElementById('reporter');
-                if (rep) rep.value = currentUser.name || "請先至設定填寫姓名";
-            } else if (tabId === 'events') {
-                renderEventNameGrid(); // 切換到活動頁時重繪名單確保狀態最新
-            }
-
-            window.scrollTo({ top: 0, behavior: 'smooth' });
-        }
-
-        // ==========================================
-        // 使用者資料與設定
-        // ==========================================
-        function loadLocalUser() {
-            const saved = localStorage.getItem('spiritual_user_profile');
-            if (saved) {
-                const parsed = JSON.parse(saved);
-                currentUser = { ...currentUser, ...parsed };
-                updateProfileUI();
-                fetchRemoteRecords();
+                renderEventNameGrid(); 
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+            } else if (tabId === 'reflection') {
+                scrollToCurrentCourse(); 
+            } else {
+                window.scrollTo({ top: 0, behavior: 'smooth' });
             }
         }
 
-        function initUser() {
-            const input = document.getElementById('inputName');
-            isProfileLoaded = true;
-            input.readOnly = true; 
-            updateProfileUI(); 
-            checkButtonState();
-            syncUserProfile();
+        function scrollToCurrentCourse() {
+            const todayObj = new Date();
+            todayObj.setHours(0,0,0,0);
+            
+            let targetDateStr = INSTITUTE_COURSES[INSTITUTE_COURSES.length - 1].date;
+
+            for (let course of INSTITUTE_COURSES) {
+                let arr = course.date.split('月');
+                let cDate = new Date(todayObj.getFullYear(), parseInt(arr[0])-1, parseInt(arr[1].replace('日','')));
+                
+                let diff = (cDate - todayObj) / (1000 * 60 * 60 * 24);
+                if (diff >= -4) {
+                    targetDateStr = course.date;
+                    break;
+                }
+            }
+
+            setTimeout(() => {
+                const el = document.getElementById(`course-card-${targetDateStr}`);
+                if (el) {
+                    const headerOffset = 80; 
+                    const elementPosition = el.getBoundingClientRect().top;
+                    const offsetPosition = elementPosition + window.pageYOffset - headerOffset;
+                    window.scrollTo({ top: offsetPosition, behavior: 'smooth' });
+                }
+            }, 100);
+        }
+
+        // ==========================================
+        // 初始化與名稱儲存邏輯
+        // ==========================================
+        function initNamesFromStorage() {
+            const savedSignInName = localStorage.getItem('spiritual_last_signin_name') || "";
+            document.getElementById('inputName').value = savedSignInName;
+            
+            const savedReporterName = localStorage.getItem('spiritual_last_reporter_name') || "";
+            const reporterInput = document.getElementById('reporter');
+            if(reporterInput) reporterInput.value = savedReporterName;
+            
+            checkSignInButtonState();
         }
 
         function initDateCheck() {
@@ -824,75 +827,36 @@
             
             document.getElementById('dailyQuoteDisplay').textContent = quoteObj.text;
             document.getElementById('dailyQuoteAuthor').textContent = "—— " + quoteObj.author;
-            document.getElementById('modalQuote').textContent = fullQuote;
-            
-            checkButtonState(); 
         }
 
-        function checkButtonState() {
+        function checkSignInButtonState() {
+            const inputName = document.getElementById('inputName').value.trim();
             const btn = document.getElementById('btnSignIn');
             const btnText = document.getElementById('btnText');
             const btnIcon = document.getElementById('btnIcon');
 
-            if (!isProfileLoaded) {
+            const todayRecord = records.find(r => r.dateStr === todayStr);
+            if (todayRecord) {
                 btn.disabled = true;
-                btn.className = "w-full py-4 text-white rounded-2xl font-bold text-lg shadow-lg flex items-center justify-center gap-2 bg-slate-400 cursor-not-allowed";
-                btnText.textContent = "讀取資料中...";
-                btnIcon.className = "w-5 h-5";
-                btnIcon.setAttribute('data-lucide', 'loader-2');
+                btn.className = "w-full py-4 text-white rounded-2xl font-bold text-lg flex items-center justify-center gap-2 bg-emerald-500 shadow-md";
+                btnText.textContent = "今日已完成靈性簽到";
+                btnIcon.setAttribute('data-lucide', 'check-circle-2');
                 lucide.createIcons();
                 return;
             }
 
-            btn.disabled = false;
-            btn.className = "w-full py-4 text-white rounded-2xl font-bold text-lg transition-all shadow-lg flex items-center justify-center gap-2 group active:scale-[0.98] bg-gradient-to-r from-purple-600 to-indigo-600";
-            btnText.textContent = "立即簽到";
-            btnIcon.className = "w-5 h-5";
-            btnIcon.setAttribute('data-lucide', 'send');
+            if (inputName.length === 0) {
+                btn.disabled = true;
+                btn.className = "w-full py-4 text-white rounded-2xl font-bold text-lg shadow-lg flex items-center justify-center gap-2 bg-slate-400 cursor-not-allowed";
+                btnText.textContent = "請輸入姓名";
+                btnIcon.setAttribute('data-lucide', 'edit-3');
+            } else {
+                btn.disabled = false;
+                btn.className = "w-full py-4 text-white rounded-2xl font-bold text-lg transition-all shadow-lg flex items-center justify-center gap-2 group active:scale-[0.98] bg-gradient-to-r from-purple-600 to-indigo-600";
+                btnText.textContent = "立即簽到";
+                btnIcon.setAttribute('data-lucide', 'send');
+            }
             lucide.createIcons();
-        }
-
-        function updateProfileUI() {
-            document.getElementById('profileName').value = currentUser.name || "";
-            
-            const hint = document.getElementById('lineAutoHint');
-            const welcomeContainer = document.getElementById('welcomeContainer');
-            const welcomeName = document.getElementById('welcomeName');
-            const input = document.getElementById('inputName');
-            const reporter = document.getElementById('reporter');
-
-            if (currentUser.name) {
-                hint.classList.remove('hidden');
-                welcomeContainer.classList.remove('hidden');
-                welcomeName.textContent = currentUser.name;
-                
-                input.value = currentUser.name;
-                input.placeholder = "請點擊下方按鈕簽到";
-                if(reporter) reporter.value = currentUser.name;
-            } else {
-                hint.classList.add('hidden');
-                welcomeContainer.classList.add('hidden');
-                
-                input.value = "";
-                input.placeholder = "請先至「設定」輸入姓名";
-                if(reporter) reporter.value = "請先至設定填寫姓名";
-            }
-        }
-
-        function saveProfile() {
-            const newName = document.getElementById('profileName').value.trim();
-            if(newName) {
-                currentUser.name = newName;
-                localStorage.setItem('spiritual_user_profile', JSON.stringify(currentUser));
-                
-                updateProfileUI();
-                syncUserProfile();
-                
-                showToast("設定已儲存！", "success");
-                switchTab('home'); 
-            } else {
-                showToast("姓名不能為空", "error");
-            }
         }
 
         // ==========================================
@@ -905,30 +869,20 @@
             const todayRecord = records.find(r => r.dateStr === todayStr);
             if (todayRecord) {
                 showPostSignInSection();
-                document.getElementById('inputName').value = todayRecord.name;
-                
-                const btn = document.getElementById('btnSignIn');
-                btn.disabled = true;
-                btn.className = "w-full py-4 text-white rounded-2xl font-bold text-lg flex items-center justify-center gap-2 bg-emerald-500 shadow-md";
-                document.getElementById('btnText').textContent = "今日已完成靈性簽到";
-                const btnIcon = document.getElementById('btnIcon');
-                btnIcon.className = "w-5 h-5";
-                btnIcon.setAttribute('data-lucide', 'check-circle-2');
-                lucide.createIcons();
             }
-            renderReflectionList();
+            checkSignInButtonState();
         }
 
         function handleSignIn(e) {
             e.preventDefault();
-            if (!isProfileLoaded) return;
             
             const inputName = document.getElementById('inputName').value.trim();
             if (!inputName) { 
-                showToast("請先至「設定」頁面輸入您的姓名！", "error"); 
-                switchTab('settings');
+                showToast("請輸入您的姓名！", "error"); 
                 return; 
             }
+
+            localStorage.setItem('spiritual_last_signin_name', inputName);
 
             const now = new Date();
             const quoteObj = WEEKLY_QUOTES[todayStr] || WEEKLY_QUOTES["DEFAULT"];
@@ -938,31 +892,41 @@
                 id: Date.now(),
                 dateStr: todayStr,
                 timeStr: now.toLocaleTimeString('zh-TW', { hour12: false, hour:'2-digit', minute:'2-digit' }),
-                name: currentUser.name,
+                name: inputName,
                 quote: fullQuote,
                 title: "",
                 reflection: ""
             };
 
             const idx = records.findIndex(r => r.dateStr === todayStr);
-            if (idx >= 0) records[idx] = { ...records[idx], ...newRecord, title: records[idx].title, reflection: records[idx].reflection }; 
-            else records.unshift(newRecord);
+            if (idx >= 0) {
+                records[idx] = { ...records[idx], ...newRecord, title: records[idx].title, reflection: records[idx].reflection }; 
+            } else {
+                records.unshift(newRecord);
+            }
             
             localStorage.setItem('spiritual_weekly_records', JSON.stringify(records));
             sendToGAS(newRecord);
             
-            const btn = document.getElementById('btnSignIn');
-            btn.disabled = true;
-            btn.className = "w-full py-4 text-white rounded-2xl font-bold text-lg flex items-center justify-center gap-2 bg-emerald-500 shadow-md transition-all";
-            document.getElementById('btnText').textContent = "靈性簽到成功";
-            const btnIcon = document.getElementById('btnIcon');
-            btnIcon.className = "w-5 h-5";
-            btnIcon.setAttribute('data-lucide', 'check-circle-2');
-            lucide.createIcons();
-
+            checkSignInButtonState();
             showToast("靈性簽到成功！", "success");
             showPostSignInSection();
-            renderAttendance(); 
+            renderAttendance();
+            renderIntegratedCourseList(); 
+            
+            setTimeout(() => {
+                const quoteSection = document.getElementById('quoteSection');
+                if(quoteSection) {
+                    const headerOffset = 90; 
+                    const elementPosition = quoteSection.getBoundingClientRect().top;
+                    const offsetPosition = elementPosition + window.pageYOffset - headerOffset;
+                    
+                    window.scrollTo({
+                        top: offsetPosition,
+                        behavior: 'smooth'
+                    });
+                }
+            }, 100);
         }
 
         function showPostSignInSection() {
@@ -979,145 +943,109 @@
             }).catch(e => console.error("GAS Error", e));
         }
 
-        function syncUserProfile() {
-            if (!currentUser.name) return; 
-            const now = new Date();
-            const payload = {
-                op: "sync_user_profile", 
-                id: "SYNC_" + Date.now(),
-                dateStr: (now.getMonth() + 1) + "月" + now.getDate() + "日",
-                timeStr: now.toLocaleTimeString('zh-TW', { hour12: false, hour:'2-digit', minute:'2-digit' }),
-                name: currentUser.name,
-                quote: "", title: "", reflection: ""
-            };
-            sendToGAS(payload);
-        }
-
-        function fetchRemoteRecords() {
-            if (!GAS_API_URL || !currentUser.name) return;
-            const payload = { op: "get_user_records", name: currentUser.name };
-            fetch(GAS_API_URL, {
-                method: 'POST',
-                headers: { 'Content-Type': 'text/plain;charset=utf-8' }, 
-                body: JSON.stringify(payload)
-            })
-            .then(res => res.json())
-            .then(data => { if (Array.isArray(data)) mergeRecords(data); })
-            .catch(e => console.error("Fetch Error:", e));
-        }
-
-        function mergeRecords(remoteData) {
-            let hasChange = false;
-            remoteData.forEach(remote => {
-                const idx = records.findIndex(r => r.dateStr === remote.dateStr);
-                if (idx >= 0) {
-                    const local = records[idx];
-                    if (remote.reflection || remote.title) {
-                        records[idx] = { ...local, ...remote };
-                        hasChange = true;
-                    }
-                } else {
-                    records.push(remote);
-                    hasChange = true;
-                }
-            });
-
-            if (hasChange) {
-                records.sort((a, b) => b.id - a.id); 
-                localStorage.setItem('spiritual_weekly_records', JSON.stringify(records));
-                renderAttendance();
-                renderReflectionList();
-                const todayRecord = records.find(r => r.dateStr === todayStr);
-                if (todayRecord) {
-                    showPostSignInSection();
-                    if (todayRecord.name) document.getElementById('inputName').value = todayRecord.name;
-                }
-            }
-        }
-
         // ==========================================
-        // UI: 出席與心得
+        // UI: 首頁圓圈出席進度與課程心得整合
         // ==========================================
         function renderAttendance() {
             const container = document.getElementById('monthlyAttendanceWidget');
             container.innerHTML = '';
-            
-            const now = new Date();
-            const year = now.getFullYear();
-            const month = now.getMonth();
-            
-            let d = new Date(year, month, 1);
-            const wednesdays = [];
-            while(d.getMonth() === month) {
-                if(d.getDay() === 3) wednesdays.push(new Date(d));
-                d.setDate(d.getDate() + 1);
-            }
 
-            const today = new Date();
-            today.setHours(0,0,0,0);
-            const diff = 3 - today.getDay();
-            const thisWed = new Date(today);
-            thisWed.setDate(today.getDate() + diff);
-
-            wednesdays.forEach(date => {
-                const dateStr = (date.getMonth()+1) + "月" + date.getDate() + "日";
+            INSTITUTE_COURSES.forEach((course) => {
+                const dateStr = course.date;
                 const isPresent = records.some(r => r.dateStr === dateStr);
-                const isThisWeek = date.getTime() === thisWed.getTime();
+                const isToday = dateStr === todayStr;
 
                 let circleClass = isPresent 
                     ? "bg-purple-500 border-purple-500 shadow-md" 
                     : "bg-white/50 border-purple-200";
                 
-                let textClass = isThisWeek ? "text-pink-600 scale-110 font-bold" : "text-slate-500";
-                let ringClass = isThisWeek ? "ring-2 ring-pink-300 ring-offset-2 scale-110" : "";
+                let textClass = isToday ? "text-pink-600 font-bold" : "text-slate-500";
+                let ringClass = isToday ? "ring-2 ring-pink-300 ring-offset-2 scale-110" : "";
 
                 const html = `
-                    <div class="flex flex-col items-center gap-1.5">
-                        <span class="text-[10px] sm:text-xs ${textClass}">${date.getDate()}日</span>
-                        <div class="w-3.5 h-3.5 sm:w-4 sm:h-4 rounded-full border-2 transition-all duration-300 ${circleClass} ${ringClass}"></div>
+                    <div class="flex flex-col items-center gap-2 shrink-0 w-12 cursor-pointer transition-transform hover:scale-105" title="${course.title}">
+                        <span class="text-[10px] ${textClass}">${dateStr.split('月')[1]}</span>
+                        <div class="w-4 h-4 rounded-full border-2 transition-all duration-300 ${circleClass} ${ringClass}"></div>
                     </div>
                 `;
                 container.innerHTML += html;
             });
         }
 
-        function renderReflectionList() {
-            const list = document.getElementById('reflectionList');
-            const btn = list.firstElementChild;
-            list.innerHTML = '';
-            list.appendChild(btn);
+        function renderIntegratedCourseList() {
+            const container = document.getElementById('integratedCourseList');
+            container.innerHTML = '';
+            
+            INSTITUTE_COURSES.forEach((course, i) => {
+                const courseDateArr = course.date.split('月');
+                const courseDateObj = new Date(new Date().getFullYear(), parseInt(courseDateArr[0])-1, parseInt(courseDateArr[1].replace('日','')));
+                const todayObj = new Date(new Date().setHours(0,0,0,0));
+                
+                const isPast = courseDateObj < todayObj;
+                const isToday = course.date === todayStr;
+                
+                const record = records.find(r => r.dateStr === course.date);
+                const hasReflection = record && record.reflection && record.reflection.trim() !== "";
 
-            records.filter(r => r.title).forEach(r => {
-                const card = document.createElement('div');
-                card.className = "group bg-white/70 backdrop-blur-sm p-5 rounded-2xl shadow-[0_2px_10px_rgba(0,0,0,0.03)] active:scale-[0.98] transition-all cursor-pointer relative overflow-hidden border border-white";
-                card.onclick = () => openReflectionModal(r.dateStr); 
-                card.innerHTML = `
-                    <div class="absolute top-0 right-0 w-24 h-24 bg-gradient-to-br from-purple-100/50 to-transparent rounded-bl-full -z-10"></div>
-                    <div class="flex justify-between items-start mb-2">
-                        <div class="flex items-center gap-2">
-                            <span class="text-[10px] font-bold text-purple-600 bg-purple-100 px-2 py-0.5 rounded-md">${r.dateStr}</span>
-                            <span class="text-[10px] font-medium text-slate-400">${r.timeStr}</span>
+                let boxClass = "bg-white/70 border-white hover:border-purple-300 hover:shadow-md cursor-pointer";
+                if (isToday) boxClass = "bg-purple-100/90 border-purple-300 shadow-md ring-2 ring-purple-200 cursor-pointer";
+                else if (isPast && !hasReflection) boxClass = "bg-white/40 border-slate-100 opacity-80 cursor-pointer grayscale-[20%]";
+                
+                let iconHtml = '';
+                if (hasReflection) {
+                    iconHtml = `
+                        <div class="flex items-center gap-1.5 bg-emerald-50 text-emerald-600 px-2.5 py-1 rounded-lg border border-emerald-100 shadow-sm ml-auto">
+                            <i data-lucide="check-circle-2" class="w-4 h-4"></i>
+                            <span class="text-[10px] font-bold">已記錄</span>
                         </div>
+                    `;
+                } else if (isToday || isPast) {
+                    iconHtml = `
+                        <div class="flex items-center gap-1 text-slate-400 ml-auto bg-slate-50 px-2.5 py-1 rounded-lg border border-slate-200 group-hover:bg-purple-50 group-hover:text-purple-500 group-hover:border-purple-200 transition-colors">
+                            <i data-lucide="edit-3" class="w-3.5 h-3.5"></i>
+                            <span class="text-[10px] font-bold">寫心得</span>
+                        </div>
+                    `;
+                } else {
+                    iconHtml = `<i data-lucide="lock" class="w-4 h-4 text-slate-300 ml-auto"></i>`;
+                }
+
+                const cardHtml = `
+                    <div id="course-card-${course.date}" onclick="openReflectionModal('${course.date}', '${course.title}', ${courseDateObj > todayObj})" class="group flex flex-col p-4 rounded-2xl border ${boxClass} transition-all active:scale-[0.98]">
+                        <div class="flex items-center gap-3">
+                            <div class="w-10 h-10 rounded-xl ${isToday ? 'bg-purple-500 text-white' : 'bg-white text-slate-500 shadow-inner'} flex flex-col items-center justify-center shrink-0">
+                                <span class="text-[9px] font-medium opacity-80 leading-tight">堂次</span>
+                                <span class="text-sm font-bold leading-tight">${i+1}</span>
+                            </div>
+                            <div class="flex-1">
+                                <p class="text-xs ${isToday ? 'text-purple-400' : 'text-slate-400'} font-bold mb-0.5">${course.date}</p>
+                                <p class="text-[15px] font-bold ${isToday ? 'text-purple-800' : 'text-slate-700'}">${course.title}</p>
+                            </div>
+                            ${iconHtml}
+                        </div>
+                        ${hasReflection ? `<div class="mt-3 text-xs text-slate-500 bg-white/50 p-2.5 rounded-lg border border-slate-100 line-clamp-2">${record.reflection}</div>` : ''}
                     </div>
-                    <h3 class="text-base font-bold text-slate-800 mb-1.5 truncate">${r.title}</h3>
-                    <p class="text-slate-500 text-xs line-clamp-2 leading-relaxed">${r.reflection}</p>
                 `;
-                list.appendChild(card);
+                container.innerHTML += cardHtml;
             });
+            lucide.createIcons();
         }
 
-        function openReflectionModal(targetDateStr = null) {
-            editingDateStr = targetDateStr || todayStr;
-            const record = records.find(r => r.dateStr === editingDateStr);
-
-            if (!record) {
-                showToast("請先完成今日靈性簽到才能撰寫心得！", "error");
+        function openReflectionModal(targetDateStr, courseTitle, isFuture) {
+            if (isFuture) {
+                showToast("這堂課還沒開始哦！", "info");
                 return;
             }
 
-            document.getElementById('modalQuote').textContent = record.quote;
-            document.getElementById('refTitle').value = record.title || "";
-            document.getElementById('refContent').value = record.reflection || "";
+            editingDateStr = targetDateStr;
+            editingCourseTitle = courseTitle;
+
+            const record = records.find(r => r.dateStr === editingDateStr);
+
+            document.getElementById('refCourseTitleDisplay').textContent = courseTitle;
+            document.getElementById('refCourseDateDisplay').textContent = targetDateStr;
+            
+            document.getElementById('refContent').value = record ? (record.reflection || "") : "";
             
             document.getElementById('reflectionModal').classList.remove('hidden');
             document.body.style.overflow = 'hidden'; 
@@ -1129,79 +1057,39 @@
         }
 
         function submitReflection() {
-            const title = document.getElementById('refTitle').value.trim();
+            const title = editingCourseTitle; // 標題不再由使用者填寫，直接讀取課程名稱
             const content = document.getElementById('refContent').value.trim();
             
-            if (!title || !content) { showToast("標題與心得不可空白", "error"); return; }
+            if (!content) { showToast("心得不可空白", "error"); return; }
 
-            const idx = records.findIndex(r => r.dateStr === editingDateStr);
+            const now = new Date();
+            let idx = records.findIndex(r => r.dateStr === editingDateStr);
+            
             if (idx >= 0) {
                 records[idx].title = title;
                 records[idx].reflection = content;
-                localStorage.setItem('spiritual_weekly_records', JSON.stringify(records));
-                
-                sendToGAS(records[idx]);
-                renderReflectionList();
-                closeReflectionModal();
-                showToast("心得已成功封存！", "success");
-            }
-        }
-
-        function toggleHistoryModal(show) {
-            const modal = document.getElementById('historyModal');
-            if (show) {
-                modal.classList.remove('hidden');
-                document.body.style.overflow = 'hidden';
-                renderAnnualHistory();
             } else {
-                modal.classList.add('hidden');
-                document.body.style.overflow = '';
+                const inputName = document.getElementById('inputName').value.trim() || localStorage.getItem('spiritual_last_signin_name') || "無名氏";
+                const newRecord = {
+                    id: Date.now(),
+                    dateStr: editingDateStr,
+                    timeStr: now.toLocaleTimeString('zh-TW', { hour12: false, hour:'2-digit', minute:'2-digit' }),
+                    name: inputName,
+                    quote: "從心得區補記",
+                    title: title,
+                    reflection: content
+                };
+                records.push(newRecord);
+                idx = records.length - 1;
             }
-        }
-
-        function renderAnnualHistory() {
-            const container = document.getElementById('annualHistoryContent');
-            container.innerHTML = '';
             
-            const now = new Date();
-            const currentMonth = now.getMonth();
-            const year = now.getFullYear();
-
-            for (let m = 0; m <= currentMonth; m++) {
-                const monthName = (m + 1) + "月";
-                let d = new Date(year, m, 1);
-                let wednesdays = [];
-                while(d.getMonth() === m) {
-                    if(d.getDay() === 3) wednesdays.push(new Date(d));
-                    d.setDate(d.getDate() + 1);
-                }
-
-                const monthDiv = document.createElement('div');
-                monthDiv.className = "bg-white/60 rounded-2xl p-4 border border-white shadow-sm flex flex-row items-center gap-4";
-                
-                let wedsHtml = wednesdays.map(date => {
-                    const dStr = (m+1) + "月" + date.getDate() + "日";
-                    const isPresent = records.some(r => r.dateStr === dStr);
-                    const isToday = dStr === todayStr;
-                    
-                    const bgClass = isPresent ? "bg-purple-500 text-white shadow-md border-purple-500" : "bg-white text-slate-400 border-slate-200";
-                    const ringClass = isToday ? "ring-2 ring-pink-400 ring-offset-1" : "";
-
-                    return `
-                        <div class="flex flex-col items-center gap-1">
-                            <div class="w-8 h-8 rounded-full border flex items-center justify-center transition-all ${bgClass} ${ringClass}">
-                                <span class="text-xs font-bold">${date.getDate()}</span>
-                            </div>
-                        </div>
-                    `;
-                }).join('');
-
-                monthDiv.innerHTML = `
-                    <div class="w-12 font-bold text-slate-700 text-base text-center border-r border-slate-200 pr-2">${monthName}</div>
-                    <div class="flex flex-wrap gap-2.5 flex-1">${wedsHtml}</div>
-                `;
-                container.appendChild(monthDiv);
-            }
+            localStorage.setItem('spiritual_weekly_records', JSON.stringify(records));
+            sendToGAS(records[idx]);
+            
+            renderIntegratedCourseList();
+            renderAttendance(); 
+            closeReflectionModal();
+            showToast("心得已成功儲存！", "success");
         }
 
         // ==========================================
@@ -1222,7 +1110,6 @@
                 return evDate >= today;
             });
 
-            // 過濾過去活動並反轉(讓距離現在最近的排在最上面)
             const pastEvents = UPCOMING_EVENTS.filter(ev => {
                 const evDate = new Date(ev.date);
                 evDate.setHours(0, 0, 0, 0);
@@ -1237,7 +1124,6 @@
 
             const weekDays = ['日', '一', '二', '三', '四', '五', '六'];
 
-            // 渲染近期活動
             if (filteredEvents.length === 0) {
                 container.innerHTML = `
                     <div class="text-center mt-8 pb-4">
@@ -1269,15 +1155,8 @@
                     `;
                     container.insertAdjacentHTML('beforeend', cardHTML);
                 });
-
-                container.insertAdjacentHTML('beforeend', `
-                    <div class="text-center mt-8 pb-4">
-                        <p class="text-slate-400 text-sm">期待您的參與！</p>
-                    </div>
-                `);
             }
 
-            // 渲染過去活動
             if (pastEvents.length === 0 && pastContainer) {
                 pastContainer.innerHTML = '<p class="text-sm text-slate-400 text-center py-2">尚無過去活動紀錄</p>';
             } else if (pastContainer) {
@@ -1303,54 +1182,83 @@
                     pastContainer.insertAdjacentHTML('beforeend', cardHTML);
                 });
             }
-
             lucide.createIcons();
         }
 
         // ==========================================
-        // UI: 活動簽到與抽值日生邏輯
+        // UI: 活動管理 (名單簽到與抽值日生)
         // ==========================================
         function loadEventAttendanceData() {
             const storedAtt = localStorage.getItem('spiritual_event_attendances');
             if (storedAtt) eventAttendances = JSON.parse(storedAtt);
-            // 確保今天的陣列存在
             if (!eventAttendances[todayStr]) eventAttendances[todayStr] = [];
 
             const storedHistory = localStorage.getItem('spiritual_duty_history');
             if (storedHistory) dutyHistory = JSON.parse(storedHistory);
             
-            // 如果今天已經有抽籤結果，顯示出來
             const todayDuty = dutyHistory.find(h => h.date === todayStr);
-            if (todayDuty) {
-                showDutyResultUI(todayDuty.names);
+            if (todayDuty) showDutyResultUI(todayDuty.names);
+        }
+
+        function toggleEditMode() {
+            isEditMode = !isEditMode;
+            const btn = document.getElementById('editModeBtn');
+            if(isEditMode) {
+                btn.innerHTML = `<i data-lucide="check" class="w-3.5 h-3.5"></i> 完成編輯`;
+                btn.classList.add('bg-purple-100', 'text-purple-600');
+                btn.classList.remove('bg-white/50', 'text-slate-500');
+            } else {
+                btn.innerHTML = `<i data-lucide="edit-2" class="w-3.5 h-3.5"></i> 編輯名單`;
+                btn.classList.remove('bg-purple-100', 'text-purple-600');
+                btn.classList.add('bg-white/50', 'text-slate-500');
             }
+            renderEventNameGrid();
+        }
+
+        function deletePerson(name, e) {
+            e.stopPropagation();
+            // 從總名單刪除
+            allNamesList = allNamesList.filter(n => n !== name);
+            localStorage.setItem('spiritual_all_names_v2', JSON.stringify(allNamesList));
+            
+            // 從今日簽到中刪除
+            let todayAtt = eventAttendances[todayStr] || [];
+            todayAtt = todayAtt.filter(n => n !== name);
+            eventAttendances[todayStr] = todayAtt;
+            localStorage.setItem('spiritual_event_attendances', JSON.stringify(eventAttendances));
+            
+            renderEventNameGrid();
+            showToast(`已刪除 ${name}`, "success");
         }
 
         function renderEventNameGrid() {
             const grid = document.getElementById('nameGrid');
+            if(!grid) return;
             grid.innerHTML = '';
             const todayAtt = eventAttendances[todayStr] || [];
 
-            // 合併預設名單與自定義名單
-            const allNames = [...new Set([...PRESET_NAMES, ...customNamesList])];
-
-            allNames.forEach(name => {
+            allNamesList.forEach(name => {
                 const isSelected = todayAtt.includes(name);
                 const btn = document.createElement('button');
-                btn.textContent = name;
                 
-                // 設定按鈕樣式
-                btn.className = `px-3 py-1.5 rounded-full text-sm font-bold transition-all border ${
-                    isSelected
-                    ? 'bg-purple-500 text-white border-purple-500 shadow-md transform scale-105'
-                    : 'bg-white/80 text-slate-600 border-slate-200 hover:bg-white active:bg-slate-100 active:scale-95'
-                }`;
-                
-                btn.onclick = () => toggleEventName(name);
+                if (isEditMode) {
+                    btn.className = `relative px-3 py-1.5 pr-8 rounded-full text-sm font-bold transition-all border bg-slate-50 text-slate-500 border-slate-200 shadow-sm opacity-90 hover:opacity-100 animate-pulse`;
+                    btn.style.animationDuration = '2s';
+                    btn.innerHTML = `${name} <div onclick="deletePerson('${name}', event)" class="absolute right-1 top-1/2 -translate-y-1/2 bg-rose-100 text-rose-500 rounded-full p-1 shadow-sm hover:bg-rose-500 hover:text-white transition-colors cursor-pointer"><i data-lucide="x" class="w-2.5 h-2.5"></i></div>`;
+                } else {
+                    btn.textContent = name;
+                    btn.className = `px-3 py-1.5 rounded-full text-sm font-bold transition-all border ${
+                        isSelected
+                        ? 'bg-purple-500 text-white border-purple-500 shadow-md transform scale-105'
+                        : 'bg-white/80 text-slate-600 border-slate-200 hover:bg-white active:bg-slate-100 active:scale-95'
+                    }`;
+                    btn.onclick = () => toggleEventName(name);
+                }
                 grid.appendChild(btn);
             });
 
             document.getElementById('signInCount').textContent = todayAtt.length;
+            lucide.createIcons();
         }
 
         function addNewPerson() {
@@ -1358,17 +1266,16 @@
             const name = input.value.trim();
             if (!name) return;
 
-            if (PRESET_NAMES.includes(name) || customNamesList.includes(name)) {
+            if (allNamesList.includes(name)) {
                 showToast("此人已在名單中", "info");
                 input.value = '';
                 return;
             }
 
-            customNamesList.push(name);
-            localStorage.setItem('spiritual_custom_names', JSON.stringify(customNamesList));
+            allNamesList.push(name);
+            localStorage.setItem('spiritual_all_names_v2', JSON.stringify(allNamesList));
             input.value = '';
             
-            // 自動幫新加入的人簽到
             let todayAtt = eventAttendances[todayStr] || [];
             if (!todayAtt.includes(name)) {
                 todayAtt.push(name);
@@ -1384,12 +1291,9 @@
             let todayAtt = eventAttendances[todayStr] || [];
             
             if (todayAtt.includes(name)) {
-                // 移除
                 todayAtt = todayAtt.filter(n => n !== name);
             } else {
-                // 加入
                 todayAtt.push(name);
-                // 輕微的震動回饋 (如果裝置支援)
                 if (navigator.vibrate) navigator.vibrate(50);
             }
             
@@ -1402,8 +1306,29 @@
         function drawDuty() {
             const todayAtt = eventAttendances[todayStr] || [];
             if (todayAtt.length < 2) {
-                showToast("簽到人數需達到 2 人以上才能抽值日生！", "error");
+                showToast("今日簽到人數需達到 2 人以上才能抽值日生！", "error");
                 return;
+            }
+
+            // 尋找排除今日以外的歷史紀錄
+            const historyWithoutToday = dutyHistory.filter(h => h.date !== todayStr);
+            
+            let checkLimit = 5; // 預設排除近五次內的人選
+            let eligibleCandidates = [];
+            
+            while(checkLimit >= 0) {
+                let recentDuties = new Set();
+                const recentDraws = historyWithoutToday.slice(0, checkLimit);
+                recentDraws.forEach(h => {
+                    recentDuties.add(h.names[0]);
+                    recentDuties.add(h.names[1]);
+                });
+                
+                eligibleCandidates = todayAtt.filter(name => !recentDuties.has(name));
+                if (eligibleCandidates.length >= 2) {
+                    break;
+                }
+                checkLimit--; // 如果剩下符合資格的人數不足2人，則逐步放寬不重複條件
             }
 
             const btn = document.getElementById('drawDutyBtn');
@@ -1415,10 +1340,10 @@
             display.classList.add('slot-machine');
             
             let ticks = 0;
-            const maxTicks = 20; // 抽籤動畫次數
+            const maxTicks = 20; 
             
-            // 抽籤動畫效果
             const interval = setInterval(() => {
+                // 動畫效果維持使用所有簽到的人
                 const temp1 = todayAtt[Math.floor(Math.random() * todayAtt.length)];
                 let temp2 = todayAtt[Math.floor(Math.random() * todayAtt.length)];
                 while(temp1 === temp2 && todayAtt.length > 1) {
@@ -1431,25 +1356,21 @@
                 if (ticks >= maxTicks) {
                     clearInterval(interval);
                     
-                    // 正式抽取
-                    let shuffled = [...todayAtt].sort(() => 0.5 - Math.random());
+                    // 從符合資格的名單 (eligibleCandidates) 中隨機抽取兩位
+                    let shuffled = [...eligibleCandidates].sort(() => 0.5 - Math.random());
                     let picked = [shuffled[0], shuffled[1]];
                     
-                    // 記錄到歷史 (如果今天已抽過則覆蓋)
                     dutyHistory = dutyHistory.filter(h => h.date !== todayStr);
                     dutyHistory.unshift({ date: todayStr, names: picked });
                     
-                    // 確保歷史紀錄不要無限膨脹 (保留近20筆)
                     if(dutyHistory.length > 20) dutyHistory.pop();
-                    
                     localStorage.setItem('spiritual_duty_history', JSON.stringify(dutyHistory));
                     
-                    // 顯示結果
                     display.classList.remove('slot-machine');
                     showDutyResultUI(picked);
                     renderDutyHistory();
                     
-                    showToast("值日生已抽出！", "success");
+                    showToast(checkLimit < 5 ? "因人數不足，已自動放寬不重複條件！" : "值日生已抽出！", "success");
                     btn.disabled = false;
                 }
             }, 50);
@@ -1464,6 +1385,7 @@
 
         function renderDutyHistory() {
             const list = document.getElementById('dutyHistoryModalList');
+            if(!list) return;
             list.innerHTML = '';
             
             if (dutyHistory.length === 0) {
@@ -1486,7 +1408,7 @@
         }
 
         // ==========================================
-        // Modal 開關邏輯 (新增)
+        // Modal 開關邏輯
         // ==========================================
         function openDutyHistoryModal() {
             document.getElementById('dutyHistoryModal').classList.remove('hidden');
@@ -1532,81 +1454,189 @@
             }
         }
 
-        // 新增：切換預算單位
         function setFinanceUnit(unit) {
             currentFinanceUnit = unit;
             
             const btnTy = document.getElementById('finance-unit-ty');
             const btnHc = document.getElementById('finance-unit-hc');
+            const btnOther = document.getElementById('finance-unit-other');
             
+            [btnTy, btnHc, btnOther].forEach(btn => {
+                btn.className = "px-3 py-1.5 rounded-lg text-slate-400 hover:text-purple-500 transition-all";
+            });
+
             if (unit === 'TY') {
-                btnTy.className = "text-purple-600 transition-all transform scale-105 drop-shadow-sm";
-                btnHc.className = "text-slate-400 hover:text-purple-500 transition-all";
+                btnTy.className = "px-3 py-1.5 rounded-lg text-purple-600 bg-white shadow-sm transition-all transform";
+            } else if (unit === 'HC') {
+                btnHc.className = "px-3 py-1.5 rounded-lg text-purple-600 bg-white shadow-sm transition-all transform";
             } else {
-                btnHc.className = "text-purple-600 transition-all transform scale-105 drop-shadow-sm";
-                btnTy.className = "text-slate-400 hover:text-purple-500 transition-all";
+                btnOther.className = "px-3 py-1.5 rounded-lg text-purple-600 bg-white shadow-sm transition-all transform";
             }
             
             renderFinanceView();
         }
 
-        // 新增：載入與渲染預算紀錄
         function loadLocalExpenses() {
-            const saved = localStorage.getItem('spiritual_local_expenses');
+            const saved = localStorage.getItem('spiritual_local_expenses_v2');
             if (saved) {
                 localExpenses = JSON.parse(saved);
             } else {
-                // 預設假資料 (加入 unit 欄位)
                 localExpenses = [
-                    { item: '吃湯圓猜燈謎伙食', date: '3月4日', reporter: '瑋群', amount: 850, unit: '桃園支聯會單成中心(TY YSA)' },
-                    { item: '冰島毛線材料', date: '4月1日', reporter: '唯甄', amount: 1200, unit: '新竹支聯會單成中心(HC YSA)' }
+                    { unit: '桃園支聯會單成中心(TY YSA)', item: '排球', date: '1月7日', amount: 1980, reporter: '應奇穎' },
+                    { unit: '桃園支聯會單成中心(TY YSA)', item: '〔在數位社會保持自我〕講座', date: '1月14日', amount: 2875, reporter: '應奇穎' },
+                    { unit: '桃園支聯會單成中心(TY YSA)', item: '排球', date: '1月21日', amount: 2040, reporter: '應奇穎' },
+                    { unit: '桃園支聯會單成中心(TY YSA)', item: '委員開會', date: '1月25日', amount: 631, reporter: '黃翊龍' },
+                    { unit: '桃園支聯會單成中心(TY YSA)', item: '打排球', date: '1月28日', amount: 1305, reporter: '應奇穎' },
+                    { unit: '桃園支聯會單成中心(TY YSA)', item: '打排球', date: '2月4日', amount: 1385, reporter: '廖芷妘(?)' },
+                    { unit: '桃園支聯會單成中心(TY YSA)', item: '過年圍爐', date: '2月11日', amount: 1750, reporter: '黃利亞Lia' },
+                    { unit: '桃園支聯會單成中心(TY YSA)', item: '過年圍爐', date: '2月11日', amount: 2547, reporter: '廖瑋群' },
+                    { unit: '桃園支聯會單成中心(TY YSA)', item: '過年圍爐', date: '2月11日', amount: 446, reporter: '劉壹中' },
+                    { unit: '桃園支聯會單成中心(TY YSA)', item: '打排球', date: '2月25日', amount: 310, reporter: '廖瑋群' },
+                    { unit: '桃園支聯會單成中心(TY YSA)', item: '打排球', date: '2月25日', amount: 1445, reporter: '廖瑋群' },
+                    { unit: '桃園支聯會單成中心(TY YSA)', item: '福音研究所(吃湯圓+猜燈謎因)', date: '3月4日', amount: 3565, reporter: '應奇穎' },
+                    { unit: '桃園支聯會單成中心(TY YSA)', item: '福音研究所(吃湯圓+猜燈謎因)', date: '3月4日', amount: 216, reporter: '廖芷妘' },
+                    { unit: '桃園支聯會單成中心(TY YSA)', item: '福音研究所(桌球)', date: '3月11日', amount: 1970, reporter: '廖瑋群' },
+                    { unit: '桃園支聯會單成中心(TY YSA)', item: '福音研究所(排球)', date: '3月18日', amount: 2640, reporter: '王菁珊' },
+                    { unit: '桃園支聯會單成中心(TY YSA)', item: '福音研究所(排球)', date: '3月18日', amount: 142, reporter: '王菁珊' },
+                    { unit: '桃園支聯會單成中心(TY YSA)', item: '福音研究所(冰島毛線)', date: '3月25日', amount: 14879, reporter: '王菁珊' },
+                    { unit: '新竹支聯會單成中心(HC YSA)', item: '福音研究所(課程餐點)', date: '3月6日', amount: 480, reporter: '黃驛閔' },
+                    { unit: '新竹支聯會單成中心(HC YSA)', item: '福音研究所(課程餐點)', date: '3月13日', amount: 360, reporter: '黃驛閔' },
+                    { unit: '桃園支聯會單成中心(TY YSA)', item: '福音研究所(冰島毛線)', date: '3月27日', amount: 2620, reporter: '廖瑋群' },
+                    { unit: '新竹支聯會單成中心(HC YSA)', item: '福音研究所(福研晚餐)', date: '3月27日', amount: 110, reporter: '黃驛閔' }
                 ];
-                localStorage.setItem('spiritual_local_expenses', JSON.stringify(localExpenses));
+                localStorage.setItem('spiritual_local_expenses_v2', JSON.stringify(localExpenses));
             }
             renderFinanceView();
         }
 
         function renderFinanceView() {
-            const totalBudget = 50000;
+            const totalBudget = 500000;
+            
+            let unitSpents = {
+                '桃園支聯會單成中心(TY YSA)': 0,
+                '新竹支聯會單成中心(HC YSA)': 0,
+                '龍潭福研(LT Ward)': 0,
+                '桃園 x 新竹支聯會(TY x HC YSA)': 0,
+                '單成大會(YSA Conference)': 0,
+                '其他': 0 
+            };
+            
+            let totalSpent = 0;
 
-            // 根據選取的單位過濾支出
-            const filteredExpenses = localExpenses.filter(exp => {
-                if (!exp.unit) return true; // 舊資料無單位則預設顯示
-                if (currentFinanceUnit === 'TY') {
-                    return exp.unit.includes('桃園');
-                } else if (currentFinanceUnit === 'HC') {
-                    return exp.unit.includes('新竹');
+            localExpenses.forEach(exp => {
+                const amount = Number(exp.amount) || 0;
+                totalSpent += amount;
+                
+                if (exp.unit && unitSpents[exp.unit] !== undefined) {
+                    unitSpents[exp.unit] += amount;
+                } else {
+                    unitSpents['其他'] += amount;
                 }
-                return true;
             });
 
-            let totalSpent = filteredExpenses.reduce((sum, exp) => sum + Number(exp.amount), 0);
+            // 繪製逐列支出概況 (無邊框設計)
+            const breakdownContainer = document.getElementById('budget-breakdown');
+            breakdownContainer.innerHTML = '';
+            for (const [unitName, spent] of Object.entries(unitSpents)) {
+                if (spent > 0) {
+                    breakdownContainer.innerHTML += `
+                        <div class="flex justify-between items-center text-sm py-2 border-b border-indigo-100/30 last:border-0">
+                            <span class="text-slate-600 font-medium truncate pr-4">${unitName}</span>
+                            <span class="font-bold text-rose-500 shrink-0">$ ${spent.toLocaleString()}</span>
+                        </div>
+                    `;
+                }
+            }
+            if(breakdownContainer.innerHTML === '') {
+                 breakdownContainer.innerHTML = '<p class="text-xs text-slate-400 text-center py-2">目前無任何支出紀錄</p>';
+            }
+
             let remaining = totalBudget - totalSpent;
             let percent = Math.min((totalSpent / totalBudget) * 100, 100);
 
-            document.getElementById('budget-spent').textContent = `$ ${totalSpent.toLocaleString()}`;
-            document.getElementById('budget-remaining').textContent = `剩餘額度: $ ${remaining.toLocaleString()}`;
+            document.getElementById('budget-remaining').textContent = `總剩餘額度: $ ${remaining.toLocaleString()}`;
             document.getElementById('budget-progress').style.width = `${percent}%`;
+
+            const filteredExpenses = localExpenses.filter(exp => {
+                if (!exp.unit) return true; 
+                if (currentFinanceUnit === 'TY') return exp.unit.includes('桃園');
+                else if (currentFinanceUnit === 'HC') return exp.unit.includes('新竹');
+                else return (!exp.unit.includes('桃園') && !exp.unit.includes('新竹')); 
+            });
 
             const listContainer = document.getElementById('recent-expenses-list');
             listContainer.innerHTML = '';
             
-            const displayList = [...filteredExpenses].reverse().slice(0, 10);
+            const displayList = [...filteredExpenses].reverse();
             
             if(displayList.length === 0) {
-                 listContainer.innerHTML = '<p class="text-xs text-slate-400 text-center py-2">該單位尚無支出紀錄</p>';
+                 listContainer.innerHTML = '<p class="text-xs text-slate-400 text-center py-3">該單位尚無支出紀錄</p>';
             } else {
+                // 將支出依照月份群組化
+                const grouped = {};
                 displayList.forEach(exp => {
-                    listContainer.innerHTML += `
-                        <div class="flex justify-between items-center p-3 bg-white/60 rounded-xl border border-white">
+                    const match = exp.date.match(/(\d+)月/);
+                    const m = match ? match[1] + '月' : '其他';
+                    if (!grouped[m]) grouped[m] = [];
+                    grouped[m].push(exp);
+                });
+
+                // 將月份由大到小排序
+                const sortedMonths = Object.keys(grouped).sort((a, b) => {
+                    const numA = parseInt(a.replace('月', '')) || 0;
+                    const numB = parseInt(b.replace('月', '')) || 0;
+                    return numB - numA;
+                });
+
+                sortedMonths.forEach((month, index) => {
+                    const exps = grouped[month];
+                    const monthTotal = exps.reduce((sum, e) => sum + Number(e.amount), 0);
+                    const isFirst = index === 0; // 預設展開最新的月份
+                    
+                    let expsHtml = exps.map(exp => `
+                        <div class="flex justify-between items-center py-3 border-b border-slate-100/60 last:border-0 pl-2 pr-1">
                             <div>
                                 <p class="text-sm font-bold text-slate-700">${exp.item}</p>
-                                <p class="text-xs text-slate-400">${exp.date} · ${exp.reporter}</p>
+                                <p class="text-[11px] text-slate-400 mt-0.5">${exp.date} · ${exp.reporter}</p>
                             </div>
-                            <span class="text-sm font-bold text-slate-700">-$ ${exp.amount.toLocaleString()}</span>
+                            <span class="text-sm font-bold text-slate-700">-$ ${Number(exp.amount).toLocaleString()}</span>
+                        </div>
+                    `).join('');
+
+                    listContainer.innerHTML += `
+                        <div class="mb-3 last:mb-0 border border-slate-100/80 rounded-2xl overflow-hidden bg-white/40 shadow-[0_2px_10px_rgba(0,0,0,0.02)]">
+                            <button onclick="toggleMonthAccordion(this)" class="w-full flex justify-between items-center p-3.5 bg-white/60 hover:bg-white/80 transition-colors">
+                                <div class="flex items-center gap-2">
+                                    <i data-lucide="calendar" class="w-4 h-4 text-indigo-400"></i>
+                                    <span class="font-bold text-slate-700">${month}</span>
+                                    <span class="text-[10px] font-bold text-slate-400 bg-slate-100 px-2 py-0.5 rounded-md">${exps.length}筆</span>
+                                </div>
+                                <div class="flex items-center gap-3">
+                                    <span class="text-sm font-bold text-rose-500">-$ ${monthTotal.toLocaleString()}</span>
+                                    <i data-lucide="chevron-down" class="w-4 h-4 text-slate-400 transition-transform duration-300 ${isFirst ? 'rotate-180' : ''} accordion-icon"></i>
+                                </div>
+                            </button>
+                            <div class="accordion-content transition-all duration-300 px-2 ${isFirst ? 'block' : 'hidden'}">
+                                ${expsHtml}
+                            </div>
                         </div>
                     `;
                 });
+            }
+            lucide.createIcons();
+        }
+
+        function toggleMonthAccordion(btn) {
+            const content = btn.nextElementSibling;
+            const icon = btn.querySelector('.accordion-icon');
+            if (content.classList.contains('hidden')) {
+                content.classList.remove('hidden');
+                content.classList.add('block');
+                icon.classList.add('rotate-180');
+            } else {
+                content.classList.add('hidden');
+                content.classList.remove('block');
+                icon.classList.remove('rotate-180');
             }
         }
 
@@ -1629,12 +1659,13 @@
                 form.addEventListener('submit', (e) => {
                     e.preventDefault();
                     
-                    const reporterName = document.getElementById('reporter').value;
-                    if (!currentUser.name || reporterName === "請先至設定填寫姓名") {
-                        showToast("請先至「設定」輸入您的姓名才能報帳", "error");
-                        switchTab('settings');
+                    const reporterName = document.getElementById('reporter').value.trim();
+                    if (!reporterName) {
+                        showToast("報帳者姓名不可為空", "error");
                         return;
                     }
+
+                    localStorage.setItem('spiritual_last_reporter_name', reporterName);
 
                     pendingExpenseData = {
                         'timestamp': new Date().toLocaleString(),
@@ -1690,7 +1721,6 @@
                     body: JSON.stringify(pendingExpenseData)
                 });
 
-                // 新增：將提交的紀錄存入本地以更新預算視圖
                 const dateObj = new Date(pendingExpenseData['日期']);
                 const monthDay = (dateObj.getMonth() + 1) + '月' + dateObj.getDate() + '日';
                 
@@ -1699,18 +1729,18 @@
                     date: monthDay,
                     reporter: pendingExpenseData['報帳者'],
                     amount: pendingExpenseData['金額'],
-                    unit: pendingExpenseData['使用單位'] // 新增紀錄使用單位
+                    unit: pendingExpenseData['使用單位'] 
                 });
-                localStorage.setItem('spiritual_local_expenses', JSON.stringify(localExpenses));
+                localStorage.setItem('spiritual_local_expenses_v2', JSON.stringify(localExpenses));
                 renderFinanceView();
 
-                showToast('報帳已送出！請記得將發票與匯款帳號交給廖瑋群弟兄以利後續作業', 'success', 6000);
+                showToast('報帳已送出！請記得將發票與匯款帳號交給負責人', 'success', 6000);
                 
-                // 重設表單
+                const savedName = document.getElementById('reporter').value;
                 document.getElementById('expense-form').reset();
                 document.getElementById('expenseDate').valueAsDate = new Date();
                 document.getElementById('mainActivity').value = "";
-                document.getElementById('reporter').value = currentUser.name; // 補回名字
+                document.getElementById('reporter').value = savedName; 
                 
             } catch (error) {
                 console.error('Submit Error:', error);
