@@ -254,6 +254,37 @@
 
             <!-- 報帳表單區塊 -->
             <div id="finance-form-section" class="glass rounded-3xl p-6 shadow-sm block animate-[fadeIn_0.3s_ease-out]">
+                <div class="bg-amber-50 border border-amber-200 rounded-2xl p-4 mb-6 shadow-sm">
+                    <h3 class="text-sm font-bold text-amber-700 mb-2 flex items-center gap-1.5">
+                        <i data-lucide="alert-triangle" class="w-4 h-4"></i> 報帳注意事項
+                    </h3>
+                    <ul class="text-xs text-amber-800 space-y-2.5 leading-relaxed">
+                        <li class="flex items-start gap-1">
+                            <span class="shrink-0 mt-0.5">1.</span>
+                            <div>
+                                確保發票已打統編
+                                <button type="button" onclick="copyTaxId()" class="inline-flex items-center gap-1 bg-amber-200/50 hover:bg-amber-200 px-1.5 py-0.5 rounded text-amber-900 font-mono font-bold transition-colors active:scale-95 ml-1">
+                                    04173382 <i data-lucide="copy" class="w-3 h-3"></i>
+                                </button>
+                            </div>
+                        </li>
+                        <li class="flex items-start gap-1">
+                            <span class="shrink-0 mt-0.5">2.</span>
+                            <div>
+                                如果是收據請確定抬頭為「<strong>財團法人台灣耶穌基督後期聖徒教會</strong>」<br>
+                                <span class="text-rose-500 font-bold block mt-0.5">*注意請填寫正確的「台灣」而非「臺灣」</span>
+                            </div>
+                        </li>
+                        <li class="flex items-start gap-1">
+                            <span class="shrink-0 mt-0.5">3.</span>
+                            <span>填寫完成後請將發票交給總務「廖瑋群」弟兄。</span>
+                        </li>
+                        <li class="flex items-start gap-1">
+                            <span class="shrink-0 mt-0.5">4.</span>
+                            <span>主活動通常為福音研究所，點選「填入福研」按鈕將文字帶入，如果只有社交活動則直接填寫在主活動格子中。</span>
+                        </li>
+                    </ul>
+                </div>
                 <form id="expense-form" class="space-y-5">
                     <!-- 報帳者 & 活動項目 -->
                     <div class="flex flex-col md:grid md:grid-cols-2 gap-5 md:gap-6">
