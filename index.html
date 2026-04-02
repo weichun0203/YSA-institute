@@ -1,3 +1,4 @@
+```html
 <!DOCTYPE html>
 <html lang="zh-TW">
 <head>
@@ -145,31 +146,11 @@
                 <p class="text-slate-500 text-xs font-serif italic">「藉著微小而簡單的事能成就偉大的事」</p>
             </div>
 
-            <!-- 簽到輸入框 -->
-            <div class="glass rounded-3xl p-6 md:p-8 flex flex-col justify-center relative shadow-xl mb-8 mt-2">
-                <form id="signInForm" onsubmit="handleSignIn(event)" class="flex flex-col gap-5">
-                    <div>
-                        <label class="text-lg font-bold text-slate-700 flex items-center gap-2 mb-3">
-                            <i data-lucide="user-check" class="w-5 h-5 text-purple-600"></i>
-                            今日靈性簽到
-                        </label>
-                        <div class="relative">
-                            <input type="text" id="inputName" placeholder="請輸入您的姓名..." oninput="checkSignInButtonState()" class="w-full pl-5 pr-4 py-4 rounded-2xl bg-white/70 border border-white focus:bg-white focus:ring-4 focus:ring-purple-200 outline-none transition-all placeholder:text-slate-400 text-lg shadow-inner text-slate-700">
-                        </div>
-                    </div>
-
-                    <button type="submit" id="btnSignIn" class="w-full py-4 text-white rounded-2xl font-bold text-lg transition-all shadow-lg flex items-center justify-center gap-2 group active:scale-[0.98] bg-slate-400 cursor-not-allowed" disabled>
-                        <span id="btnText">請輸入姓名</span>
-                        <i id="btnIcon" data-lucide="edit-3" class="w-5 h-5"></i>
-                    </button>
-                </form>
-            </div>
-
-            <!-- 簽到後顯示區域 -->
-            <div id="postSignInSection" class="hidden transition-all duration-700 ease-in-out">
+            <!-- 簽到後顯示區域 (移至上方) -->
+            <div id="postSignInSection" class="hidden transition-all duration-700 ease-in-out mb-4">
                 
                 <!-- 每周金句 -->
-                <div id="quoteSection" class="mb-8 text-center animate-pulse pt-2">
+                <div id="quoteSection" class="mb-4 text-center animate-pulse pt-2">
                     <h3 class="text-xs font-bold text-purple-500 tracking-widest uppercase mb-2">每周金句</h3>
                     <div class="relative p-6 md:p-8 glass rounded-2xl inline-block w-full">
                         <i data-lucide="quote" class="absolute top-4 left-4 text-purple-300 w-5 h-5 opacity-50"></i>
@@ -186,7 +167,7 @@
                 </div>
 
                 <!-- 課程出席進度 (16堂) -->
-                <div class="glass rounded-2xl p-5 mb-8">
+                <div class="glass rounded-2xl p-5 mb-4">
                     <div class="flex items-center justify-between mb-4">
                         <div class="flex items-center gap-2">
                             <div class="p-1.5 bg-purple-100 rounded-lg text-purple-600">
@@ -196,11 +177,31 @@
                         </div>
                     </div>
                     <!-- 橫向卷軸的圓圈區域 -->
-                    <div id="monthlyAttendanceWidget" class="flex gap-4 overflow-x-auto no-scrollbar pb-2 px-1 items-center">
+                    <div id="monthlyAttendanceWidget" class="flex gap-4 overflow-x-auto no-scrollbar pb-2 px-1 items-center scroll-smooth">
                         <!-- JS 動態產生 16 個圓圈 -->
                     </div>
                     <p class="text-[10px] text-slate-400 mt-2 text-right">左右滑動查看完整進度</p>
                 </div>
+            </div>
+
+            <!-- 簽到輸入框 (移至下方) -->
+            <div id="signInFormWrapper" class="glass rounded-3xl p-6 md:p-8 flex flex-col justify-center relative shadow-xl mb-8 mt-2 transition-all duration-500">
+                <form id="signInForm" onsubmit="handleSignIn(event)" class="flex flex-col gap-5">
+                    <div>
+                        <label class="text-lg font-bold text-slate-700 flex items-center gap-2 mb-3">
+                            <i data-lucide="user-check" class="w-5 h-5 text-purple-600"></i>
+                            今日靈性簽到
+                        </label>
+                        <div class="relative">
+                            <input type="text" id="inputName" placeholder="請輸入您的姓名..." oninput="checkSignInButtonState()" class="w-full pl-5 pr-4 py-4 rounded-2xl bg-white/70 border border-white focus:bg-white focus:ring-4 focus:ring-purple-200 outline-none transition-all placeholder:text-slate-400 text-lg shadow-inner text-slate-700">
+                        </div>
+                    </div>
+
+                    <button type="submit" id="btnSignIn" class="w-full py-4 text-white rounded-2xl font-bold text-lg transition-all shadow-lg flex items-center justify-center gap-2 group active:scale-[0.98] bg-slate-400 cursor-not-allowed" disabled>
+                        <span id="btnText">請輸入姓名</span>
+                        <i id="btnIcon" data-lucide="edit-3" class="w-5 h-5"></i>
+                    </button>
+                </form>
             </div>
         </div>
 
@@ -256,7 +257,7 @@
             <div id="finance-form-section" class="glass rounded-3xl p-6 shadow-sm block animate-[fadeIn_0.3s_ease-out]">
                 <form id="expense-form" class="space-y-5">
                     <!-- 報帳者 & 活動項目 -->
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div class="flex flex-col md:grid md:grid-cols-2 gap-5 md:gap-6">
                         <div class="space-y-1.5">
                             <label class="block text-sm font-bold text-slate-700">報帳者</label>
                             <input type="text" id="reporter" required placeholder="請輸入您的姓名" class="w-full px-4 py-3 rounded-xl bg-white border border-slate-200 shadow-sm focus:border-transparent focus:ring-2 focus:ring-purple-400 outline-none text-slate-700">
@@ -274,7 +275,7 @@
                     <hr class="border-white">
 
                     <!-- 使用單位 & 開支類型 -->
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div class="flex flex-col md:grid md:grid-cols-2 gap-5 md:gap-6">
                         <div class="space-y-1.5">
                             <label class="block text-sm font-bold text-slate-700">使用單位</label>
                             <select id="unit" required class="w-full px-4 py-3 rounded-xl bg-white border border-slate-200 shadow-sm focus:border-transparent focus:ring-2 focus:ring-purple-400 outline-none text-slate-700 appearance-none">
@@ -301,26 +302,26 @@
                     </div>
 
                     <!-- 日期 & 主/社交活動 -->
-                    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                    <div class="flex flex-col md:grid md:grid-cols-3 gap-5 md:gap-6">
                         <div class="space-y-1.5">
                             <label class="block text-sm font-bold text-slate-700">日期</label>
                             <input type="date" id="expenseDate" required class="w-full px-4 py-3 rounded-xl bg-white border border-slate-200 shadow-sm focus:border-transparent focus:ring-2 focus:ring-purple-400 outline-none text-slate-700">
                         </div>
-                        <div class="space-y-1.5 sm:col-span-1">
+                        <div class="space-y-1.5 md:col-span-1">
                             <div class="flex items-center justify-between">
                                 <label class="block text-sm font-bold text-slate-700">主活動</label>
                                 <button type="button" onclick="document.getElementById('mainActivity').value='福音研究所'" class="text-[10px] font-bold text-purple-600 bg-purple-100 hover:bg-purple-200 px-2 py-0.5 rounded transition shadow-sm active:scale-95">填入福研</button>
                             </div>
                             <input type="text" id="mainActivity" value="" required placeholder="請輸入活動名稱" class="w-full px-4 py-3 rounded-xl bg-white border border-slate-200 shadow-sm focus:border-transparent focus:ring-2 focus:ring-purple-400 outline-none text-slate-700">
                         </div>
-                        <div class="space-y-1.5 sm:col-span-1">
+                        <div class="space-y-1.5 md:col-span-1">
                             <label class="block text-sm font-bold text-slate-700">社交活動</label>
                             <input type="text" id="socialActivity" placeholder="排球活動、課程..." class="w-full px-4 py-3 rounded-xl bg-white border border-slate-200 shadow-sm focus:border-transparent focus:ring-2 focus:ring-purple-400 outline-none text-slate-700">
                         </div>
                     </div>
 
                     <!-- 金額 & 訂購份/個數 -->
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div class="flex flex-col md:grid md:grid-cols-2 gap-5 md:gap-6">
                         <div class="space-y-1.5">
                             <label class="block text-sm font-bold text-slate-700">金額</label>
                             <div class="relative">
@@ -337,7 +338,7 @@
                     <hr class="border-white">
 
                     <!-- 發票類型 & 號碼 -->
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div class="flex flex-col md:grid md:grid-cols-2 gap-5 md:gap-6">
                         <div class="space-y-1.5">
                             <label class="block text-sm font-bold text-slate-700">發票類型</label>
                             <select id="invoiceType" required class="w-full px-4 py-3 rounded-xl bg-white border border-slate-200 shadow-sm focus:border-transparent focus:ring-2 focus:ring-purple-400 outline-none text-slate-700 appearance-none">
@@ -770,7 +771,12 @@
                 renderEventNameGrid(); 
                 window.scrollTo({ top: 0, behavior: 'smooth' });
             } else if (tabId === 'reflection') {
-                scrollToCurrentCourse(); 
+                // 手機板(寬度小於768)才自動跳轉到當天課程
+                if (window.innerWidth < 768) {
+                    scrollToCurrentCourse(); 
+                } else {
+                    window.scrollTo({ top: 0, behavior: 'smooth' });
+                }
             } else {
                 window.scrollTo({ top: 0, behavior: 'smooth' });
             }
@@ -914,23 +920,16 @@
             renderAttendance();
             renderIntegratedCourseList(); 
             
+            // 簽到後稍微讓表單淡化，提示完成
             setTimeout(() => {
-                const quoteSection = document.getElementById('quoteSection');
-                if(quoteSection) {
-                    const headerOffset = 90; 
-                    const elementPosition = quoteSection.getBoundingClientRect().top;
-                    const offsetPosition = elementPosition + window.pageYOffset - headerOffset;
-                    
-                    window.scrollTo({
-                        top: offsetPosition,
-                        behavior: 'smooth'
-                    });
-                }
+                const formWrapper = document.getElementById('signInFormWrapper');
+                if(formWrapper) formWrapper.classList.add('opacity-60');
             }, 100);
         }
 
         function showPostSignInSection() {
             document.getElementById('postSignInSection').classList.remove('hidden');
+            scrollProgressToCurrentWeek(); // 顯示區塊後自動滑動卷軸
         }
 
         function sendToGAS(payload) {
@@ -950,45 +949,86 @@
             const container = document.getElementById('monthlyAttendanceWidget');
             container.innerHTML = '';
 
+            const todayObj = new Date();
+            todayObj.setHours(0,0,0,0);
+            let currentCourseDateStr = INSTITUTE_COURSES[INSTITUTE_COURSES.length - 1].date;
+            
+            // 找出距離今天最近的本周課程
+            for (let course of INSTITUTE_COURSES) {
+                let arr = course.date.split('月');
+                let cDate = new Date(todayObj.getFullYear(), parseInt(arr[0])-1, parseInt(arr[1].replace('日','')));
+                if ((cDate - todayObj) / (1000 * 60 * 60 * 24) >= -4) {
+                    currentCourseDateStr = course.date;
+                    break;
+                }
+            }
+
             INSTITUTE_COURSES.forEach((course) => {
                 const dateStr = course.date;
                 const isPresent = records.some(r => r.dateStr === dateStr);
-                const isToday = dateStr === todayStr;
+                const isCurrentWeek = dateStr === currentCourseDateStr;
 
                 let circleClass = isPresent 
                     ? "bg-purple-500 border-purple-500 shadow-md" 
                     : "bg-white/50 border-purple-200";
                 
-                let textClass = isToday ? "text-pink-600 font-bold" : "text-slate-500";
-                let ringClass = isToday ? "ring-2 ring-pink-300 ring-offset-2 scale-110" : "";
+                let textClass = isCurrentWeek ? "text-pink-600 font-bold scale-110 transform" : "text-slate-500";
+                let ringClass = isCurrentWeek ? "ring-2 ring-pink-300 ring-offset-2 scale-110 current-week-node" : "";
 
                 const html = `
                     <div class="flex flex-col items-center gap-2 shrink-0 w-12 cursor-pointer transition-transform hover:scale-105" title="${course.title}">
-                        <span class="text-[10px] ${textClass}">${dateStr.split('月')[1]}</span>
+                        <span class="text-[10px] transition-all ${textClass}">${dateStr.split('月')[1]}</span>
                         <div class="w-4 h-4 rounded-full border-2 transition-all duration-300 ${circleClass} ${ringClass}"></div>
                     </div>
                 `;
                 container.innerHTML += html;
             });
+            scrollProgressToCurrentWeek();
+        }
+
+        function scrollProgressToCurrentWeek() {
+            setTimeout(() => {
+                const container = document.getElementById('monthlyAttendanceWidget');
+                const currentNode = container?.querySelector('.current-week-node');
+                if (container && currentNode) {
+                    const scrollLeft = currentNode.offsetLeft - (container.clientWidth / 2) + (currentNode.clientWidth / 2);
+                    container.scrollTo({ left: scrollLeft, behavior: 'smooth' });
+                }
+            }, 300);
         }
 
         function renderIntegratedCourseList() {
             const container = document.getElementById('integratedCourseList');
             container.innerHTML = '';
             
+            const todayObj = new Date();
+            todayObj.setHours(0,0,0,0);
+            let currentCourseDateStr = INSTITUTE_COURSES[INSTITUTE_COURSES.length - 1].date;
+            
+            // 找出距離今天最近的本周課程
+            for (let course of INSTITUTE_COURSES) {
+                let arr = course.date.split('月');
+                let cDate = new Date(todayObj.getFullYear(), parseInt(arr[0])-1, parseInt(arr[1].replace('日','')));
+                if ((cDate - todayObj) / (1000 * 60 * 60 * 24) >= -4) {
+                    currentCourseDateStr = course.date;
+                    break;
+                }
+            }
+            
             INSTITUTE_COURSES.forEach((course, i) => {
                 const courseDateArr = course.date.split('月');
                 const courseDateObj = new Date(new Date().getFullYear(), parseInt(courseDateArr[0])-1, parseInt(courseDateArr[1].replace('日','')));
-                const todayObj = new Date(new Date().setHours(0,0,0,0));
                 
                 const isPast = courseDateObj < todayObj;
-                const isToday = course.date === todayStr;
+                const isCurrentWeek = course.date === currentCourseDateStr;
                 
                 const record = records.find(r => r.dateStr === course.date);
                 const hasReflection = record && record.reflection && record.reflection.trim() !== "";
 
                 let boxClass = "bg-white/70 border-white hover:border-purple-300 hover:shadow-md cursor-pointer";
-                if (isToday) boxClass = "bg-purple-100/90 border-purple-300 shadow-md ring-2 ring-purple-200 cursor-pointer";
+                
+                // 本周課程加上醒目的粉色系標示
+                if (isCurrentWeek) boxClass = "bg-gradient-to-r from-pink-50 to-purple-50 border-pink-300 shadow-md ring-2 ring-pink-200 cursor-pointer transform scale-[1.01] my-2";
                 else if (isPast && !hasReflection) boxClass = "bg-white/40 border-slate-100 opacity-80 cursor-pointer grayscale-[20%]";
                 
                 let iconHtml = '';
@@ -999,7 +1039,7 @@
                             <span class="text-[10px] font-bold">已記錄</span>
                         </div>
                     `;
-                } else if (isToday || isPast) {
+                } else if (isCurrentWeek || isPast) {
                     iconHtml = `
                         <div class="flex items-center gap-1 text-slate-400 ml-auto bg-slate-50 px-2.5 py-1 rounded-lg border border-slate-200 group-hover:bg-purple-50 group-hover:text-purple-500 group-hover:border-purple-200 transition-colors">
                             <i data-lucide="edit-3" class="w-3.5 h-3.5"></i>
@@ -1010,16 +1050,20 @@
                     iconHtml = `<i data-lucide="lock" class="w-4 h-4 text-slate-300 ml-auto"></i>`;
                 }
 
+                // 加上「本周課程」的小標籤
+                let weekBadge = isCurrentWeek ? `<span class="absolute -top-2.5 right-4 bg-pink-500 text-white text-[10px] font-bold px-2 py-0.5 rounded-full shadow-sm">本周課程</span>` : '';
+
                 const cardHtml = `
-                    <div id="course-card-${course.date}" onclick="openReflectionModal('${course.date}', '${course.title}', ${courseDateObj > todayObj})" class="group flex flex-col p-4 rounded-2xl border ${boxClass} transition-all active:scale-[0.98]">
+                    <div id="course-card-${course.date}" onclick="openReflectionModal('${course.date}', '${course.title}', ${courseDateObj > todayObj})" class="relative group flex flex-col p-4 rounded-2xl border ${boxClass} transition-all active:scale-[0.98]">
+                        ${weekBadge}
                         <div class="flex items-center gap-3">
-                            <div class="w-10 h-10 rounded-xl ${isToday ? 'bg-purple-500 text-white' : 'bg-white text-slate-500 shadow-inner'} flex flex-col items-center justify-center shrink-0">
+                            <div class="w-10 h-10 rounded-xl ${isCurrentWeek ? 'bg-pink-500 text-white' : 'bg-white text-slate-500 shadow-inner'} flex flex-col items-center justify-center shrink-0">
                                 <span class="text-[9px] font-medium opacity-80 leading-tight">堂次</span>
                                 <span class="text-sm font-bold leading-tight">${i+1}</span>
                             </div>
                             <div class="flex-1">
-                                <p class="text-xs ${isToday ? 'text-purple-400' : 'text-slate-400'} font-bold mb-0.5">${course.date}</p>
-                                <p class="text-[15px] font-bold ${isToday ? 'text-purple-800' : 'text-slate-700'}">${course.title}</p>
+                                <p class="text-xs ${isCurrentWeek ? 'text-pink-500' : 'text-slate-400'} font-bold mb-0.5">${course.date}</p>
+                                <p class="text-[15px] font-bold ${isCurrentWeek ? 'text-purple-900' : 'text-slate-700'}">${course.title}</p>
                             </div>
                             ${iconHtml}
                         </div>
@@ -1191,7 +1235,12 @@
         function loadEventAttendanceData() {
             const storedAtt = localStorage.getItem('spiritual_event_attendances');
             if (storedAtt) eventAttendances = JSON.parse(storedAtt);
-            if (!eventAttendances[todayStr]) eventAttendances[todayStr] = [];
+            
+            // 預設將所有人選取 (如果是新的一天沒有紀錄)
+            if (!eventAttendances[todayStr]) {
+                eventAttendances[todayStr] = [...allNamesList];
+                localStorage.setItem('spiritual_event_attendances', JSON.stringify(eventAttendances));
+            }
 
             const storedHistory = localStorage.getItem('spiritual_duty_history');
             if (storedHistory) dutyHistory = JSON.parse(storedHistory);
