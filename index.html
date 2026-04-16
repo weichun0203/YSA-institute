@@ -762,7 +762,7 @@
                 allNamesList = JSON.parse(storedNames);
             } else {
                 const legacyCustom = JSON.parse(localStorage.getItem('spiritual_custom_names') || '[]');
-                const defaultNames = ["黃湘", "威廉", "庭希", "彥中", "黛娜", "小平", "銘霖", "畯紳", "佳晨", "鈺茹", "唯甄", "瑋群", "韋樵", "名煌", "利亞", "修儀", "昕玥", "人豪", "雅文", "蕭惟哲", "若雲", "奇穎", "紫嫺", "米斯卡", "雅聖"];
+                const defaultNames = ["廖瑋群","廖芷妘", "黃利亞","王威廉", "陳彥中", "黃畯紳", "林佳晨", "賴韋樵", "邱鈺茹", "徐唯甄", "黃名煌", "應奇穎","鍾昕玥", "郭人豪", "官雅文", "蕭惟哲", "白若雲",  "郭紫嫺", "吳庭希", "米斯卡", "張雅聖", "許銘霖", "林修儀","黃湘","謝黛娜"];
                 allNamesList = [...new Set([...defaultNames, ...legacyCustom])];
                 localStorage.setItem('spiritual_all_names_v2', JSON.stringify(allNamesList));
             }
