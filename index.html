@@ -70,7 +70,7 @@
             to { opacity: 1; margin-top: 0; }
         }
 
-        /* 置頂標題專用樣式 (優化：無邊界漸層淡出毛玻璃) */
+        /* 置頂標題專用樣式 */
         .sticky-header {
             position: sticky;
             top: 0;
@@ -145,7 +145,7 @@
                 <p class="text-slate-500 text-xs font-serif italic">「藉著微小而簡單的事能成就偉大的事」</p>
             </div>
 
-            <!-- 簽到後顯示區域 (移至上方) -->
+            <!-- 簽到後顯示區域 -->
             <div id="postSignInSection" class="hidden transition-all duration-700 ease-in-out mb-4">
                 
                 <!-- 每周金句 -->
@@ -183,7 +183,7 @@
                 </div>
             </div>
 
-            <!-- 簽到輸入框 (移至下方) -->
+            <!-- 簽到輸入框 -->
             <div id="signInFormWrapper" class="glass rounded-3xl p-6 md:p-8 flex flex-col justify-center relative shadow-xl mb-8 mt-2 transition-all duration-500">
                 <form id="signInForm" onsubmit="handleSignIn(event)" class="flex flex-col gap-5">
                     <div>
@@ -395,9 +395,8 @@
                 </form>
             </div>
 
-            <!-- 預算與支出檢視區塊 (優化版無邊框) -->
+            <!-- 預算與支出檢視區塊 -->
             <div id="finance-view-section" class="hidden animate-[fadeIn_0.3s_ease-out] space-y-6">
-
                 <!-- 預算概況卡片 -->
                 <div class="glass rounded-3xl p-6 shadow-sm bg-gradient-to-br from-indigo-50 to-purple-50 border border-indigo-100">
                     <h3 class="text-sm font-bold text-slate-500 mb-4 flex items-center gap-2">
@@ -409,9 +408,8 @@
                         <span class="text-xl font-bold text-slate-800">$ 500,000</span>
                     </div>
 
-                    <!-- 逐列顯示各單位支出 (無邊框設計) -->
                     <div id="budget-breakdown" class="mb-5">
-                        <!-- JS 動態插入大於 0 的支出列 -->
+                        <!-- JS 動態插入 -->
                     </div>
 
                     <div class="w-full bg-slate-200 rounded-full h-2 mb-2 overflow-hidden shadow-inner mt-4">
@@ -426,14 +424,12 @@
                         <h3 class="text-sm font-bold text-slate-500 flex items-center gap-2">
                             <i data-lucide="list-collapse" class="w-4 h-4"></i> 近期支出紀錄
                         </h3>
-                        <!-- 過濾按鈕 -->
                         <div class="text-xs font-bold flex flex-wrap items-center bg-white/50 p-1.5 rounded-xl border border-white shadow-sm gap-1">
                             <button id="finance-unit-ty" onclick="setFinanceUnit('TY')" class="px-3 py-1.5 rounded-lg text-purple-600 bg-white shadow-sm transition-all transform">桃園</button>
                             <button id="finance-unit-hc" onclick="setFinanceUnit('HC')" class="px-3 py-1.5 rounded-lg text-slate-400 hover:text-purple-500 transition-all">新竹</button>
                             <button id="finance-unit-other" onclick="setFinanceUnit('OTHER')" class="px-3 py-1.5 rounded-lg text-slate-400 hover:text-purple-500 transition-all">其他</button>
                         </div>
                     </div>
-                    <!-- 列表無邊框設計 -->
                     <div id="recent-expenses-list">
                         <!-- JS 動態插入 -->
                     </div>
@@ -441,81 +437,136 @@
             </div>
         </div>
 
-        <!-- ==================== [區塊 5] 管理頁面 (活動簽到與抽籤) ==================== -->
+        <!-- ==================== [區塊 5] 管理頁面 (應用程式網格) ==================== -->
         <div id="tab-settings" class="tab-content pt-0">
-            <!-- 標題區 (置頂) -->
-            <div class="sticky-header flex items-center gap-2">
-                <h2 class="text-xl font-bold text-slate-800 flex items-center gap-2">
-                    <i data-lucide="clipboard-list" class="text-purple-600"></i> 活動管理
-                </h2>
+            
+            <!-- 管理中心主選單 (網格) -->
+            <div id="settings-menu" class="block animate-[fadeIn_0.3s_ease-out]">
+                <!-- 標題區 (置頂) -->
+                <div class="sticky-header flex items-center gap-2">
+                    <h2 class="text-xl font-bold text-slate-800 flex items-center gap-2">
+                        <i data-lucide="layout-grid" class="text-purple-600"></i> 管理中心
+                    </h2>
+                </div>
+                
+                <div class="grid grid-cols-2 gap-4 mt-2">
+                    <!-- App 1: 人員樹狀圖 -->
+                    <a href="https://weichun0203.github.io/YSA-institute/member" target="_blank" class="glass rounded-3xl p-5 flex flex-col items-center justify-center text-center gap-3 active:scale-95 transition-all border border-blue-100 shadow-sm bg-gradient-to-br from-white to-blue-50/50 hover:shadow-md hover:border-blue-200 group">
+                        <div class="w-14 h-14 bg-blue-100 text-blue-600 rounded-2xl flex items-center justify-center shadow-inner group-hover:bg-blue-500 group-hover:text-white transition-colors">
+                            <i data-lucide="network" class="w-7 h-7"></i>
+                        </div>
+                        <div>
+                            <h3 class="font-bold text-slate-800 text-[15px]">人員樹狀圖</h3>
+                            <p class="text-[10px] text-slate-500 mt-1">組織架構與名單</p>
+                        </div>
+                    </a>
+
+                    <!-- App 2: 簽到與值日生 -->
+                    <button onclick="toggleSettingsView('duty')" class="glass rounded-3xl p-5 flex flex-col items-center justify-center text-center gap-3 active:scale-95 transition-all border border-orange-100 shadow-sm bg-gradient-to-br from-white to-orange-50/50 hover:shadow-md hover:border-orange-200 group">
+                        <div class="w-14 h-14 bg-orange-100 text-orange-600 rounded-2xl flex items-center justify-center shadow-inner group-hover:bg-orange-500 group-hover:text-white transition-colors">
+                            <i data-lucide="users" class="w-7 h-7"></i>
+                        </div>
+                        <div>
+                            <h3 class="font-bold text-slate-800 text-[15px]">簽到與值日生</h3>
+                            <p class="text-[10px] text-slate-500 mt-1">紀錄出席與抽籤</p>
+                        </div>
+                    </button>
+                </div>
+                
+                <div class="text-center mt-12 pb-4">
+                    <p class="text-xs text-slate-400">App Version 2.8.0</p>
+                </div>
+            </div>
+
+            <!-- 簽到與值日生 子功能頁面 (隱藏) -->
+            <div id="settings-duty" class="hidden animate-[fadeIn_0.3s_ease-out]">
+                <!-- 標題區 (置頂) -->
+                <div class="sticky-header flex items-center justify-between gap-2">
+                    <div class="flex items-center gap-3">
+                        <button onclick="toggleSettingsView('menu')" class="p-2 bg-white/50 hover:bg-white rounded-full shadow-sm border border-slate-200 text-slate-600 transition-colors active:scale-95">
+                            <i data-lucide="chevron-left" class="w-5 h-5"></i>
+                        </button>
+                        <h2 class="text-xl font-bold text-slate-800">
+                            簽到與值日生
+                        </h2>
+                    </div>
+                </div>
+
+                <!-- 步驟 1: 活動簽到 -->
+                <div class="glass rounded-3xl p-6 shadow-sm border border-purple-100 mb-6 mt-2 relative overflow-hidden">
+                    <div class="absolute top-0 left-0 w-1.5 h-full bg-purple-400"></div>
+                    
+                    <div class="flex justify-between items-center mb-1">
+                        <span class="text-[10px] font-bold text-purple-500 tracking-wider uppercase">Step 1</span>
+                    </div>
+                    
+                    <div class="flex justify-between items-center mb-4">
+                        <h3 class="text-lg font-bold text-slate-800 flex items-center gap-2">
+                            今日活動名單
+                        </h3>
+                        <button onclick="toggleEditMode()" id="editModeBtn" class="text-xs font-bold text-slate-500 hover:text-purple-600 transition-colors flex items-center gap-1 bg-white/50 px-3 py-1.5 rounded-lg border border-slate-200 shadow-sm active:scale-95">
+                            <i data-lucide="edit-2" class="w-3.5 h-3.5"></i> 編輯名單
+                        </button>
+                    </div>
+                    
+                    <p class="text-xs text-slate-500 mb-4">點選下方姓名，記錄今日出席人員。</p>
+                    
+                    <div id="nameGrid" class="flex flex-wrap gap-2 justify-start mb-5">
+                        <!-- 姓名按鈕將由 JavaScript 動態生成 -->
+                    </div>
+                    
+                    <div class="flex gap-2 mt-2 mb-4">
+                        <input type="text" id="newPersonInput" placeholder="輸入新朋友姓名..." class="flex-1 px-4 py-2.5 rounded-xl bg-white border border-slate-200 shadow-sm focus:ring-2 focus:ring-purple-300 outline-none text-sm text-slate-700">
+                        <button onclick="addNewPerson()" class="bg-purple-100 text-purple-600 px-5 py-2.5 rounded-xl font-bold text-sm hover:bg-purple-200 active:scale-95 transition-transform flex items-center gap-1 shrink-0 shadow-sm">
+                            <i data-lucide="user-plus" class="w-4 h-4"></i> 加入
+                        </button>
+                    </div>
+
+                    <div class="pt-4 border-t border-slate-200/50 flex justify-between items-center">
+                        <span class="text-sm font-bold text-slate-600">
+                            今日已簽到：<span id="signInCount" class="text-purple-600 text-xl mx-1.5 font-black">0</span> 人
+                        </span>
+                    </div>
+                </div>
+
+                <!-- 步驟 2: 值日生抽籤 -->
+                <div class="glass rounded-3xl p-6 shadow-sm border border-orange-100 mb-6 relative overflow-hidden">
+                    <div class="absolute top-0 left-0 w-1.5 h-full bg-orange-400"></div>
+                    
+                    <div class="flex justify-between items-center mb-1">
+                        <span class="text-[10px] font-bold text-orange-500 tracking-wider uppercase">Step 2</span>
+                    </div>
+
+                    <div class="flex justify-between items-center mb-4">
+                        <h3 class="text-lg font-bold text-slate-800 flex items-center gap-2">
+                            值日生抽籤
+                        </h3>
+                        <button onclick="openDutyHistoryModal()" class="text-xs font-bold text-slate-500 hover:text-orange-600 transition-colors flex items-center gap-1 bg-white/50 px-3 py-1.5 rounded-lg border border-slate-200 shadow-sm">
+                            <i data-lucide="history" class="w-3.5 h-3.5"></i> 抽籤紀錄
+                        </button>
+                    </div>
+                    
+                    <p class="text-xs text-slate-500 mb-5">系統將從上方「已簽到名單」中隨機抽取兩位。</p>
+
+                    <button onclick="drawDuty()" id="drawDutyBtn" class="w-full bg-gradient-to-r from-orange-400 to-rose-500 text-white px-5 py-3.5 rounded-xl font-bold shadow-md active:scale-95 transition-transform flex items-center justify-center gap-2 mb-4">
+                        <i data-lucide="dices" class="w-5 h-5"></i> 開始抽取今日值日生
+                    </button>
+
+                    <!-- 值日生結果顯示 -->
+                    <div id="dutyResultSection" class="hidden rounded-2xl p-6 bg-gradient-to-br from-orange-50 to-yellow-50 border border-orange-200 transition-all shadow-inner">
+                        <div class="flex items-center justify-center gap-2 mb-3">
+                            <i data-lucide="sparkles" class="w-4 h-4 text-orange-500"></i>
+                            <h4 class="text-center text-sm font-bold text-orange-600">今日值日生</h4>
+                            <i data-lucide="sparkles" class="w-4 h-4 text-orange-500"></i>
+                        </div>
+                        <div id="dutyNamesDisplay" class="text-center text-3xl font-bold text-slate-800 tracking-widest py-1">
+                            <!-- 動態顯示 -->
+                        </div>
+                    </div>
+                </div>
             </div>
             
-            <!-- 值日生抽籤功能 -->
-            <div class="glass rounded-3xl p-6 shadow-sm border border-orange-100 mb-6 mt-2">
-                <div class="flex justify-between items-center mb-4">
-                    <h3 class="text-lg font-bold text-slate-800 flex items-center gap-2">
-                        <i data-lucide="star" class="text-orange-500"></i> 值日生抽籤
-                    </h3>
-                    <button onclick="openDutyHistoryModal()" class="text-xs font-bold text-slate-500 hover:text-orange-600 transition-colors flex items-center gap-1 bg-white/50 px-3 py-1.5 rounded-lg border border-slate-200 shadow-sm">
-                        <i data-lucide="history" class="w-3.5 h-3.5"></i> 抽籤紀錄
-                    </button>
-                </div>
-                
-                <p class="text-xs text-slate-500 mb-5">系統將從下方「今日活動名單」中隨機抽取兩位。</p>
-
-                <button onclick="drawDuty()" id="drawDutyBtn" class="w-full bg-gradient-to-r from-orange-400 to-rose-500 text-white px-5 py-3.5 rounded-xl font-bold shadow-md active:scale-95 transition-transform flex items-center justify-center gap-2 mb-4">
-                    <i data-lucide="dices" class="w-5 h-5"></i> 開始抽取今日值日生
-                </button>
-
-                <!-- 值日生結果顯示 -->
-                <div id="dutyResultSection" class="hidden rounded-2xl p-6 bg-gradient-to-br from-orange-50 to-yellow-50 border border-orange-200 transition-all shadow-inner">
-                    <div class="flex items-center justify-center gap-2 mb-3">
-                        <i data-lucide="sparkles" class="w-4 h-4 text-orange-500"></i>
-                        <h4 class="text-center text-sm font-bold text-orange-600">今日值日生</h4>
-                        <i data-lucide="sparkles" class="w-4 h-4 text-orange-500"></i>
-                    </div>
-                    <div id="dutyNamesDisplay" class="text-center text-3xl font-bold text-slate-800 tracking-widest py-1">
-                        <!-- 動態顯示 -->
-                    </div>
-                </div>
-            </div>
-
-            <!-- 活動簽到區塊 -->
-            <div class="glass rounded-3xl p-6 shadow-sm border border-purple-100 mb-6">
-                <div class="flex justify-between items-center mb-4">
-                    <h3 class="text-lg font-bold text-slate-800 flex items-center gap-2">
-                        <i data-lucide="users" class="text-purple-500"></i> 今日活動名單
-                    </h3>
-                    <button onclick="toggleEditMode()" id="editModeBtn" class="text-xs font-bold text-slate-500 hover:text-purple-600 transition-colors flex items-center gap-1 bg-white/50 px-3 py-1.5 rounded-lg border border-slate-200 shadow-sm active:scale-95">
-                        <i data-lucide="edit-2" class="w-3.5 h-3.5"></i> 編輯名單
-                    </button>
-                </div>
-                
-                <p class="text-xs text-slate-500 mb-4">點擊姓名即可完成簽到。</p>
-                
-                <div id="nameGrid" class="flex flex-wrap gap-2 justify-start mb-5">
-                    <!-- 姓名按鈕將由 JavaScript 動態生成 -->
-                </div>
-                
-                <div class="flex gap-2 mt-2 mb-4">
-                    <input type="text" id="newPersonInput" placeholder="輸入新朋友姓名..." class="flex-1 px-4 py-2.5 rounded-xl bg-white border border-slate-200 shadow-sm focus:ring-2 focus:ring-purple-300 outline-none text-sm text-slate-700">
-                    <button onclick="addNewPerson()" class="bg-purple-100 text-purple-600 px-5 py-2.5 rounded-xl font-bold text-sm hover:bg-purple-200 active:scale-95 transition-transform flex items-center gap-1 shrink-0 shadow-sm">
-                        <i data-lucide="user-plus" class="w-4 h-4"></i> 加入
-                    </button>
-                </div>
-
-                <div class="pt-4 border-t border-slate-200/50 flex justify-between items-center">
-                    <span class="text-sm font-bold text-slate-600">
-                        今日已簽到：<span id="signInCount" class="text-purple-600 text-xl mx-1.5 font-black">0</span> 人
-                    </span>
-                </div>
-            </div>
-            
-            <div class="text-center mt-8 pb-4">
-                <p class="text-xs text-slate-400">App Version 2.7.0</p>
-            </div>
         </div>
-
     </div>
 
     <!-- ==================== 底部導覽列 (Bottom Navigation) ==================== -->
@@ -756,16 +807,9 @@
             initFinanceForm(); 
             renderEvents(); 
             
-            // 載入或初始化名單
-            const storedNames = localStorage.getItem('spiritual_all_names_v2');
-            if(storedNames) {
-                allNamesList = JSON.parse(storedNames);
-            } else {
-                const legacyCustom = JSON.parse(localStorage.getItem('spiritual_custom_names') || '[]');
-                const defaultNames = ["廖瑋群","廖芷妘", "黃利亞","王威廉", "陳彥中", "黃畯紳", "林佳晨", "賴韋樵", "邱鈺茹", "徐唯甄", "黃名煌", "應奇穎","鍾昕玥", "郭人豪", "官雅文", "蕭惟哲", "白若雲",  "郭紫嫺", "吳庭希", "米斯卡", "張雅聖", "許銘霖", "林修儀","黃湘","謝黛娜"];
-                allNamesList = [...new Set([...defaultNames, ...legacyCustom])];
-                localStorage.setItem('spiritual_all_names_v2', JSON.stringify(allNamesList));
-            }
+            // 初始化名單 (移除本地存取，每次重新載入)
+            const defaultNames = ["廖瑋群","廖芷妘", "黃利亞","王威廉", "陳彥中", "黃畯紳", "林佳晨", "賴韋樵", "邱鈺茹", "徐唯甄", "黃名煌", "應奇穎","鍾昕玥", "郭人豪", "官雅文", "蕭惟哲", "白若雲",  "郭紫嫺", "吳庭希", "米斯卡", "張雅聖", "許銘霖", "林修儀","黃湘","謝黛娜"];
+            allNamesList = [...defaultNames];
 
             loadEventAttendanceData();
             renderEventNameGrid();
@@ -805,6 +849,7 @@
 
             if (tabId === 'settings') {
                 renderEventNameGrid(); 
+                toggleSettingsView('menu'); // 切換頁籤時重置回管理選單
                 window.scrollTo({ top: 0, behavior: 'smooth' });
             } else if (tabId === 'reflection') {
                 // 手機板(寬度小於768)才自動跳轉到當天課程
@@ -814,6 +859,22 @@
                     window.scrollTo({ top: 0, behavior: 'smooth' });
                 }
             } else {
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+            }
+        }
+        
+        // 切換管理內部的子頁面（網格選單 vs 簽到值日生）
+        function toggleSettingsView(view) {
+            const menu = document.getElementById('settings-menu');
+            const duty = document.getElementById('settings-duty');
+            
+            if (view === 'duty') {
+                menu.classList.add('hidden');
+                duty.classList.remove('hidden');
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+            } else {
+                duty.classList.add('hidden');
+                menu.classList.remove('hidden');
                 window.scrollTo({ top: 0, behavior: 'smooth' });
             }
         }
@@ -1269,18 +1330,11 @@
         // UI: 活動管理 (名單簽到與抽值日生)
         // ==========================================
         function loadEventAttendanceData() {
-            const storedAtt = localStorage.getItem('spiritual_event_attendances');
-            if (storedAtt) eventAttendances = JSON.parse(storedAtt);
-            
-            // 預設將所有人選取 (如果是新的一天沒有紀錄)
+            // 移除 LocalStorage，預設將所有人選取 (每次重新載入)
             if (!eventAttendances[todayStr]) {
                 eventAttendances[todayStr] = [...allNamesList];
-                localStorage.setItem('spiritual_event_attendances', JSON.stringify(eventAttendances));
             }
 
-            const storedHistory = localStorage.getItem('spiritual_duty_history');
-            if (storedHistory) dutyHistory = JSON.parse(storedHistory);
-            
             const todayDuty = dutyHistory.find(h => h.date === todayStr);
             if (todayDuty) showDutyResultUI(todayDuty.names);
         }
@@ -1304,13 +1358,11 @@
             e.stopPropagation();
             // 從總名單刪除
             allNamesList = allNamesList.filter(n => n !== name);
-            localStorage.setItem('spiritual_all_names_v2', JSON.stringify(allNamesList));
             
             // 從今日簽到中刪除
             let todayAtt = eventAttendances[todayStr] || [];
             todayAtt = todayAtt.filter(n => n !== name);
             eventAttendances[todayStr] = todayAtt;
-            localStorage.setItem('spiritual_event_attendances', JSON.stringify(eventAttendances));
             
             renderEventNameGrid();
             showToast(`已刪除 ${name}`, "success");
@@ -1358,14 +1410,12 @@
             }
 
             allNamesList.push(name);
-            localStorage.setItem('spiritual_all_names_v2', JSON.stringify(allNamesList));
             input.value = '';
             
             let todayAtt = eventAttendances[todayStr] || [];
             if (!todayAtt.includes(name)) {
                 todayAtt.push(name);
                 eventAttendances[todayStr] = todayAtt;
-                localStorage.setItem('spiritual_event_attendances', JSON.stringify(eventAttendances));
             }
             
             renderEventNameGrid();
@@ -1383,7 +1433,6 @@
             }
             
             eventAttendances[todayStr] = todayAtt;
-            localStorage.setItem('spiritual_event_attendances', JSON.stringify(eventAttendances));
             
             renderEventNameGrid();
         }
@@ -1449,7 +1498,6 @@
                     dutyHistory.unshift({ date: todayStr, names: picked });
                     
                     if(dutyHistory.length > 20) dutyHistory.pop();
-                    localStorage.setItem('spiritual_duty_history', JSON.stringify(dutyHistory));
                     
                     display.classList.remove('slot-machine');
                     showDutyResultUI(picked);
