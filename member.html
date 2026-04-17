@@ -283,6 +283,23 @@
             let isHeaderScrolled = false;
             
             window.addEventListener('scroll', () => {
+                // 手機版 (螢幕寬度小於 768px) 停用此特效以保持最高流暢度
+                if (window.innerWidth < 768) {
+                    // 若從電腦版縮小視窗，確保恢復原本展開的狀態
+                    if (isHeaderScrolled) {
+                        window.requestAnimationFrame(() => {
+                            mainHeader.classList.remove('pt-6', 'pb-4');
+                            mainHeader.classList.add('pt-16', 'pb-12');
+                            mainTitle.classList.remove('text-2xl', 'mb-3');
+                            mainTitle.classList.add('text-3xl', 'mb-2');
+                            quoteText.classList.remove('max-h-0', 'opacity-0', 'mb-0');
+                            quoteText.classList.add('max-h-[200px]', 'opacity-100', 'mb-4');
+                            isHeaderScrolled = false;
+                        });
+                    }
+                    return;
+                }
+
                 const shouldBeScrolled = window.scrollY > 40;
                 
                 // 使用狀態鎖定 (State Guard)，避免在同一個狀態時重複操作 DOM 觸發重繪
