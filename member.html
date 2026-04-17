@@ -110,7 +110,7 @@
         <!-- Footer -->
         <footer class="mt-16 text-center">
             <p class="text-slate-400 text-[10px] font-bold tracking-widest uppercase mb-1">Organization Management System</p>
-            <p class="text-slate-300 text-[9px]">Ver 4.0.0 • 青年單身成人中心</p>
+            <p class="text-slate-300 text-[9px]">Ver 4.1.0 • 桃園單身成人聚集場所</p>
         </footer>
     </div>
 
@@ -183,32 +183,70 @@
         let orgData = [
             {
                 id: 'branch-ty',
-                name: '桃園分支聯會',
+                name: '桃園支聯會',
                 children: [
-                    { id: 'ty-ty', name: '桃園支會', members: [{ name: '張志明', job: '軟體工程師', age: '23-30', role: '主教' }, { name: '王美玲', job: '教師', age: '30-35', role: '慈助會會長' }] },
-                    { id: 'ty-lt', name: '龍潭支會', members: [{ name: '林木森', job: '公務員', age: '30-35' }] },
-                    { id: 'ty-zl', name: '中壢支會', members: [{ name: '郭子乾', job: '演藝人員', age: '23-30' }] },
-                    { id: 'ty-lz', name: '蘆竹支會', members: [{ name: '趙又廷', job: '演員', age: '30-35' }] },
-                    { id: 'ty-ks', name: '龜幼支會', members: [{ name: '孫悟空', job: '保全人員', age: '18-23' }] },
-                    { id: 'ty-bd', name: '八德支會', members: [{ name: '蔡依林', job: '歌手', age: '23-30' }] },
+                    { id: 'ty-ty', name: '桃園支會', members: [
+                        { name: '黃利亞', job: '未填寫', age: '', role: '活動組' },
+                        { name: '黃翊龍', job: '未填寫', age: '30-35', role: '單成代表男主席' },
+                        { name: '王威廉', job: '未填寫', age: '', role: '' },
+                        { name: '徐唯甄', job: '未填寫', age: '', role: '' },
+                        { name: '黃名煌', job: '未填寫', age: '', role: '' },
+                        { name: '蕭惟哲', job: '未填寫', age: '', role: '' }
+                    ] },
+                    { id: 'ty-lt', name: '龍潭支會', members: [
+                        { name: '黃畯紳', job: '未填寫', age: '', role: '' }
+                    ] },
+                    { id: 'ty-zl', name: '中壢支會', members: [
+                        { name: '瑪德諾·米斯卡', job: '未填寫', age: '', role: '' },
+                        { name: '許銘霖', job: '未填寫', age: '', role: '' },
+                        { name: '林修儀', job: '未填寫', age: '', role: '' }
+                    ] },
+                    { id: 'ty-lz', name: '蘆竹支會', members: [
+                        { name: '賴韋樵', job: '未填寫', age: '', role: '' },
+                        { name: '邱鈺茹', job: '未填寫', age: '', role: '' },
+                        { name: '郭人豪', job: '未填寫', age: '', role: '' },
+                        { name: '官雅文', job: '未填寫', age: '', role: '單成代表女主席' },
+                        { name: '白若雲', job: '未填寫', age: '', role: '' },
+                        { name: '白若琳', job: '未填寫', age: '', role: '' }
+                    ] },
+                    { id: 'ty-ks', name: '龜山支會', members: [
+                        { name: '廖瑋群', job: '未填寫', age: '', role: '財務/設備組' },
+                        { name: '廖芷妘', job: '未填寫', age: '', role: '食物組' },
+                        { name: '應奇穎', job: '未填寫', age: '', role: '食物組' },
+                        { name: '鍾昕玥', job: '未填寫', age: '', role: '' },
+                        { name: '郭紫嫺', job: '未填寫', age: '', role: '' },
+                        { name: '吳庭希', job: '未填寫', age: '', role: '' },
+                        { name: '張雅聖', job: '未填寫', age: '', role: '' }
+                    ] },
+                    { id: 'ty-bd', name: '八德支會', members: [] },
                 ]
             },
             {
                 id: 'branch-hc',
-                name: '新竹分支聯會',
+                name: '新竹支聯會',
                 children: [
-                    { id: 'hc-z1', name: '竹一支會', members: [{ name: '劉德華', job: '藝術總監', age: '30-35', role: '長老定額組會長' }] },
-                    { id: 'hc-z3', name: '竹三支會', members: [{ name: '金城武', job: '產品開發', age: '30-35' }] },
-                    { id: 'hc-zb', name: '竹北支會', members: [{ name: '彭于晏', job: '健身教練', age: '23-30' }] },
-                    { id: 'hc-zn', name: '竹南支會', members: [{ name: '張曼玉', job: '行政主管', age: '30-35' }] },
-                    { id: 'hc-ml', name: '苗栗支會', members: [{ name: '舒淇', job: '行銷經理', age: '23-30' }] },
+                    { id: 'hc-z1', name: '竹一支會', members: [
+                        { name: '陳彥中', job: '未填寫', age: '', role: '' }
+                    ] },
+                    { id: 'hc-z3', name: '竹三支會', members: [] },
+                    { id: 'hc-zb', name: '竹北支會', members: [] },
+                    { id: 'hc-zn', name: '竹南支會', members: [] },
+                    { id: 'hc-ml', name: '苗栗支會', members: [] },
                 ]
             },
             {
                 id: 'branch-other-stake',
                 name: '其他(支聯會)',
                 children: [
-                    { id: 'other-tpe', name: '台北', members: [{ name: '林依晨', job: '演員', age: '30-35', role: '活動委員' }, { name: '陳柏霖', job: '演員', age: '30-35' }, { name: '王淨', job: '演員', age: '23-30' }] }
+                    { id: 'other-tpe', name: '台北', members: [
+                        { name: '黃湘', job: '未填寫', age: '', role: '' }
+                        { name: '謝黛娜', job: '未填寫', age: '', role: '' }
+                    ] },
+                    { id: 'other-lk', name: '林口', members: [
+                        { name: '林佳晨', job: '未填寫', age: '', role: '' }
+                    ] },
+                    { id: 'other-misc', name: '未分類', members: [
+                    ] }
                 ]
             }
         ];
@@ -520,6 +558,7 @@
                                 } else {
                                     sub.members.forEach((m, idx) => {
                                         const ageDisplay = m.age || '未填寫';
+                                        const jobDisplay = m.job || '未填寫';
                                         const roleBadge = m.role && m.role.trim() !== '' ? `<span class="ml-2 px-2 py-0.5 bg-amber-100 text-amber-700 text-[10px] font-bold rounded-md whitespace-nowrap inline-flex items-center gap-1 shadow-sm"><i data-lucide="award" class="w-3 h-3"></i>${m.role}</span>` : '';
                                         memHtml += `
                                             <div class="flex items-center p-4 bg-white/60 hover:bg-white/90 rounded-2xl group transition-all shadow-sm border border-white/50 mb-2 last:mb-0">
@@ -529,7 +568,7 @@
                                                 <div class="flex flex-col">
                                                     <span class="font-black text-slate-800 text-base leading-tight flex items-center flex-wrap gap-y-1">${m.name} ${roleBadge}</span>
                                                     <span class="text-[10px] text-slate-400 flex items-center mt-1.5 font-bold tracking-wide">
-                                                        <i data-lucide="briefcase" class="w-3 h-3 mr-1"></i> ${m.job}
+                                                        <i data-lucide="briefcase" class="w-3 h-3 mr-1"></i> ${jobDisplay}
                                                         <span class="mx-2 text-slate-200">|</span>
                                                         <i data-lucide="user-square-2" class="w-3 h-3 mr-1"></i> ${ageDisplay}
                                                     </span>
