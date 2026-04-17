@@ -207,16 +207,42 @@
         <!-- ==================== [區塊 2] 課程與心得整合頁面 ==================== -->
         <div id="tab-reflection" class="tab-content pt-0">
             <!-- 標題區 (置頂) -->
-            <div class="sticky-header flex justify-between items-center">
-                <h2 class="text-xl font-bold text-slate-800 flex items-center gap-2">
-                    <i data-lucide="book-heart" class="text-purple-600"></i> 課程與心得
-                </h2>
-                <p class="text-slate-500 text-[10px]">點擊卡片撰寫</p>
+            <div class="sticky-header flex items-center justify-between gap-2">
+                <div class="flex items-center gap-3">
+                    <button id="ref-back-btn" onclick="toggleReflectionView('categories')" class="hidden p-2 bg-white/50 hover:bg-white rounded-full shadow-sm border border-slate-200 text-slate-600 transition-colors active:scale-95">
+                        <i data-lucide="chevron-left" class="w-5 h-5"></i>
+                    </button>
+                    <h2 id="ref-header-title" class="text-xl font-bold text-slate-800 flex items-center gap-2">
+                        <i data-lucide="book-heart" class="text-purple-600"></i> 課程與心得
+                    </h2>
+                </div>
+                <p id="ref-header-subtitle" class="hidden text-slate-500 text-[10px]">點擊卡片撰寫</p>
             </div>
 
-            <!-- 課程與心得整合列表 -->
-            <div id="integratedCourseList" class="space-y-4 pb-4">
-                <!-- JS 動態產生 16 堂課程卡片 -->
+            <!-- 父元素分類視圖 -->
+            <div id="reflection-categories" class="block animate-[fadeIn_0.3s_ease-out]">
+                <button onclick="toggleReflectionView('courses')" class="w-full glass rounded-3xl p-6 flex flex-col items-start gap-3 active:scale-95 transition-all border border-purple-100 shadow-sm bg-gradient-to-br from-white to-purple-50 hover:shadow-md hover:border-purple-300 group text-left relative overflow-hidden mt-2">
+                    <div class="absolute -right-6 -top-6 opacity-[0.03] group-hover:scale-110 transition-transform duration-500">
+                        <i data-lucide="book-heart" class="w-40 h-40 text-purple-900"></i>
+                    </div>
+                    <div class="w-14 h-14 bg-purple-100 text-purple-600 rounded-2xl flex items-center justify-center shadow-inner group-hover:bg-purple-500 group-hover:text-white transition-colors">
+                        <i data-lucide="library" class="w-7 h-7"></i>
+                    </div>
+                    <div>
+                        <h3 class="font-bold text-slate-800 text-xl tracking-wide">永恆家庭 (下)</h3>
+                        <p class="text-sm font-bold text-slate-500 mt-1 font-serif italic">2026年 3月 - 6月</p>
+                    </div>
+                    <div class="mt-1 flex items-center gap-1.5 text-xs font-bold text-purple-600 bg-purple-100/80 px-3 py-1.5 rounded-lg border border-purple-200">
+                        <i data-lucide="list-video" class="w-4 h-4"></i> 共 14 堂課
+                    </div>
+                </button>
+            </div>
+
+            <!-- 課程與心得整合列表視圖 (預設隱藏) -->
+            <div id="reflection-courses" class="hidden animate-[fadeIn_0.3s_ease-out]">
+                <div id="integratedCourseList" class="space-y-4 pb-4">
+                    <!-- JS 動態產生 16 堂課程卡片 -->
+                </div>
             </div>
         </div>
 
@@ -626,6 +652,21 @@
             </div>
             <div class="p-6 sm:p-8 overflow-y-auto pb-[env(safe-area-inset-bottom)] mb-2">
                 <div class="space-y-5">
+                    
+                    <!-- 引言與課程連結區塊 -->
+                    <div class="space-y-3">
+                        <div class="bg-purple-50 p-4 rounded-2xl border border-purple-100 relative overflow-hidden">
+                            <i data-lucide="quote" class="absolute top-2 left-2 w-6 h-6 text-purple-200/50"></i>
+                            <p class="text-sm text-purple-800 font-serif italic leading-relaxed relative z-10 px-2">
+                                「當我們記錄下靈性的提示時，我們向神表明我們珍視祂的教導，這也會讓我們獲得更多的啟示。」
+                            </p>
+                        </div>
+                        <a href="https://www.churchofjesuschrist.org/study/manual/the-eternal-family-class-prep-material-2022?lang=zho" target="_blank" class="flex items-center justify-center gap-2 w-full text-sm font-bold text-indigo-600 bg-indigo-50 hover:bg-indigo-100 py-3.5 rounded-xl transition-colors border border-indigo-100 active:scale-95 shadow-sm">
+                            <i data-lucide="book-open" class="w-4 h-4"></i>
+                            點擊查看課程研讀資料
+                        </a>
+                    </div>
+
                     <div>
                         <label class="block text-sm font-bold text-slate-700 mb-2 ml-1">心得與覺察</label>
                         <textarea id="refContent" placeholder="寫下您當下最真實的感受..." class="w-full px-4 py-3.5 rounded-xl bg-white/80 border border-slate-200 focus:ring-2 focus:ring-purple-300 outline-none min-h-[160px] resize-none leading-relaxed shadow-sm"></textarea>
@@ -852,17 +893,44 @@
                 toggleSettingsView('menu'); // 切換頁籤時重置回管理選單
                 window.scrollTo({ top: 0, behavior: 'smooth' });
             } else if (tabId === 'reflection') {
-                // 手機板(寬度小於768)才自動跳轉到當天課程
-                if (window.innerWidth < 768) {
-                    scrollToCurrentCourse(); 
-                } else {
-                    window.scrollTo({ top: 0, behavior: 'smooth' });
-                }
+                toggleReflectionView('categories'); // 點進課程時，一律先回到父選單
+                window.scrollTo({ top: 0, behavior: 'smooth' });
             } else {
                 window.scrollTo({ top: 0, behavior: 'smooth' });
             }
         }
         
+        // 切換「課程與心得」視圖 (父選單 vs 課程清單)
+        function toggleReflectionView(view) {
+            const categoriesView = document.getElementById('reflection-categories');
+            const coursesView = document.getElementById('reflection-courses');
+            const backBtn = document.getElementById('ref-back-btn');
+            const headerTitle = document.getElementById('ref-header-title');
+            const headerSubtitle = document.getElementById('ref-header-subtitle');
+
+            if (view === 'courses') {
+                categoriesView.classList.add('hidden');
+                coursesView.classList.remove('hidden');
+                backBtn.classList.remove('hidden');
+                headerTitle.innerHTML = '永恆家庭 (下)';
+                headerSubtitle.classList.remove('hidden');
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+                
+                // 如果是手機版，展開清單後自動滑動到當前課程
+                if (window.innerWidth < 768) {
+                    scrollToCurrentCourse(); 
+                }
+            } else {
+                coursesView.classList.add('hidden');
+                categoriesView.classList.remove('hidden');
+                backBtn.classList.add('hidden');
+                headerTitle.innerHTML = '<i data-lucide="book-heart" class="text-purple-600"></i> 課程與心得';
+                headerSubtitle.classList.add('hidden');
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+            }
+            lucide.createIcons();
+        }
+
         // 切換管理內部的子頁面（網格選單 vs 簽到值日生）
         function toggleSettingsView(view) {
             const menu = document.getElementById('settings-menu');
@@ -1190,6 +1258,7 @@
             
             document.getElementById('reflectionModal').classList.remove('hidden');
             document.body.style.overflow = 'hidden'; 
+            lucide.createIcons();
         }
 
         function closeReflectionModal() {
