@@ -216,13 +216,42 @@
                         <i data-lucide="book-heart" class="text-purple-600"></i> 課程與心得
                     </h2>
                 </div>
-                <p id="ref-header-subtitle" class="hidden text-slate-500 text-[10px]">點擊卡片撰寫</p>
+                <div id="ref-header-actions" class="hidden items-center gap-2">
+                    <button onclick="exportReflectionsCSV()" class="flex items-center gap-1 bg-purple-50 text-purple-600 border border-purple-100 hover:bg-purple-100 px-2 py-1 rounded-lg transition-colors active:scale-95 shadow-sm">
+                        <i data-lucide="download" class="w-3 h-3"></i>
+                        <span class="text-[10px] font-bold">匯出 CSV</span>
+                    </button>
+                    <p class="text-slate-500 text-[10px]">點擊卡片撰寫</p>
+                </div>
             </div>
 
             <!-- 父元素分類視圖 -->
-            <div id="reflection-categories" class="block animate-[fadeIn_0.3s_ease-out]">
-                <button onclick="toggleReflectionView('courses')" class="w-full glass rounded-3xl p-6 flex flex-col items-start gap-3 active:scale-95 transition-all border border-purple-100 shadow-sm bg-gradient-to-br from-white to-purple-50 hover:shadow-md hover:border-purple-300 group text-left relative overflow-hidden mt-2">
+            <div id="reflection-categories" class="block animate-[fadeIn_0.3s_ease-out] space-y-4 mt-2">
+                
+                <!-- 大課程 1: 永恆家庭 (上) [已完結] -->
+                <button onclick="toggleReflectionView('courses', 'eternal_family_1')" class="w-full glass rounded-3xl p-6 flex flex-col items-start gap-3 active:scale-95 transition-all border border-slate-200 shadow-sm bg-white/50 hover:bg-white/80 group text-left relative overflow-hidden opacity-85 grayscale-[10%]">
                     <div class="absolute -right-6 -top-6 opacity-[0.03] group-hover:scale-110 transition-transform duration-500">
+                        <i data-lucide="book-heart" class="w-40 h-40 text-slate-900"></i>
+                    </div>
+                    <div class="w-14 h-14 bg-slate-100 text-slate-500 rounded-2xl flex items-center justify-center shadow-inner group-hover:bg-slate-400 group-hover:text-white transition-colors">
+                        <i data-lucide="library" class="w-7 h-7"></i>
+                    </div>
+                    <div>
+                        <h3 class="font-bold text-slate-700 text-xl tracking-wide">永恆家庭 (上)</h3>
+                        <p class="text-sm font-bold text-slate-400 mt-1 font-serif italic">2025年 9月 - 12月</p>
+                    </div>
+                    <div class="mt-1 flex items-center gap-1.5 text-xs font-bold text-slate-500 bg-slate-100 px-3 py-1.5 rounded-lg border border-slate-200">
+                        <i data-lucide="check-circle-2" class="w-4 h-4"></i> 已完結 (共 14 堂)
+                    </div>
+                </button>
+
+                <!-- 大課程 2: 永恆家庭 (下) [目前活躍課程 - 醒目標示] -->
+                <button onclick="toggleReflectionView('courses', 'eternal_family_2')" class="w-full glass rounded-3xl p-6 flex flex-col items-start gap-3 active:scale-95 transition-all border border-pink-300 shadow-md bg-gradient-to-br from-white to-purple-50 hover:from-pink-50 hover:to-purple-100 ring-2 ring-pink-200 ring-offset-2 transform scale-[1.02] hover:shadow-lg group text-left relative overflow-hidden my-4 z-10">
+                    <!-- 右上角目前課程特小標籤 -->
+                    <div class="absolute top-0 right-0 bg-pink-500 text-white text-[11px] font-bold px-4 py-1.5 rounded-bl-2xl shadow-sm z-10 flex items-center gap-1">
+                        <i data-lucide="sparkles" class="w-3 h-3"></i> 目前課程
+                    </div>
+                    <div class="absolute -right-6 -top-6 opacity-[0.04] group-hover:scale-110 transition-transform duration-500">
                         <i data-lucide="book-heart" class="w-40 h-40 text-purple-900"></i>
                     </div>
                     <div class="w-14 h-14 bg-purple-100 text-purple-600 rounded-2xl flex items-center justify-center shadow-inner group-hover:bg-purple-500 group-hover:text-white transition-colors">
@@ -236,12 +265,30 @@
                         <i data-lucide="list-video" class="w-4 h-4"></i> 共 14 堂課
                     </div>
                 </button>
+
+                <!-- 大課程 3: 即將開始課程 [未來課程] -->
+                <button onclick="showToast('課程尚未開放，敬請期待！', 'info')" class="w-full glass rounded-3xl p-6 flex flex-col items-start gap-3 transition-all border border-slate-200 shadow-sm bg-slate-50 group text-left relative overflow-hidden opacity-60 cursor-not-allowed">
+                    <div class="absolute -right-6 -top-6 opacity-[0.02]">
+                        <i data-lucide="book-heart" class="w-40 h-40 text-slate-900"></i>
+                    </div>
+                    <div class="w-14 h-14 bg-slate-200 text-slate-400 rounded-2xl flex items-center justify-center shadow-inner">
+                        <i data-lucide="lock" class="w-7 h-7"></i>
+                    </div>
+                    <div>
+                        <h3 class="font-bold text-slate-500 text-xl tracking-wide">即將開始課程</h3>
+                        <p class="text-sm font-bold text-slate-400 mt-1 font-serif italic">預計 2026年 9月 開始</p>
+                    </div>
+                    <div class="mt-1 flex items-center gap-1.5 text-xs font-bold text-slate-400 bg-slate-200/50 px-3 py-1.5 rounded-lg border border-slate-200">
+                        <i data-lucide="calendar-clock" class="w-4 h-4"></i> 敬請期待
+                    </div>
+                </button>
+
             </div>
 
             <!-- 課程與心得整合列表視圖 (預設隱藏) -->
             <div id="reflection-courses" class="hidden animate-[fadeIn_0.3s_ease-out]">
-                <div id="integratedCourseList" class="space-y-4 pb-4">
-                    <!-- JS 動態產生 16 堂課程卡片 -->
+                <div id="integratedCourseList" class="space-y-4 pb-4 mt-2">
+                    <!-- JS 動態產生課程卡片 -->
                 </div>
             </div>
         </div>
@@ -500,7 +547,7 @@
                 </div>
                 
                 <div class="text-center mt-12 pb-4">
-                    <p class="text-xs text-slate-400">App Version 2.8.0</p>
+                    <p class="text-xs text-slate-400">App Version 2.9.0</p>
                 </div>
             </div>
 
@@ -661,7 +708,7 @@
                                 「當我們記錄下靈性的提示時，我們向神表明我們珍視祂的教導，這也會讓我們獲得更多的啟示。」
                             </p>
                         </div>
-                        <a href="https://www.churchofjesuschrist.org/study/manual/the-eternal-family-class-prep-material-2022?lang=zho" target="_blank" class="flex items-center justify-center gap-2 w-full text-sm font-bold text-indigo-600 bg-indigo-50 hover:bg-indigo-100 py-3.5 rounded-xl transition-colors border border-indigo-100 active:scale-95 shadow-sm">
+                        <a id="refCourseLink" href="https://www.churchofjesuschrist.org/study/manual/the-eternal-family-class-prep-material-2022?lang=zho" target="_blank" class="flex items-center justify-center gap-2 w-full text-sm font-bold text-indigo-600 bg-indigo-50 hover:bg-indigo-100 py-3.5 rounded-xl transition-colors border border-indigo-100 active:scale-95 shadow-sm">
                             <i data-lucide="book-open" class="w-4 h-4"></i>
                             點擊查看課程研讀資料
                         </a>
@@ -734,11 +781,59 @@
     <!-- 腳本邏輯 -->
     <script>
         // ==========================================
-        // CONFIGURATION
+        // CONFIGURATION & MULTI-COURSE DATA
         // ==========================================
         const GAS_API_URL = "https://script.google.com/macros/s/AKfycbzfrhkTZrDgNlmNM-ijRWAOhAhUBgT-VWNVorPZHnC1GR86Vuv36iYPDXupfyXOHlA-uw/exec"; 
         const FINANCE_GAS_API_URL = 'https://script.google.com/macros/s/AKfycbxD1nqOX8Vtg7Z3K58aeyWGqgStj-7GAwu8VzZIrAgX0M32iG5xxdGYHkishPxIQco66Q/exec'; 
-        // ==========================================
+        
+        // 多課程資料結構
+        const COURSES_DATA = {
+            'eternal_family_1': {
+                title: '永恆家庭 (上)',
+                status: 'past',
+                link: 'https://www.churchofjesuschrist.org/study/manual/the-eternal-family-class-prep-material-2022?lang=zho',
+                courses: [
+                    { date: '9月3日', title: '研讀永恆家庭的教義', link: 'https://www.churchofjesuschrist.org/study/manual/the-eternal-family-class-prep-material-2022/lesson-1-class-preparation-material?lang=zho' },
+                    { date: '9月10日', title: '先知在宣告永恆家庭的教義上所扮演的角色', link: 'https://www.churchofjesuschrist.org/study/manual/the-eternal-family-class-prep-material-2022/lesson-2-class-preparation-material?lang=zho' },
+                    { date: '9月17日', title: '我們的神性本質和神聖目標', link: 'https://www.churchofjesuschrist.org/study/manual/the-eternal-family-class-prep-material-2022/lesson-3-class-preparation-material?lang=zho' },
+                    { date: '9月24日', title: '家庭是天父計畫的核心', link: 'https://www.churchofjesuschrist.org/study/manual/the-eternal-family-class-prep-material-2022/lesson-4-class-preparation-material?lang=zho' },
+                    { date: '10月1日', title: '我們的塵世經驗和骨肉身體的恩賜', link: 'https://www.churchofjesuschrist.org/study/manual/the-eternal-family-class-prep-material-2022/lesson-5-class-preparation-material?lang=zho' },
+                    { date: '10月8日', title: '一男一女之間的婚姻是神所制定', link: 'https://www.churchofjesuschrist.org/study/manual/the-eternal-family-class-prep-material-2022/lesson-6-class-preparation-material?lang=zho' },
+                    { date: '10月15日', title: '性別的永恆本質和目的', link: 'https://www.churchofjesuschrist.org/study/manual/the-eternal-family-class-prep-material-2022/lesson-7-class-preparation-material?lang=zho' },
+                    { date: '10月22日', title: '嘗試了解同性吸引並關愛我們的LGBT弟兄姊妹', link: 'https://www.churchofjesuschrist.org/study/manual/the-eternal-family-class-prep-material-2022/lesson-8-class-preparation-material?lang=zho' },
+                    { date: '10月29日', title: '使家人永遠結合在一起', link: 'https://www.churchofjesuschrist.org/study/manual/the-eternal-family-class-prep-material-2022/lesson-9-class-preparation-material?lang=zho' },
+                    { date: '11月5日', title: '婚姻的新永約', link: 'https://www.churchofjesuschrist.org/study/manual/the-eternal-family-class-prep-material-2022/lesson-10-class-preparation-material?lang=zho' },
+                    { date: '11月12日', title: '選擇永恆伴侶', link: 'https://www.churchofjesuschrist.org/study/manual/the-eternal-family-class-prep-material-2022/lesson-11-class-preparation-material?lang=zho' },
+                    { date: '11月19日', title: '滋養婚姻關係', link: 'https://www.churchofjesuschrist.org/study/manual/the-eternal-family-class-prep-material-2022/lesson-12-class-preparation-material?lang=zho' },
+                    { date: '11月26日', title: '親密性關係的神聖恩賜和神聖責任', link: 'https://www.churchofjesuschrist.org/study/manual/the-eternal-family-class-prep-material-2022/lesson-13-class-preparation-material?lang=zho' },
+                    { date: '12月3日', title: '沾染色情的解決之道', link: 'https://www.churchofjesuschrist.org/study/manual/the-eternal-family-class-prep-material-2022/lesson-14-class-preparation-material?lang=zho' }
+                ]
+            },
+            'eternal_family_2': {
+                title: '永恆家庭 (下)',
+                status: 'current',
+                link: 'https://www.churchofjesuschrist.org/study/manual/the-eternal-family-class-prep-material-2022?lang=zho',
+                courses: [
+                    { date: '3月4日', title: '生養眾多、遍滿地面的誡命', link: 'https://www.churchofjesuschrist.org/study/manual/the-eternal-family-class-prep-material-2022/lesson-15-class-preparation-material?lang=zho' },
+                    { date: '3月11日', title: '透過耶穌基督獲得家庭生活的幸福', link: 'https://www.churchofjesuschrist.org/study/manual/the-eternal-family-class-prep-material-2022/lesson-16-class-preparation-material?lang=zho' },
+                    { date: '3月18日', title: '婚姻中平等的夥伴關係', link: 'https://www.churchofjesuschrist.org/study/manual/the-eternal-family-class-prep-material-2022/lesson-17-class-preparation-material?lang=zho' },
+                    { date: '3月25日', title: '提供屬世所需', link: 'https://www.churchofjesuschrist.org/study/manual/the-eternal-family-class-prep-material-2022/lesson-18-class-preparation-material?lang=zho' },
+                    { date: '4月1日', title: '母親的神聖責任', link: 'https://www.churchofjesuschrist.org/study/manual/the-eternal-family-class-prep-material-2022/lesson-19-class-preparation-material?lang=zho' },
+                    { date: '4月8日', title: '父親的神聖責任', link: 'https://www.churchofjesuschrist.org/study/manual/the-eternal-family-class-prep-material-2022/lesson-20-class-preparation-material?lang=zho' },
+                    { date: '4月15日', title: '在愛中教養兒女', link: 'https://www.churchofjesuschrist.org/study/manual/the-eternal-family-class-prep-material-2022/lesson-21-class-preparation-material?lang=zho' },
+                    { date: '4月22日', title: '在正義中教養兒女', link: 'https://www.churchofjesuschrist.org/study/manual/the-eternal-family-class-prep-material-2022/lesson-22-class-preparation-material?lang=zho' },
+                    { date: '4月29日', title: '永恆婚姻或生育兒女的祝福延遲到來時', link: 'https://www.churchofjesuschrist.org/study/manual/the-eternal-family-class-prep-material-2022/lesson-23-class-preparation-material?lang=zho' },
+                    { date: '5月6日', title: '懷著希望和憐憫面對心理健康的挑戰', link: 'https://www.churchofjesuschrist.org/study/manual/the-eternal-family-class-prep-material-2022/lesson-24-class-preparation-material?lang=zho' },
+                    { date: '5月13日', title: '家庭生活中的悔改和寬恕', link: 'https://www.churchofjesuschrist.org/study/manual/the-eternal-family-class-prep-material-2022/lesson-25-class-preparation-material?lang=zho' },
+                    { date: '5月20日', title: '察覺出虐待並得到醫治', link: 'https://www.churchofjesuschrist.org/study/manual/the-eternal-family-class-prep-material-2022/lesson-26-class-preparation-material?lang=zho' },
+                    { date: '5月27日', title: '推廣並捍衛家庭是社會的基本單位', link: 'https://www.churchofjesuschrist.org/study/manual/the-eternal-family-class-prep-material-2022/lesson-27-class-preparation-material?lang=zho' },
+                    { date: '6月3日', title: '對建立永恆家庭充滿希望', link: 'https://www.churchofjesuschrist.org/study/manual/the-eternal-family-class-prep-material-2022/lesson-28-class-preparation-material?lang=zho' }
+                ]
+            }
+        };
+
+        // 為了相容首頁進度條，將目前運作中的課程指定給它
+        const INSTITUTE_COURSES = COURSES_DATA['eternal_family_2'].courses;
 
         const WEEKLY_QUOTES = {
             "3月11日": { text: "藉著微小而簡單的事能成就偉大的事。", author: "阿爾瑪書 37:6" },
@@ -746,23 +841,6 @@
             "3月25日": { text: "神賜給我們的不只是生命，還有目的。", author: "多馬·孟蓀會長" },
             "DEFAULT": { text: "願主耶穌基督的平安與愛，今天與你同在。", author: "耶穌基督後期聖徒教會" }
         };
-
-        const INSTITUTE_COURSES = [
-            { date: '3月4日', title: '生養眾多、遍滿地面的誡命' },
-            { date: '3月11日', title: '透過耶穌基督獲得家庭生活的幸福' },
-            { date: '3月18日', title: '婚姻中平等的夥伴關係' },
-            { date: '3月25日', title: '提供屬世所需' },
-            { date: '4月1日', title: '母親的神聖責任' },
-            { date: '4月8日', title: '父親的神聖責任' },
-            { date: '4月15日', title: '在愛中教養兒女' },
-            { date: '4月22日', title: '在正義中教養兒女' },
-            { date: '4月29日', title: '永恆婚姻或生育兒女的祝福延遲到來時' },
-            { date: '5月6日', title: '懷著希望和憐憫面對心理健康的挑戰' },
-            { date: '5月13日', title: '家庭生活中的悔改和寬恕' },
-            { date: '5月20日', title: '察覺出虐待並得到醫治' },
-            { date: '5月27日', title: '推廣並捍衛家庭是社會的基本單位' },
-            { date: '6月3日', title: '對建立永恆家庭充滿希望' },
-        ];
 
         const UPCOMING_EVENTS = [
             { date: '2026-01-07', title: '打排球', desc: '放寒假中' },
@@ -801,6 +879,7 @@
         let editingCourseTitle = null;
         let allNamesList = []; 
         let isEditMode = false;
+        let currentViewingCourseId = 'eternal_family_2'; // 追蹤目前正在查看的大課程 ID
         
         let localExpenses = []; 
         let currentFinanceUnit = 'TY'; 
@@ -844,7 +923,7 @@
             initNamesFromStorage(); 
             loadRecords();
             renderAttendance();
-            renderIntegratedCourseList();
+            // 不再初始化這裡載入課程清單，交由切換選單時渲染
             initFinanceForm(); 
             renderEvents(); 
             
@@ -890,7 +969,7 @@
 
             if (tabId === 'settings') {
                 renderEventNameGrid(); 
-                toggleSettingsView('menu'); // 切換頁籤時重置回管理選單
+                toggleSettingsView('menu'); 
                 window.scrollTo({ top: 0, behavior: 'smooth' });
             } else if (tabId === 'reflection') {
                 toggleReflectionView('categories'); // 點進課程時，一律先回到父選單
@@ -901,23 +980,31 @@
         }
         
         // 切換「課程與心得」視圖 (父選單 vs 課程清單)
-        function toggleReflectionView(view) {
+        function toggleReflectionView(view, courseId = null) {
             const categoriesView = document.getElementById('reflection-categories');
             const coursesView = document.getElementById('reflection-courses');
             const backBtn = document.getElementById('ref-back-btn');
             const headerTitle = document.getElementById('ref-header-title');
-            const headerSubtitle = document.getElementById('ref-header-subtitle');
+            const headerActions = document.getElementById('ref-header-actions');
 
             if (view === 'courses') {
+                if (courseId) currentViewingCourseId = courseId;
+                const courseData = COURSES_DATA[currentViewingCourseId];
+
                 categoriesView.classList.add('hidden');
                 coursesView.classList.remove('hidden');
                 backBtn.classList.remove('hidden');
-                headerTitle.innerHTML = '永恆家庭 (下)';
-                headerSubtitle.classList.remove('hidden');
+                headerTitle.innerHTML = courseData.title;
+                headerActions.classList.remove('hidden');
+                headerActions.classList.add('flex');
+
+                // 重新渲染被選取的課程清單
+                renderIntegratedCourseList(currentViewingCourseId);
+
                 window.scrollTo({ top: 0, behavior: 'smooth' });
                 
-                // 如果是手機版，展開清單後自動滑動到當前課程
-                if (window.innerWidth < 768) {
+                // 如果是手機版，且是當前活躍課程，展開清單後自動滑動到當前課程進度
+                if (window.innerWidth < 768 && courseData.status === 'current') {
                     scrollToCurrentCourse(); 
                 }
             } else {
@@ -925,7 +1012,8 @@
                 categoriesView.classList.remove('hidden');
                 backBtn.classList.add('hidden');
                 headerTitle.innerHTML = '<i data-lucide="book-heart" class="text-purple-600"></i> 課程與心得';
-                headerSubtitle.classList.add('hidden');
+                headerActions.classList.add('hidden');
+                headerActions.classList.remove('flex');
                 window.scrollTo({ top: 0, behavior: 'smooth' });
             }
             lucide.createIcons();
@@ -951,9 +1039,13 @@
             const todayObj = new Date();
             todayObj.setHours(0,0,0,0);
             
-            let targetDateStr = INSTITUTE_COURSES[INSTITUTE_COURSES.length - 1].date;
+            // 使用目前正在瀏覽的課程陣列
+            const currentCourses = COURSES_DATA[currentViewingCourseId].courses;
+            if (!currentCourses || currentCourses.length === 0) return;
 
-            for (let course of INSTITUTE_COURSES) {
+            let targetDateStr = currentCourses[currentCourses.length - 1].date;
+
+            for (let course of currentCourses) {
                 let arr = course.date.split('月');
                 let cDate = new Date(todayObj.getFullYear(), parseInt(arr[0])-1, parseInt(arr[1].replace('日','')));
                 
@@ -994,7 +1086,6 @@
             todayStr = (now.getMonth() + 1) + "月" + now.getDate() + "日";
 
             const quoteObj = WEEKLY_QUOTES[todayStr] || WEEKLY_QUOTES["DEFAULT"];
-            const fullQuote = `${quoteObj.text} —— ${quoteObj.author}`;
             
             document.getElementById('dailyQuoteDisplay').textContent = quoteObj.text;
             document.getElementById('dailyQuoteAuthor').textContent = "—— " + quoteObj.author;
@@ -1083,7 +1174,11 @@
             showToast("靈性簽到成功！", "success");
             showPostSignInSection();
             renderAttendance();
-            renderIntegratedCourseList(); 
+            
+            // 若在子選單內，則即時刷新
+            if (document.getElementById('reflection-courses').classList.contains('block') || !document.getElementById('reflection-courses').classList.contains('hidden')) {
+                renderIntegratedCourseList(currentViewingCourseId);
+            }
             
             // 簽到後稍微讓表單淡化，提示完成
             setTimeout(() => {
@@ -1116,6 +1211,7 @@
 
             const todayObj = new Date();
             todayObj.setHours(0,0,0,0);
+            // 固定顯示當前主要的課程進度
             let currentCourseDateStr = INSTITUTE_COURSES[INSTITUTE_COURSES.length - 1].date;
             
             // 找出距離今天最近的本周課程
@@ -1162,29 +1258,46 @@
             }, 300);
         }
 
-        function renderIntegratedCourseList() {
+        // 動態渲染選定的課程清單
+        function renderIntegratedCourseList(courseId = 'eternal_family_2') {
             const container = document.getElementById('integratedCourseList');
             container.innerHTML = '';
             
+            const currentData = COURSES_DATA[courseId];
+            const coursesToRender = currentData.courses;
+
+            if (!coursesToRender || coursesToRender.length === 0) {
+                container.innerHTML = '<p class="text-center text-slate-400 py-8 text-sm">尚無課程資料</p>';
+                return;
+            }
+
             const todayObj = new Date();
             todayObj.setHours(0,0,0,0);
-            let currentCourseDateStr = INSTITUTE_COURSES[INSTITUTE_COURSES.length - 1].date;
+            let currentCourseDateStr = null;
             
-            // 找出距離今天最近的本周課程
-            for (let course of INSTITUTE_COURSES) {
-                let arr = course.date.split('月');
-                let cDate = new Date(todayObj.getFullYear(), parseInt(arr[0])-1, parseInt(arr[1].replace('日','')));
-                if ((cDate - todayObj) / (1000 * 60 * 60 * 24) >= -4) {
-                    currentCourseDateStr = course.date;
-                    break;
+            // 如果是目前活躍的課程，才計算「本周課程」標示
+            if (currentData.status === 'current') {
+                currentCourseDateStr = coursesToRender[coursesToRender.length - 1].date;
+                for (let course of coursesToRender) {
+                    let arr = course.date.split('月');
+                    let cDate = new Date(todayObj.getFullYear(), parseInt(arr[0])-1, parseInt(arr[1].replace('日','')));
+                    if ((cDate - todayObj) / (1000 * 60 * 60 * 24) >= -4) {
+                        currentCourseDateStr = course.date;
+                        break;
+                    }
                 }
             }
             
-            INSTITUTE_COURSES.forEach((course, i) => {
+            coursesToRender.forEach((course, i) => {
+                let year = todayObj.getFullYear();
+                if (currentData.status === 'past') {
+                    year = 2025; // 過去課程的年份修正 (這裡為了簡化示範固定為2025，可依需求調整)
+                }
+
                 const courseDateArr = course.date.split('月');
-                const courseDateObj = new Date(new Date().getFullYear(), parseInt(courseDateArr[0])-1, parseInt(courseDateArr[1].replace('日','')));
+                const courseDateObj = new Date(year, parseInt(courseDateArr[0])-1, parseInt(courseDateArr[1].replace('日','')));
                 
-                const isPast = courseDateObj < todayObj;
+                const isPast = courseDateObj < todayObj || currentData.status === 'past';
                 const isCurrentWeek = course.date === currentCourseDateStr;
                 
                 const record = records.find(r => r.dateStr === course.date);
@@ -1193,8 +1306,11 @@
                 let boxClass = "bg-white/70 border-white hover:border-purple-300 hover:shadow-md cursor-pointer";
                 
                 // 本周課程加上醒目的粉色系標示
-                if (isCurrentWeek) boxClass = "bg-gradient-to-r from-pink-50 to-purple-50 border-pink-300 shadow-md ring-2 ring-pink-200 cursor-pointer transform scale-[1.01] my-2";
-                else if (isPast && !hasReflection) boxClass = "bg-white/40 border-slate-100 opacity-80 cursor-pointer grayscale-[20%]";
+                if (isCurrentWeek) {
+                    boxClass = "bg-gradient-to-r from-pink-50 to-purple-50 border-pink-300 shadow-md ring-2 ring-pink-200 cursor-pointer transform scale-[1.01] my-2";
+                } else if (isPast && !hasReflection) {
+                    boxClass = "bg-white/40 border-slate-100 opacity-80 cursor-pointer grayscale-[20%]";
+                }
                 
                 let iconHtml = '';
                 if (hasReflection) {
@@ -1219,7 +1335,7 @@
                 let weekBadge = isCurrentWeek ? `<span class="absolute -top-2.5 right-4 bg-pink-500 text-white text-[10px] font-bold px-2 py-0.5 rounded-full shadow-sm">本周課程</span>` : '';
 
                 const cardHtml = `
-                    <div id="course-card-${course.date}" onclick="openReflectionModal('${course.date}', '${course.title}', ${courseDateObj > todayObj})" class="relative group flex flex-col p-4 rounded-2xl border ${boxClass} transition-all active:scale-[0.98]">
+                    <div id="course-card-${course.date}" onclick="openReflectionModal('${course.date}', '${course.title}', ${courseDateObj > todayObj && currentData.status !== 'past'}, '${course.link}')" class="relative group flex flex-col p-4 rounded-2xl border ${boxClass} transition-all active:scale-[0.98]">
                         ${weekBadge}
                         <div class="flex items-center gap-3">
                             <div class="w-10 h-10 rounded-xl ${isCurrentWeek ? 'bg-pink-500 text-white' : 'bg-white text-slate-500 shadow-inner'} flex flex-col items-center justify-center shrink-0">
@@ -1240,7 +1356,7 @@
             lucide.createIcons();
         }
 
-        function openReflectionModal(targetDateStr, courseTitle, isFuture) {
+        function openReflectionModal(targetDateStr, courseTitle, isFuture, courseLink) {
             if (isFuture) {
                 showToast("這堂課還沒開始哦！", "info");
                 return;
@@ -1253,6 +1369,16 @@
 
             document.getElementById('refCourseTitleDisplay').textContent = courseTitle;
             document.getElementById('refCourseDateDisplay').textContent = targetDateStr;
+
+            const refLinkBtn = document.getElementById('refCourseLink');
+            if (refLinkBtn) {
+                if (courseLink && courseLink !== 'undefined') {
+                    refLinkBtn.href = courseLink;
+                    refLinkBtn.style.display = 'flex';
+                } else {
+                    refLinkBtn.style.display = 'none';
+                }
+            }
             
             document.getElementById('refContent').value = record ? (record.reflection || "") : "";
             
@@ -1296,10 +1422,56 @@
             localStorage.setItem('spiritual_weekly_records', JSON.stringify(records));
             sendToGAS(records[idx]);
             
-            renderIntegratedCourseList();
+            renderIntegratedCourseList(currentViewingCourseId);
             renderAttendance(); 
             closeReflectionModal();
             showToast("心得已成功儲存！", "success");
+        }
+
+        function exportReflectionsCSV() {
+            const courseData = COURSES_DATA[currentViewingCourseId];
+            if (!courseData) return;
+
+            // 先檢查是否至少有一筆心得，如果完全沒有則不匯出
+            let hasData = false;
+            for (let course of courseData.courses) {
+                const record = records.find(r => r.dateStr === course.date);
+                if (record && record.reflection && record.reflection.trim() !== "") {
+                    hasData = true;
+                    break;
+                }
+            }
+
+            if (!hasData) {
+                showToast("目前這門課還沒有任何心得紀錄可以匯出哦！", "info");
+                return;
+            }
+
+            // 加上 \uFEFF (BOM) 讓 Excel 預設以 UTF-8 開啟，避免中文亂碼
+            let csvContent = '\uFEFF';
+            csvContent += "日期,課程名稱,心得與覺察\n";
+
+            // 只要有心得，就把所有課程標題都匯出
+            courseData.courses.forEach(course => {
+                const record = records.find(r => r.dateStr === course.date);
+                const reflectionText = (record && record.reflection) ? record.reflection.trim() : "";
+                
+                // 處理 CSV 格式中的雙引號，避免內文換行或符號破壞格式
+                const escapedTitle = course.title.replace(/"/g, '""');
+                const escapedReflection = reflectionText.replace(/"/g, '""');
+                csvContent += `"${course.date}","${escapedTitle}","${escapedReflection}"\n`;
+            });
+
+            const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+            const url = URL.createObjectURL(blob);
+            const link = document.createElement("a");
+            link.setAttribute("href", url);
+            link.setAttribute("download", `心得紀錄_${courseData.title}.csv`);
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            
+            showToast("CSV 心得下載成功！", "success");
         }
 
         // ==========================================
