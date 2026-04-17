@@ -110,7 +110,7 @@
         <!-- Footer -->
         <footer class="mt-16 text-center">
             <p class="text-slate-400 text-[10px] font-bold tracking-widest uppercase mb-1">Organization Management System</p>
-            <p class="text-slate-300 text-[9px]">Ver 4.1.0 • 桃園單身成人聚集場所</p>
+            <p class="text-slate-300 text-[9px]">Ver 4.3.0 • 桃園單身成人聚集場所</p>
         </footer>
     </div>
 
@@ -148,7 +148,7 @@
                     </div>
                     <div class="space-y-2">
                         <label class="text-xs font-black text-slate-400 uppercase tracking-widest ml-1">領袖職位 (選填)</label>
-                        <input type="text" id="inputRole" placeholder="例如：會長、主教..." class="w-full px-5 py-4 bg-amber-50/50 border border-amber-200 rounded-2xl focus:ring-4 focus:ring-amber-500/10 focus:bg-white transition-all outline-none font-bold text-amber-700 placeholder:text-amber-300">
+                        <input type="text" id="inputRole" placeholder="多項請以逗號分隔，例如：主席, 美宣組..." class="w-full px-5 py-4 bg-amber-50/50 border border-amber-200 rounded-2xl focus:ring-4 focus:ring-amber-500/10 focus:bg-white transition-all outline-none font-bold text-amber-700 placeholder:text-amber-300">
                     </div>
                     <div class="space-y-2">
                         <label class="text-xs font-black text-slate-400 uppercase tracking-widest ml-1">年齡區間</label>
@@ -159,11 +159,21 @@
                             <option value="30-35">30-35 歲</option>
                         </select>
                     </div>
+                    <div class="space-y-2 flex items-center gap-2 mt-2">
+                        <input type="checkbox" id="inputHide" class="w-5 h-5 rounded border-slate-300 text-purple-600 focus:ring-purple-500">
+                        <label for="inputHide" class="text-sm font-bold text-slate-600">設定為隱藏名單 (僅出現在領袖分工表，不顯示於單成名單)</label>
+                    </div>
                 </div>
 
                 <!-- 組織領袖分工表 (查看時顯示) -->
-                <div id="fieldLeadersView" class="hidden max-h-[50vh] overflow-y-auto no-scrollbar pb-4 space-y-4">
-                    <!-- 動態渲染 -->
+                <div id="fieldLeadersView" class="hidden pb-4">
+                    <div id="leaderTabs" class="flex bg-slate-200/50 p-1 rounded-xl mb-4">
+                        <button type="button" onclick="switchLeaderTab('org')" id="tab-btn-org" class="flex-1 py-2 text-sm font-bold bg-white text-purple-600 rounded-lg shadow-sm transition-all">組織分工</button>
+                        <button type="button" onclick="switchLeaderTab('rep')" id="tab-btn-rep" class="flex-1 py-2 text-sm font-bold text-slate-500 rounded-lg transition-all hover:text-purple-500">單成代表</button>
+                    </div>
+                    <div id="leadersContentContainer" class="max-h-[50vh] overflow-y-auto no-scrollbar space-y-4">
+                        <!-- 動態渲染 -->
+                    </div>
                 </div>
 
                 <div id="formButtons" class="mt-10 flex gap-4 pb-2 pt-4">
@@ -171,7 +181,7 @@
                     <button type="submit" class="flex-1 py-4 bg-slate-800 text-white font-black rounded-2xl hover:bg-slate-900 shadow-xl shadow-slate-200 transition-all active:scale-95">確認提交</button>
                 </div>
                 
-                <div id="viewButtons" class="hidden mt-6 pb-2 pt-2">
+                <div id="viewButtons" class="hidden mt-4 pb-2">
                     <button type="button" onclick="closeModal()" class="w-full py-4 bg-slate-800 text-white font-black rounded-2xl hover:bg-slate-900 shadow-xl shadow-slate-200 transition-all active:scale-95">關閉</button>
                 </div>
             </form>
@@ -186,32 +196,38 @@
                 name: '桃園支聯會',
                 children: [
                     { id: 'ty-ty', name: '桃園支會', members: [
-                        { name: '黃利亞', job: '未填寫', age: '', role: '活動組' },
-                        { name: '黃翊龍', job: '未填寫', age: '30-35', role: '單成代表男主席' },
+                        { name: '趙致遠', job: '未填寫', age: '', role: '會長團', hideInList: true },
+                        { name: '林元博', job: '未填寫', age: '', role: '高級諮議', hideInList: true },
+                        { name: '陸小平', job: '未填寫', age: '', role: '年輕單成顧問', hideInList: true },
+                        { name: '廖祐宏', job: '未填寫', age: '', role: '年輕單成顧問', hideInList: true },
+                        { name: '黃利亞', job: '未填寫', age: '', role: '活動/企劃組, 桃園支會單成代表' },
+                        { name: '黃翊龍', job: '未填寫', age: '30-35', role: '主席, 美宣/公關組' },
+                        { name: '黃畯紳', job: '未填寫', age: '', role: '財務組, 桃園支會單成代表' },
                         { name: '王威廉', job: '未填寫', age: '', role: '' },
                         { name: '徐唯甄', job: '未填寫', age: '', role: '' },
                         { name: '黃名煌', job: '未填寫', age: '', role: '' },
-                        { name: '蕭惟哲', job: '未填寫', age: '', role: '' }
+                        { name: '蕭惟哲', job: '未填寫', age: '', role: '' },
+                        { name: '王奕晴', job: '未填寫', age: '', role: '活動/企劃組' }
                     ] },
-                    { id: 'ty-lt', name: '龍潭支會', members: [
-                        { name: '黃畯紳', job: '未填寫', age: '', role: '' }
-                    ] },
+                    { id: 'ty-lt', name: '龍潭支會', members: [] },
                     { id: 'ty-zl', name: '中壢支會', members: [
                         { name: '瑪德諾·米斯卡', job: '未填寫', age: '', role: '' },
                         { name: '許銘霖', job: '未填寫', age: '', role: '' },
-                        { name: '林修儀', job: '未填寫', age: '', role: '' }
+                        { name: '林修儀', job: '未填寫', age: '', role: '' },
+                        { name: '李詩琳', job: '未填寫', age: '', role: '活動/企劃組, 中壢支會單成代表' }
                     ] },
                     { id: 'ty-lz', name: '蘆竹支會', members: [
                         { name: '賴韋樵', job: '未填寫', age: '', role: '' },
                         { name: '邱鈺茹', job: '未填寫', age: '', role: '' },
-                        { name: '郭人豪', job: '未填寫', age: '', role: '' },
-                        { name: '官雅文', job: '未填寫', age: '', role: '單成代表女主席' },
+                        { name: '郭人豪', job: '未填寫', age: '', role: '蘆竹支會單成代表' },
+                        { name: '關雅文', job: '未填寫', age: '', role: '主席, 美宣/公關組, 蘆竹支會單成代表' },
                         { name: '白若雲', job: '未填寫', age: '', role: '' },
-                        { name: '白若琳', job: '未填寫', age: '', role: '' }
+                        { name: '白若琳', job: '未填寫', age: '', role: '設備組' }
                     ] },
                     { id: 'ty-ks', name: '龜山支會', members: [
-                        { name: '廖瑋群', job: '未填寫', age: '', role: '財務/設備組' },
-                        { name: '廖芷妘', job: '未填寫', age: '', role: '食物組' },
+                        { name: '廖瑋群', job: '未填寫', age: '', role: '財務組, 設備組' },
+                        { name: '廖芷妘', job: '未填寫', age: '', role: '食物組, 龜山支會單成代表' },
+                        { name: '鍾尚軒', job: '未填寫', age: '', role: '龜山支會單成代表' },
                         { name: '應奇穎', job: '未填寫', age: '', role: '食物組' },
                         { name: '鍾昕玥', job: '未填寫', age: '', role: '' },
                         { name: '郭紫嫺', job: '未填寫', age: '', role: '' },
@@ -245,8 +261,7 @@
                     { id: 'other-lk', name: '林口', members: [
                         { name: '林佳晨', job: '未填寫', age: '', role: '' }
                     ] },
-                    { id: 'other-misc', name: '未分類', members: [
-                    ] }
+                    { id: 'other-misc', name: '未分類', members: [] }
                 ]
             }
         ];
@@ -255,10 +270,11 @@
         let expandedNodes = new Set(['branch-ty', 'branch-hc', 'branch-other-stake']);
         let searchTerm = '';
         let currentModalConfig = {
-            mode: '', // 'add-branch', 'add-sub-branch', 'add-member', 'edit-member', 'view-leaders'
+            mode: '', 
             parentId: null,
             targetIdx: null
         };
+        let currentLeaderTab = 'org';
 
         // --- 初始化 ---
         document.addEventListener('DOMContentLoaded', () => {
@@ -277,23 +293,17 @@
             
             window.addEventListener('scroll', () => {
                 if (window.scrollY > 40) {
-                    // 向下捲動時：縮小 Header 內距與隱藏名言
                     mainHeader.classList.remove('pt-16', 'pb-12');
                     mainHeader.classList.add('pt-6', 'pb-4');
-                    
                     mainTitle.classList.remove('text-3xl', 'mb-2');
                     mainTitle.classList.add('text-2xl', 'mb-3');
-                    
                     quoteText.classList.remove('max-h-[200px]', 'opacity-100', 'mb-4');
                     quoteText.classList.add('max-h-0', 'opacity-0', 'mb-0');
                 } else {
-                    // 回到最頂端時：恢復原本大小與顯示名言
                     mainHeader.classList.remove('pt-6', 'pb-4');
                     mainHeader.classList.add('pt-16', 'pb-12');
-                    
                     mainTitle.classList.remove('text-2xl', 'mb-3');
                     mainTitle.classList.add('text-3xl', 'mb-2');
-                    
                     quoteText.classList.remove('max-h-0', 'opacity-0', 'mb-0');
                     quoteText.classList.add('max-h-[200px]', 'opacity-100', 'mb-4');
                 }
@@ -329,6 +339,7 @@
             const inputJob = document.getElementById('inputJob');
             const inputRole = document.getElementById('inputRole');
             const inputAge = document.getElementById('inputAge');
+            const inputHide = document.getElementById('inputHide');
 
             // 預設隱藏所有區塊
             fieldOrg.classList.add('hidden');
@@ -343,6 +354,7 @@
             inputJob.value = '';
             inputRole.value = '';
             inputAge.value = '';
+            inputHide.checked = false;
             inputOrgName.required = false;
             inputName.required = false;
             inputJob.required = false;
@@ -393,6 +405,7 @@
                     inputJob.value = foundMember.job;
                     inputRole.value = foundMember.role || '';
                     inputAge.value = foundMember.age || '';
+                    inputHide.checked = !!foundMember.hideInList;
                 }
                 setTimeout(() => inputName.focus(), 100);
             }
@@ -400,28 +413,7 @@
                 titleEl.textContent = '組織領袖分工表';
                 fieldLeaders.classList.remove('hidden');
                 viewButtons.classList.remove('hidden');
-
-                // 產生領袖列表
-                let leadersHtml = '';
-                orgData.forEach(branch => {
-                    branch.children.forEach(sub => {
-                        const leaders = (sub.members || []).filter(m => m.role && m.role.trim() !== '');
-                        if (leaders.length > 0) {
-                            leadersHtml += `<div class="mb-5">
-                                <h4 class="font-bold text-slate-800 mb-2 px-1 flex items-center gap-2"><i data-lucide="map-pin" class="w-4 h-4 text-purple-500"></i>${branch.name} - ${sub.name}</h4>
-                                <ul class="space-y-2">`;
-                            leaders.forEach(l => {
-                                leadersHtml += `<li class="flex justify-between items-center bg-white/60 p-3 rounded-xl border border-slate-100 shadow-sm">
-                                    <span class="font-bold text-slate-700 text-sm">${l.name}</span>
-                                    <span class="text-[11px] font-bold bg-amber-100 text-amber-700 px-2.5 py-1 rounded-md flex items-center gap-1"><i data-lucide="award" class="w-3 h-3"></i>${l.role}</span>
-                                </li>`;
-                            });
-                            leadersHtml += `</ul></div>`;
-                        }
-                    });
-                });
-                if(!leadersHtml) leadersHtml = '<p class="text-center text-slate-400 py-6 font-bold">目前尚未設定任何領袖</p>';
-                fieldLeaders.innerHTML = leadersHtml;
+                switchLeaderTab('org'); // 預設打開組織分工頁籤
             }
 
             // 顯示動畫
@@ -445,6 +437,109 @@
             }, 300);
         }
 
+        // --- 切換領袖表頁籤 ---
+        function switchLeaderTab(tab) {
+            currentLeaderTab = tab;
+            const btnOrg = document.getElementById('tab-btn-org');
+            const btnRep = document.getElementById('tab-btn-rep');
+            
+            if (tab === 'org') {
+                btnOrg.className = "flex-1 py-2 text-sm font-bold bg-white text-purple-600 rounded-lg shadow-sm transition-all";
+                btnRep.className = "flex-1 py-2 text-sm font-bold text-slate-500 rounded-lg transition-all hover:text-purple-500";
+            } else {
+                btnRep.className = "flex-1 py-2 text-sm font-bold bg-white text-purple-600 rounded-lg shadow-sm transition-all";
+                btnOrg.className = "flex-1 py-2 text-sm font-bold text-slate-500 rounded-lg transition-all hover:text-purple-500";
+            }
+            renderLeaderContent();
+        }
+
+        // --- 渲染領袖名單內容 ---
+        function renderLeaderContent() {
+            const container = document.getElementById('leadersContentContainer');
+            let leadersHtml = '';
+            
+            let allLeaders = [];
+            orgData.forEach(branch => {
+                branch.children.forEach(sub => {
+                    (sub.members || []).forEach(m => {
+                        if (m.role && m.role.trim() !== '') {
+                            allLeaders.push({ ...m, branchName: sub.name });
+                        }
+                    });
+                });
+            });
+
+            if (allLeaders.length === 0) {
+                container.innerHTML = '<p class="text-center text-slate-400 py-6 font-bold">目前尚未設定任何領袖</p>';
+                return;
+            }
+
+            if (currentLeaderTab === 'org') {
+                // 組織分工
+                const targetGroups = ['會長團', '高級諮議', '年輕單成顧問', '主席', '活動/企劃組', '美宣/公關組', '食物組', '財務組', '設備組', '其他職位'];
+                
+                targetGroups.forEach(groupName => {
+                    let groupMembers;
+                    if (groupName === '其他職位') {
+                        groupMembers = allLeaders.filter(m => {
+                            // 避免單純的"單成代表"顯示在其他職位
+                            const isRepOnly = m.role.includes('單成代表') && !targetGroups.some(g => g !== '其他職位' && m.role.includes(g));
+                            const hasOtherGroup = targetGroups.some(g => g !== '其他職位' && m.role.includes(g));
+                            return !isRepOnly && !hasOtherGroup;
+                        });
+                    } else {
+                        groupMembers = allLeaders.filter(m => m.role.includes(groupName));
+                    }
+
+                    if (groupMembers.length > 0) {
+                        leadersHtml += `<div class="mb-5">
+                            <h4 class="font-bold text-slate-800 mb-2 px-1 flex items-center gap-2"><i data-lucide="users" class="w-4 h-4 text-purple-500"></i>${groupName}</h4>
+                            <ul class="space-y-2">`;
+                        groupMembers.forEach(l => {
+                            leadersHtml += `<li class="flex justify-between items-center bg-white/60 p-3 rounded-xl border border-slate-100 shadow-sm">
+                                <div class="flex items-center gap-2">
+                                    <span class="font-bold text-slate-700 text-sm">${l.name}</span>
+                                    <span class="text-[10px] text-slate-400 bg-slate-100 px-1.5 py-0.5 rounded">${l.branchName}</span>
+                                </div>
+                                <span class="text-[11px] font-bold bg-amber-100 text-amber-700 px-2.5 py-1 rounded-md flex items-center gap-1"><i data-lucide="award" class="w-3 h-3"></i>${l.role}</span>
+                            </li>`;
+                        });
+                        leadersHtml += `</ul></div>`;
+                    }
+                });
+            } else {
+                // 單成代表分組
+                let reps = allLeaders.filter(m => m.role.includes('單成代表'));
+                if (reps.length > 0) {
+                    const groupedByBranch = {};
+                    reps.forEach(r => {
+                        if(!groupedByBranch[r.branchName]) groupedByBranch[r.branchName] = [];
+                        groupedByBranch[r.branchName].push(r);
+                    });
+                    
+                    Object.keys(groupedByBranch).forEach(branch => {
+                        leadersHtml += `<div class="mb-5">
+                            <h4 class="font-bold text-slate-800 mb-2 px-1 flex items-center gap-2"><i data-lucide="map-pin" class="w-4 h-4 text-purple-500"></i>${branch}</h4>
+                            <ul class="space-y-2">`;
+                        groupedByBranch[branch].forEach(l => {
+                            leadersHtml += `<li class="flex justify-between items-center bg-white/60 p-3 rounded-xl border border-slate-100 shadow-sm">
+                                <div class="flex items-center gap-2">
+                                    <span class="font-bold text-slate-700 text-sm">${l.name}</span>
+                                </div>
+                                <span class="text-[11px] font-bold bg-purple-100 text-purple-700 px-2.5 py-1 rounded-md flex items-center gap-1"><i data-lucide="award" class="w-3 h-3"></i>單成代表</span>
+                            </li>`;
+                        });
+                        leadersHtml += `</ul></div>`;
+                    });
+                } else {
+                    leadersHtml = '<p class="text-center text-slate-400 py-6 font-bold">目前尚未設定單成代表</p>';
+                }
+            }
+
+            container.innerHTML = leadersHtml || '<p class="text-center text-slate-400 py-6 font-bold">無資料</p>';
+            lucide.createIcons();
+        }
+
         // --- 表單送出處理 ---
         function handleSubmit(e) {
             e.preventDefault();
@@ -457,6 +552,7 @@
             const jobVal = document.getElementById('inputJob').value.trim();
             const roleVal = document.getElementById('inputRole').value.trim();
             const ageVal = document.getElementById('inputAge').value;
+            const hideVal = document.getElementById('inputHide').checked;
 
             if (currentModalConfig.mode === 'add-branch') {
                 if(!orgNameVal) return;
@@ -478,7 +574,7 @@
                     const sub = branch.children.find(s => s.id === currentModalConfig.parentId);
                     if (sub) {
                         if (!sub.members) sub.members = [];
-                        sub.members.push({ name: nameVal, job: jobVal, age: ageVal, role: roleVal });
+                        sub.members.push({ name: nameVal, job: jobVal, age: ageVal, role: roleVal, hideInList: hideVal });
                         expandedNodes.add(sub.id);
                         expandedNodes.add(branch.id);
                     }
@@ -489,7 +585,7 @@
                 orgData.forEach(branch => {
                     const sub = branch.children.find(s => s.id === currentModalConfig.parentId);
                     if (sub && sub.members[currentModalConfig.targetIdx]) {
-                        sub.members[currentModalConfig.targetIdx] = { name: nameVal, job: jobVal, age: ageVal, role: roleVal };
+                        sub.members[currentModalConfig.targetIdx] = { name: nameVal, job: jobVal, age: ageVal, role: roleVal, hideInList: hideVal };
                     }
                 });
             }
@@ -508,8 +604,9 @@
             if (searchTerm) {
                 filteredData = orgData.map(branch => {
                     const filteredSubBranches = branch.children.map(sub => {
-                        const members = sub.members || [];
-                        const filteredMembers = members.filter(m => 
+                        // 僅搜尋沒有被隱藏的人員
+                        const visibleMembers = sub.members ? sub.members.filter(m => !m.hideInList) : [];
+                        const filteredMembers = visibleMembers.filter(m => 
                             m.name.includes(searchTerm) || m.job.includes(searchTerm) || sub.name.includes(searchTerm)
                         );
                         if (sub.name.includes(searchTerm) || filteredMembers.length > 0) {
@@ -540,7 +637,8 @@
 
             filteredData.forEach(branch => {
                 const isExp = expandedNodes.has(branch.id);
-                const total = branch.children.reduce((acc, curr) => acc + (curr.members?.length || 0), 0);
+                // 計算總人數時，排除 hideInList 的人員
+                const total = branch.children.reduce((acc, curr) => acc + (curr.members?.filter(m => !m.hideInList).length || 0), 0);
                 
                 let subHtml = '';
                 if (isExp) {
@@ -549,14 +647,28 @@
                     } else {
                         branch.children.forEach(sub => {
                             const subExp = expandedNodes.has(sub.id);
-                            const memCount = sub.members ? sub.members.length : 0;
+                            // 計算支會人數時，排除 hideInList 的人員
+                            const visibleMembers = sub.members ? sub.members.filter(m => !m.hideInList) : [];
+                            const memCount = visibleMembers.length;
                             
                             let memHtml = '';
                             if (subExp) {
                                 if (memCount === 0) {
                                     memHtml = `<p class="text-center py-4 text-[10px] text-slate-400">尚無人員</p>`;
                                 } else {
-                                    sub.members.forEach((m, idx) => {
+                                    // 將名單加上原始 index，過濾隱藏名單，並依據「是否有職位」進行排序
+                                    const displayMembers = sub.members
+                                        .map((m, idx) => ({ ...m, originalIdx: idx }))
+                                        .filter(m => !m.hideInList)
+                                        .sort((a, b) => {
+                                            const aHasRole = a.role && a.role.trim() !== '';
+                                            const bHasRole = b.role && b.role.trim() !== '';
+                                            if (aHasRole && !bHasRole) return -1; // a 有職位，排在前面
+                                            if (!aHasRole && bHasRole) return 1;  // b 有職位，排在前面
+                                            return 0; // 兩者都有或都沒有，維持原順序
+                                        });
+
+                                    displayMembers.forEach((m) => {
                                         const ageDisplay = m.age || '未填寫';
                                         const jobDisplay = m.job || '未填寫';
                                         const roleBadge = m.role && m.role.trim() !== '' ? `<span class="ml-2 px-2 py-0.5 bg-amber-100 text-amber-700 text-[10px] font-bold rounded-md whitespace-nowrap inline-flex items-center gap-1 shadow-sm"><i data-lucide="award" class="w-3 h-3"></i>${m.role}</span>` : '';
@@ -574,7 +686,7 @@
                                                     </span>
                                                 </div>
                                                 <button 
-                                                    onclick="openModal('edit-member', '${sub.id}', ${idx})"
+                                                    onclick="openModal('edit-member', '${sub.id}', ${m.originalIdx})"
                                                     class="ml-auto p-2.5 opacity-0 group-hover:opacity-100 bg-white hover:bg-purple-600 hover:text-white text-slate-400 rounded-xl shadow-sm transition-all"
                                                 >
                                                     <i data-lucide="edit-2" class="w-4 h-4"></i>
