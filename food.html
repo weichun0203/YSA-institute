@@ -379,8 +379,8 @@
             const refreshIcon = document.getElementById('refreshIcon');
             if (refreshIcon) refreshIcon.classList.add('animate-spin');
 
-            if (GAS_API_URL && GAS_API_URL.trim() !== '') {
-                try {
+            try {
+                if (GAS_API_URL && GAS_API_URL.trim() !== '') {
                     const response = await fetch(GAS_API_URL);
                     const result = await response.json();
                     
@@ -393,17 +393,18 @@
                     } else {
                         throw new Error(result.message || '讀取失敗');
                     }
-                } catch (err) {
-                    console.warn('GAS Fetch failed, fallback to local:', err);
+                } else {
                     loadLocalData();
-                    showToast("已載入預設資料", "info");
                 }
-            } else {
+            } catch (err) {
+                console.warn('GAS Fetch failed, fallback to local:', err);
                 loadLocalData();
+                showToast("連線失敗，已載入本機預設資料", "error");
+            } finally {
+                // 確保無論成功或失敗，更新結束後一定會停止轉動
+                if (refreshIcon) refreshIcon.classList.remove('animate-spin');
+                renderAll();
             }
-
-            if (refreshIcon) refreshIcon.classList.remove('animate-spin');
-            renderAll();
         }
 
         function loadLocalData() {
@@ -1028,8 +1029,10 @@
         function submitPassword() {
             const pwd = document.getElementById('actionPassword').value;
             if (pwd === 'YSA2026') {
+                // 先把要執行的函式存起來，再關閉視窗 (關閉視窗會清空變數)
+                const callback = passwordSuccessCallback;
                 closePasswordModal();
-                if (passwordSuccessCallback) passwordSuccessCallback();
+                if (callback) callback();
             } else {
                 showToast("密碼錯誤，請重新輸入", "error");
             }
