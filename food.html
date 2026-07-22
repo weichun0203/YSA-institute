@@ -6,13 +6,12 @@
     <title>訂餐排班表</title>
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
-    <!-- Icons -->
+    <!-- Lucide Icons -->
     <script src="https://unpkg.com/lucide@latest"></script>
     <!-- Font -->
-    <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+TC:wght@400;700&family=Noto+Sans+TC:wght@300;400;500;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@300;400;500;700&display=swap" rel="stylesheet">
     
     <style>
-        /* 強制禁止左右滑動，優化觸控體驗 */
         html, body {
             overflow-x: hidden;
             width: 100%;
@@ -26,22 +25,18 @@
             font-family: 'Noto Sans TC', sans-serif;
             padding-bottom: max(2rem, env(safe-area-inset-bottom)); 
         }
-        .font-serif {
-            font-family: 'Noto Serif TC', serif;
-        }
-        
-        /* 毛玻璃與各類裝飾 */
+
         .glass {
-            background: rgba(255, 255, 255, 0.5);
+            background: rgba(255, 255, 255, 0.65);
             backdrop-filter: blur(16px);
             -webkit-backdrop-filter: blur(16px);
-            border: 1px solid rgba(255, 255, 255, 0.7);
+            border: 1px solid rgba(255, 255, 255, 0.8);
         }
         .glass-strong {
-            background: rgba(255, 255, 255, 0.9);
+            background: rgba(255, 255, 255, 0.92);
             backdrop-filter: blur(20px);
             -webkit-backdrop-filter: blur(20px);
-            border: 1px solid rgba(255, 255, 255, 0.8);
+            border: 1px solid rgba(255, 255, 255, 0.9);
         }
         .blob {
             position: absolute;
@@ -57,200 +52,260 @@
         .no-scrollbar::-webkit-scrollbar { display: none; }
         .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
 
-        .spinner {
-            border: 2px solid rgba(255, 255, 255, 0.3);
-            border-radius: 50%;
-            border-top: 2px solid #a855f7;
-            width: 16px;
-            height: 16px;
-            animation: spin 0.8s linear infinite;
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(6px); }
+            to { opacity: 1; transform: translateY(0); }
         }
-        @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
+        .animate-fade-in {
+            animation: fadeIn 0.3s ease-out forwards;
         }
     </style>
 </head>
 <body class="min-h-screen bg-gradient-to-br from-indigo-50 via-purple-50 to-pink-50 text-slate-700 relative selection:bg-purple-200">
 
     <!-- 全域 Toast 通知容器 -->
-    <div id="toastNotification" class="fixed top-8 left-1/2 -translate-x-1/2 z-[100] transition-all duration-300 transform -translate-y-24 opacity-0 pointer-events-none w-auto min-w-[260px] max-w-[90vw]">
+    <div id="toastNotification" class="fixed top-20 left-1/2 -translate-x-1/2 z-[100] transition-all duration-300 transform -translate-y-24 opacity-0 pointer-events-none w-auto min-w-[260px] max-w-[90vw]">
         <div class="bg-slate-800/95 backdrop-blur-md text-white px-5 py-3.5 rounded-2xl shadow-2xl flex items-center gap-3 border border-slate-700/50">
             <i id="toastIcon" data-lucide="info" class="w-5 h-5 shrink-0"></i>
             <span id="toastMessage" class="text-sm font-bold tracking-wide"></span>
         </div>
     </div>
 
-    <!-- 背景裝飾 -->
+    <!-- 背景動態光芒 -->
     <div class="blob w-72 h-72 md:w-96 md:h-96 bg-purple-300 opacity-40 top-0 left-0 mix-blend-multiply"></div>
-    <div class="blob w-72 h-72 md:w-96 md:h-96 bg-blue-300 opacity-40 top-20 right-0 mix-blend-multiply animation-delay-2000" style="animation-delay: 2s;"></div>
-    <div class="blob w-72 h-72 md:w-96 md:h-96 bg-pink-300 opacity-40 bottom-20 left-10 mix-blend-multiply animation-delay-4000" style="animation-delay: 4s;"></div>
+    <div class="blob w-72 h-72 md:w-96 md:h-96 bg-blue-300 opacity-40 top-20 right-0 mix-blend-multiply" style="animation-delay: 2s;"></div>
+    <div class="blob w-72 h-72 md:w-96 md:h-96 bg-pink-300 opacity-40 bottom-20 left-10 mix-blend-multiply" style="animation-delay: 4s;"></div>
 
-    <div class="max-w-xl mx-auto relative z-10 pb-10 pt-20 md:pt-24">
+    <!-- 置頂懸浮選單 -->
+    <div class="fixed top-0 left-0 w-full z-50 pointer-events-none px-3 py-2 sm:px-6">
+        <div class="max-w-xl mx-auto bg-white/85 backdrop-blur-xl border border-white/80 shadow-sm px-4 py-2.5 rounded-2xl flex items-center justify-between gap-2 pointer-events-auto">
+            <!-- 標題 -->
+            <h1 class="text-base sm:text-lg font-bold text-slate-800 flex items-center gap-2 shrink-0">
+                <i data-lucide="calendar-clock" class="text-purple-600 w-5 h-5"></i>
+                <span>訂餐排班表</span>
+            </h1>
         
-        <!-- ==================== 固定的整合式頁首 ==================== -->
-        <div class="fixed top-0 left-0 w-full z-50 pointer-events-none">
-            <div class="max-w-xl mx-auto bg-white/80 backdrop-blur-xl border-b border-white/50 shadow-sm px-4 py-3 sm:px-6 flex items-center justify-between gap-1 sm:gap-2 rounded-b-2xl pointer-events-auto">
-                <!-- 左側：標題 -->
-                <h1 class="text-lg sm:text-xl font-bold text-slate-800 flex items-center gap-1.5 shrink-0">
-                    <i data-lucide="calendar-clock" class="text-purple-600 w-5 h-5 sm:w-6 sm:h-6"></i>
-                    <span>訂餐排班表</span>
-                </h1>
-            
-                <!-- 中間：導覽按鈕 -->
-                <div class="glass-strong p-1 rounded-full flex gap-0.5 sm:gap-1 shadow-sm border border-white/80 overflow-x-auto no-scrollbar">
-                    <a href="#section-schedule" id="nav-schedule" class="px-3 sm:px-5 py-1.5 rounded-full text-xs sm:text-sm font-bold bg-purple-500 text-white shadow-sm transition-all duration-300 active:scale-90 flex items-center gap-1 whitespace-nowrap">
-                        <i data-lucide="calendar-check" class="w-3.5 h-3.5"></i> 排班表
-                    </a>
-                    <a href="#section-restaurants" id="nav-restaurants" class="px-3 sm:px-5 py-1.5 rounded-full text-xs sm:text-sm font-bold text-slate-500 hover:text-pink-500 hover:bg-pink-50 transition-all duration-300 active:scale-90 flex items-center gap-1 whitespace-nowrap">
-                        <i data-lucide="utensils" class="w-3.5 h-3.5"></i> 口袋名單
-                    </a>
-                </div>
-
-                <!-- 右側：重新整理 -->
-                <div class="flex items-center gap-1">
-                    <button id="refreshBtn" onclick="loadDataFromGASOrLocal();" class="p-2 bg-white/80 hover:bg-white text-purple-600 rounded-full shadow-sm border border-purple-100 transition-colors active:scale-95 shrink-0 flex items-center justify-center">
-                        <i data-lucide="refresh-cw" id="refreshIcon" class="w-4 h-4 sm:w-5 sm:h-5"></i>
-                    </button>
-                </div>
+            <!-- 分頁切換按鈕 -->
+            <div class="glass-strong p-1 rounded-full flex gap-1 shadow-inner border border-white/90 overflow-x-auto no-scrollbar">
+                <a href="#section-schedule" id="nav-schedule" class="px-3.5 py-1 rounded-full text-xs font-bold bg-purple-500 text-white shadow-sm transition-all duration-300 active:scale-95 flex items-center gap-1.5 whitespace-nowrap">
+                    <i data-lucide="calendar-check" class="w-3.5 h-3.5"></i> 排班表
+                </a>
+                <a href="#section-restaurants" id="nav-restaurants" class="px-3.5 py-1 rounded-full text-xs font-bold text-slate-500 hover:text-pink-500 hover:bg-pink-50 transition-all duration-300 active:scale-95 flex items-center gap-1.5 whitespace-nowrap">
+                    <i data-lucide="utensils" class="w-3.5 h-3.5"></i> 口袋名單
+                </a>
             </div>
-        </div>
 
-        <div class="px-5 md:px-6">
-            
-            <!-- ==================== [區塊 1] 排班表 ==================== -->
-            <section id="section-schedule" class="scroll-mt-32 mb-10">
-                <p class="text-xs text-slate-500 mb-6 px-1 leading-relaxed">點擊「認領」來負責當週訂餐，認領後可填寫預計購買的餐點。若無法幫忙請讓大家知道。</p>
-
-                <div id="schedule-list" class="space-y-4">
-                    <!-- 將由 JS 動態填入 -->
-                </div>
-            </section>
-
-            <!-- 漸層分隔線 -->
-            <div class="h-px bg-gradient-to-r from-transparent via-purple-200 to-transparent my-10"></div>
-
-            <!-- ==================== [區塊 2] 口袋名單 ==================== -->
-            <section id="section-restaurants" class="scroll-mt-32">
-                <div class="flex justify-between items-end mb-6 px-1">
-                    <div>
-                        <h2 class="text-lg font-bold text-slate-800 flex items-center gap-2">
-                            <i data-lucide="utensils" class="text-pink-500 w-5 h-5"></i> 餐廳推薦
-                        </h2>
-                        <p class="text-xs text-slate-500 mt-1">大家推薦的好吃名單</p>
-                    </div>
-                    <button onclick="openRestaurantModal()" class="px-4 py-2 bg-pink-100 text-pink-600 rounded-xl text-sm font-bold shadow-sm hover:bg-pink-200 active:scale-95 transition-all flex items-center gap-1.5">
-                        <i data-lucide="plus" class="w-4 h-4"></i> 新增
-                    </button>
-                </div>
-
-                <div id="restaurant-list" class="space-y-4">
-                    <!-- 將由 JS 動態填入 -->
-                </div>
-            </section>
+            <!-- 重新整理功能 -->
+            <button id="refreshBtn" onclick="loadDataFromGASOrLocal();" class="p-2 bg-white hover:bg-purple-50 text-purple-600 rounded-full shadow-sm border border-purple-100 transition-all active:scale-90 shrink-0 flex items-center justify-center">
+                <i data-lucide="refresh-cw" id="refreshIcon" class="w-4 h-4"></i>
+            </button>
         </div>
     </div>
 
+    <!-- 主要內容區域 -->
+    <div class="max-w-xl mx-auto relative z-10 pt-20 px-4 sm:px-6">
+        
+        <!-- ==================== [區塊 1] 排班表 ==================== -->
+        <section id="section-schedule" class="scroll-mt-24 mb-10">
+            <div class="flex justify-between items-center mb-4 px-1">
+                <div>
+                    <h2 class="text-base font-bold text-slate-800 flex items-center gap-2">
+                        <i data-lucide="calendar-check" class="text-purple-600 w-5 h-5"></i> 週三排班
+                    </h2>
+                    <p class="text-xs text-slate-500 mt-0.5">顯示當月剩餘週三及下月前 2 週排班資訊</p>
+                </div>
+                <button onclick="openPastSchedulesModal()" class="px-3 py-1.5 bg-purple-50 hover:bg-purple-100 text-purple-600 rounded-xl text-xs font-bold transition-all border border-purple-100 flex items-center gap-1 shrink-0 active:scale-95 shadow-sm">
+                    <i data-lucide="history" class="w-3.5 h-3.5"></i> 歷史紀錄
+                </button>
+            </div>
+
+            <!-- 排班卡片容器 -->
+            <div id="schedule-list" class="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
+                <!-- JS 動態帶入 -->
+            </div>
+        </section>
+
+        <!-- 漸層分隔線 -->
+        <div class="h-px bg-gradient-to-r from-transparent via-purple-200 to-transparent my-8"></div>
+
+        <!-- ==================== [區塊 2] 口袋名單 ==================== -->
+        <section id="section-restaurants" class="scroll-mt-24 mb-12">
+            <div class="flex justify-between items-center mb-4 px-1">
+                <div>
+                    <h2 class="text-base font-bold text-slate-800 flex items-center gap-2">
+                        <i data-lucide="utensils" class="text-pink-500 w-5 h-5"></i> 餐廳推薦
+                    </h2>
+                    <p class="text-xs text-slate-500 mt-0.5">大家的美味口袋名單</p>
+                </div>
+                <button onclick="openRestaurantModal()" class="px-3.5 py-1.5 bg-pink-500 hover:bg-pink-600 text-white rounded-xl text-xs font-bold shadow-md active:scale-95 transition-all flex items-center gap-1.5">
+                    <i data-lucide="plus" class="w-4 h-4"></i> 新增餐廳
+                </button>
+            </div>
+
+            <!-- 餐廳推薦網格 -->
+            <div id="restaurant-list" class="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
+                <!-- JS 動態帶入 -->
+            </div>
+        </section>
+    </div>
+
+    <!-- ==================== MODALS ==================== -->
+
     <!-- 餐廳表單 Modal -->
-    <div id="restaurantModal" class="fixed inset-0 z-50 hidden flex items-end sm:items-center justify-center bg-slate-900/60 backdrop-blur-sm transition-opacity">
-        <div class="glass-strong w-full sm:max-w-md rounded-t-3xl sm:rounded-3xl p-0 overflow-hidden relative flex flex-col max-h-[90vh] shadow-2xl animate-[fadeIn_0.3s_ease-out]">
-            <div class="h-16 bg-gradient-to-r from-pink-400 to-rose-400 relative flex items-center justify-center shrink-0">
-                <h3 id="modalTitleText" class="text-white font-bold text-lg">新增推薦餐廳</h3>
-                <button onclick="closeRestaurantModal()" class="absolute top-1/2 -translate-y-1/2 right-4 p-2 bg-black/10 hover:bg-black/20 rounded-full text-white transition-colors">
+    <div id="restaurantModal" class="fixed inset-0 z-50 hidden flex items-end sm:items-center justify-center bg-slate-900/60 backdrop-blur-sm transition-opacity p-0 sm:p-4">
+        <div class="glass-strong w-full sm:max-w-md rounded-t-3xl sm:rounded-3xl p-0 overflow-hidden relative flex flex-col max-h-[90vh] shadow-2xl animate-fade-in">
+            <div class="h-14 bg-gradient-to-r from-pink-500 to-rose-400 relative flex items-center justify-center shrink-0">
+                <h3 id="modalTitleText" class="text-white font-bold text-base">新增推薦餐廳</h3>
+                <button onclick="closeRestaurantModal()" class="absolute top-1/2 -translate-y-1/2 right-4 p-1.5 bg-black/10 hover:bg-black/20 rounded-full text-white transition-colors">
                     <i data-lucide="x" class="w-4 h-4"></i>
                 </button>
             </div>
-            <div class="p-5 sm:p-6 overflow-y-auto pb-[env(safe-area-inset-bottom)]">
-                <form id="addRestaurantForm" onsubmit="submitRestaurant(event)" class="space-y-4">
-                    <div class="grid grid-cols-2 gap-4">
-                        <div class="col-span-2">
-                            <label class="block text-xs font-bold text-slate-500 mb-1 ml-1">餐廳名稱 <span class="text-rose-500">*</span></label>
-                            <input type="text" id="resName" placeholder="例：八方雲集" required class="w-full px-4 py-3 rounded-xl bg-white border border-slate-200 focus:ring-2 focus:ring-pink-300 outline-none shadow-sm text-sm">
+            <div class="p-5 overflow-y-auto pb-[max(1.5rem,env(safe-area-inset-bottom))] space-y-4">
+                <form id="addRestaurantForm" onsubmit="submitRestaurant(event)" class="space-y-3.5">
+                    <div>
+                        <label class="block text-xs font-bold text-slate-600 mb-1">餐廳名稱 <span class="text-rose-500">*</span></label>
+                        <input type="text" id="resName" placeholder="例：八方雲集" required class="w-full px-3.5 py-2.5 rounded-xl bg-white border border-slate-200 focus:ring-2 focus:ring-pink-300 outline-none text-sm shadow-sm">
+                    </div>
+                    
+                    <div>
+                        <label class="block text-xs font-bold text-slate-600 mb-1">類別標籤 <span class="text-rose-500">*</span></label>
+                        <select id="resCategory" onchange="handleCategoryChange()" class="w-full px-3.5 py-2.5 rounded-xl bg-white border border-slate-200 focus:ring-2 focus:ring-pink-300 outline-none text-sm shadow-sm appearance-none">
+                            <option value="麵食" selected>🍜 麵食</option>
+                            <option value="健康餐">🥗 健康餐</option>
+                            <option value="火鍋">🍲 火鍋</option>
+                            <option value="便當">🍱 便當</option>
+                            <option value="__custom__">➕ 自訂新類別...</option>
+                        </select>
+                        <input type="text" id="resCustomCategory" placeholder="輸入自訂類別..." class="hidden w-full px-3.5 py-2.5 mt-2 rounded-xl bg-white border border-slate-200 focus:ring-2 focus:ring-pink-300 outline-none text-sm shadow-sm">
+                    </div>
+
+                    <div class="grid grid-cols-2 gap-3">
+                        <div>
+                            <label class="block text-xs font-bold text-slate-600 mb-1">LINE@ 連結 (選填)</label>
+                            <input type="url" id="resLineUrl" placeholder="https://lin.ee/..." class="w-full px-3.5 py-2.5 rounded-xl bg-white border border-slate-200 focus:ring-2 focus:ring-pink-300 outline-none text-sm shadow-sm">
                         </div>
                         <div>
-                            <label class="block text-xs font-bold text-slate-500 mb-1 ml-1">價格範圍 <span class="text-rose-500">*</span></label>
-                            <input type="text" id="resPrice" placeholder="例：$80 - $150" required class="w-full px-4 py-3 rounded-xl bg-white border border-slate-200 focus:ring-2 focus:ring-pink-300 outline-none shadow-sm text-sm">
-                        </div>
-                        <div>
-                            <label class="block text-xs font-bold text-slate-500 mb-1 ml-1">聯絡電話</label>
-                            <input type="tel" id="resPhone" placeholder="例：02-12345678" class="w-full px-4 py-3 rounded-xl bg-white border border-slate-200 focus:ring-2 focus:ring-pink-300 outline-none shadow-sm text-sm">
-                        </div>
-                        <div class="col-span-2">
-                            <label class="block text-xs font-bold text-slate-500 mb-1 ml-1">推薦品項 <span class="text-rose-500">*</span></label>
-                            <input type="text" id="resItems" placeholder="例：排骨飯、雞腿便當" required class="w-full px-4 py-3 rounded-xl bg-white border border-slate-200 focus:ring-2 focus:ring-pink-300 outline-none shadow-sm text-sm">
-                        </div>
-                        <div class="col-span-2 md:col-span-1">
-                            <label class="block text-xs font-bold text-slate-500 mb-1 ml-1">LINE@ 連結</label>
-                            <input type="url" id="resLineUrl" placeholder="https://lin.ee/..." class="w-full px-4 py-3 rounded-xl bg-white border border-slate-200 focus:ring-2 focus:ring-pink-300 outline-none shadow-sm text-sm">
-                        </div>
-                        <div class="col-span-2 md:col-span-1">
-                            <label class="block text-xs font-bold text-slate-500 mb-1 ml-1">購買方式</label>
-                            <select id="resMethod" class="w-full px-4 py-3 rounded-xl bg-white border border-slate-200 focus:ring-2 focus:ring-pink-300 outline-none shadow-sm text-sm appearance-none">
+                            <label class="block text-xs font-bold text-slate-600 mb-1">購買方式</label>
+                            <select id="resMethod" class="w-full px-3.5 py-2.5 rounded-xl bg-white border border-slate-200 focus:ring-2 focus:ring-pink-300 outline-none text-sm shadow-sm appearance-none">
                                 <option value="店家自送" selected>店家自送</option>
-                                <option value="外送 (UberEats/Foodpanda)">外送 (UberEats/Foodpanda)</option>
+                                <option value="外送 (UberEats/Foodpanda)">外送平台</option>
                                 <option value="自取">自取</option>
                             </select>
                         </div>
-                        <div class="col-span-2">
-                            <label class="block text-xs font-bold text-slate-500 mb-1 ml-1">備註 (選填)</label>
-                            <textarea id="resNotes" rows="2" placeholder="例：滿500外送、需提早一天訂" class="w-full px-4 py-3 rounded-xl bg-white border border-slate-200 focus:ring-2 focus:ring-pink-300 outline-none shadow-sm text-sm resize-none"></textarea>
-                        </div>
                     </div>
-                    <button type="submit" id="btnSubmitRestaurant" class="w-full bg-pink-500 text-white py-3.5 rounded-xl font-bold active:scale-[0.98] transition-transform shadow-md mt-4 flex justify-center items-center gap-2">
-                        <i data-lucide="save" class="w-5 h-5"></i> 儲存餐廳
+
+                    <div>
+                        <label class="block text-xs font-bold text-slate-600 mb-1">備註 (選填)</label>
+                        <textarea id="resNotes" rows="2" placeholder="例：滿500外送、需提早一天預訂" class="w-full px-3.5 py-2.5 rounded-xl bg-white border border-slate-200 focus:ring-2 focus:ring-pink-300 outline-none text-sm resize-none shadow-sm"></textarea>
+                    </div>
+
+                    <button type="submit" id="btnSubmitRestaurant" class="w-full bg-pink-500 text-white py-3 rounded-xl font-bold active:scale-[0.98] transition-transform shadow-md mt-2 flex justify-center items-center gap-2 text-sm">
+                        <i data-lucide="save" class="w-4 h-4"></i> 儲存餐廳
                     </button>
                 </form>
             </div>
         </div>
     </div>
 
-    <!-- 密碼驗證 Modal -->
-    <div id="passwordModal" class="fixed inset-0 z-50 hidden flex items-center justify-center bg-slate-900/60 backdrop-blur-sm transition-opacity">
-        <div class="glass-strong w-11/12 max-w-sm rounded-3xl p-6 relative shadow-2xl animate-[fadeIn_0.3s_ease-out]">
-            <div class="flex flex-col items-center text-center mb-5 mt-2">
-                <div class="w-12 h-12 bg-rose-100 text-rose-500 rounded-full flex items-center justify-center mb-3">
-                    <i data-lucide="lock" class="w-6 h-6"></i>
+    <!-- 儲存餐點資訊二次確認 Modal -->
+    <div id="confirmFoodModal" class="fixed inset-0 z-50 hidden flex items-center justify-center bg-slate-900/60 backdrop-blur-sm transition-opacity p-4">
+        <div class="glass-strong w-full max-w-sm rounded-3xl p-5 relative shadow-2xl animate-fade-in">
+            <div class="flex flex-col items-center text-center mb-4 mt-1">
+                <div class="w-11 h-11 bg-purple-100 text-purple-600 rounded-full flex items-center justify-center mb-2">
+                    <i data-lucide="send" class="w-5 h-5"></i>
                 </div>
-                <h3 class="text-lg font-bold text-slate-800">需要特殊權限</h3>
-                <p class="text-xs text-slate-500 mt-1">請輸入密碼以執行此操作</p>
+                <h3 class="text-base font-bold text-slate-800">確認儲存餐點？</h3>
+                <p class="text-xs text-slate-500 mt-0.5">儲存後將可同步推播通知發送給所有人知悉。</p>
+            </div>
+
+            <div class="bg-purple-50/70 border border-purple-100 rounded-2xl p-3.5 mb-4 space-y-1.5 text-xs text-slate-700">
+                <div class="flex justify-between">
+                    <span class="text-slate-400 font-bold">訂購日期：</span>
+                    <span id="confirmFoodDate" class="font-bold"></span>
+                </div>
+                <div class="flex justify-between">
+                    <span class="text-slate-400 font-bold">負責人：</span>
+                    <span id="confirmFoodAssignee" class="font-bold text-purple-700"></span>
+                </div>
+                <div class="flex justify-between border-t border-purple-100 pt-1.5 mt-1.5">
+                    <span class="text-slate-400 font-bold">預計餐點：</span>
+                    <span id="confirmFoodName" class="font-bold text-slate-900"></span>
+                </div>
             </div>
             
-            <input type="password" id="actionPassword" placeholder="請輸入密碼..." class="w-full px-4 py-3.5 rounded-xl bg-white border border-slate-200 focus:ring-2 focus:ring-rose-300 outline-none shadow-inner text-center font-bold tracking-widest text-slate-700 mb-4">
-            
-            <div class="flex gap-3">
-                <button onclick="closePasswordModal()" class="flex-1 py-3 bg-slate-100 text-slate-500 font-bold rounded-xl hover:bg-slate-200 transition-colors">取消</button>
-                <button onclick="submitPassword()" class="flex-1 py-3 bg-rose-500 text-white font-bold rounded-xl shadow-md hover:bg-rose-600 active:scale-95 transition-transform">確認</button>
+            <div class="flex gap-2">
+                <button onclick="closeConfirmFoodModal()" class="flex-1 py-2.5 bg-slate-100 text-slate-500 font-bold text-xs rounded-xl hover:bg-slate-200 transition-colors">再想想</button>
+                <button onclick="executeSaveFoodInfo()" class="flex-1 py-2.5 bg-purple-600 text-white font-bold text-xs rounded-xl shadow-md hover:bg-purple-700 active:scale-95 transition-transform flex items-center justify-center gap-1">
+                    <i data-lucide="check" class="w-3.5 h-3.5"></i> 確認儲存
+                </button>
             </div>
         </div>
     </div>
 
-    <!-- 身分驗證 Modal -->
-    <div id="identityModal" class="fixed inset-0 z-50 hidden flex items-center justify-center bg-slate-900/60 backdrop-blur-sm transition-opacity">
-        <div class="glass-strong w-11/12 max-w-sm rounded-3xl p-6 relative shadow-2xl animate-[fadeIn_0.3s_ease-out]">
-            <div class="flex flex-col items-center text-center mb-5 mt-2">
-                <div class="w-12 h-12 bg-purple-100 text-purple-500 rounded-full flex items-center justify-center mb-3">
-                    <i data-lucide="user" class="w-6 h-6"></i>
+    <!-- 歷史紀錄 Modal -->
+    <div id="pastSchedulesModal" class="fixed inset-0 z-50 hidden flex items-center justify-center bg-slate-900/60 backdrop-blur-sm transition-opacity p-4">
+        <div class="glass-strong w-full max-w-md rounded-3xl p-5 relative shadow-2xl max-h-[80vh] flex flex-col animate-fade-in">
+            <div class="flex justify-between items-center mb-3 pb-2 border-b border-slate-200/60">
+                <h3 class="text-base font-bold text-slate-800 flex items-center gap-2">
+                    <i data-lucide="history" class="w-4 h-4 text-purple-600"></i> 過去 4 週歷史紀錄
+                </h3>
+                <button onclick="closePastSchedulesModal()" class="p-1.5 bg-slate-100 hover:bg-slate-200 rounded-full text-slate-500 transition-colors">
+                    <i data-lucide="x" class="w-4 h-4"></i>
+                </button>
+            </div>
+            
+            <div id="past-schedule-list" class="overflow-y-auto space-y-2.5 pr-1 no-scrollbar">
+                <!-- 動態填入 -->
+            </div>
+        </div>
+    </div>
+
+    <!-- 密碼驗證 Modal -->
+    <div id="passwordModal" class="fixed inset-0 z-50 hidden flex items-center justify-center bg-slate-900/60 backdrop-blur-sm transition-opacity p-4">
+        <div class="glass-strong w-full max-w-xs rounded-3xl p-5 relative shadow-2xl animate-fade-in">
+            <div class="flex flex-col items-center text-center mb-4 mt-1">
+                <div class="w-10 h-10 bg-rose-100 text-rose-500 rounded-full flex items-center justify-center mb-2">
+                    <i data-lucide="lock" class="w-5 h-5"></i>
                 </div>
-                <h3 class="text-lg font-bold text-slate-800">您是哪位？</h3>
-                <p class="text-xs text-slate-500 mt-1">請輸入姓名，系統將自動記住，方便日後認領。</p>
+                <h3 class="text-base font-bold text-slate-800">需要權限密碼</h3>
+                <p class="text-xs text-slate-500 mt-0.5">請輸入通行密碼以執行此操作</p>
+            </div>
+            
+            <input type="password" id="actionPassword" placeholder="輸入密碼..." class="w-full px-3.5 py-2.5 rounded-xl bg-white border border-slate-200 focus:ring-2 focus:ring-rose-300 outline-none text-center font-bold tracking-widest text-slate-700 text-sm mb-3">
+            
+            <div class="flex gap-2">
+                <button onclick="closePasswordModal()" class="flex-1 py-2 bg-slate-100 text-slate-500 font-bold text-xs rounded-xl hover:bg-slate-200 transition-colors">取消</button>
+                <button onclick="submitPassword()" class="flex-1 py-2 bg-rose-500 text-white font-bold text-xs rounded-xl shadow-md hover:bg-rose-600 active:scale-95 transition-transform">確認</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 身分認領 Modal -->
+    <div id="identityModal" class="fixed inset-0 z-50 hidden flex items-center justify-center bg-slate-900/60 backdrop-blur-sm transition-opacity p-4">
+        <div class="glass-strong w-full max-w-xs rounded-3xl p-5 relative shadow-2xl animate-fade-in">
+            <div class="flex flex-col items-center text-center mb-4 mt-1">
+                <div class="w-10 h-10 bg-purple-100 text-purple-600 rounded-full flex items-center justify-center mb-2">
+                    <i data-lucide="user-check" class="w-5 h-5"></i>
+                </div>
+                <h3 class="text-base font-bold text-slate-800">請輸入您的姓名</h3>
+                <p class="text-xs text-slate-500 mt-0.5">系統將會自動記錄，方便日後認領排班。</p>
             </div>
             
             <form onsubmit="submitIdentity(event)">
-                <input type="text" id="identityName" required placeholder="請輸入您的姓名..." class="w-full px-4 py-3.5 rounded-xl bg-white border border-slate-200 focus:ring-2 focus:ring-purple-300 outline-none shadow-inner text-center font-bold tracking-widest text-slate-700 mb-4">
+                <input type="text" id="identityName" required placeholder="例如：王小明" class="w-full px-3.5 py-2.5 rounded-xl bg-white border border-slate-200 focus:ring-2 focus:ring-purple-300 outline-none text-center font-bold text-slate-700 text-sm mb-3">
                 
-                <div class="flex gap-3">
-                    <button type="button" onclick="closeIdentityModal()" class="flex-1 py-3 bg-slate-100 text-slate-500 font-bold rounded-xl hover:bg-slate-200 transition-colors">取消</button>
-                    <button type="submit" class="flex-1 py-3 bg-purple-500 text-white font-bold rounded-xl shadow-md hover:bg-purple-600 active:scale-95 transition-transform">確認</button>
+                <div class="flex gap-2">
+                    <button type="button" onclick="closeIdentityModal()" class="flex-1 py-2 bg-slate-100 text-slate-500 font-bold text-xs rounded-xl hover:bg-slate-200 transition-colors">取消</button>
+                    <button type="submit" class="flex-1 py-2 bg-purple-500 text-white font-bold text-xs rounded-xl shadow-md hover:bg-purple-600 active:scale-95 transition-transform">確認儲存</button>
                 </div>
             </form>
         </div>
     </div>
 
+    <!-- ==================== JAVASCRIPT ==================== -->
     <script>
-        // ==========================================
-        // State Management & Configuration
-        // ==========================================
-        let GAS_API_URL = 'https://script.google.com/macros/s/AKfycbwl4-pD1TlRe6OTdxJ3V1QrrBGSUCiA5mHeC7YbMn94AgYgyERmmHBr6XJSV0KVBEWbWg/exec'; 
+        // 後端 GAS API 網址
+        const GAS_API_URL = 'https://script.google.com/macros/s/AKfycbwl4-pD1TlRe6OTdxJ3V1QrrBGSUCiA5mHeC7YbMn94AgYgyERmmHBr6XJSV0KVBEWbWg/exec'; 
         
         let currentUser = { name: '' };
         let schedules = {}; 
@@ -262,16 +317,14 @@
         let passwordSuccessCallback = null;
         let pendingDateStr = null;
         let pendingActionType = null;
+        let pendingFoodSaveDateStr = null;
 
-        // ==========================================
-        // Initialization
-        // ==========================================
         document.addEventListener('DOMContentLoaded', () => {
             lucide.createIcons();
             loadUserData();
             loadDataFromGASOrLocal();
 
-            // Setup Scrollspy for Top Nav
+            // Scrollspy 頂部膠囊選單反饋
             const sections = document.querySelectorAll('section');
             const navLinks = {
                 'section-schedule': document.getElementById('nav-schedule'),
@@ -280,7 +333,7 @@
 
             const observerOptions = {
                 root: null,
-                rootMargin: '-20% 0px -70% 0px',
+                rootMargin: '-20% 0px -60% 0px',
                 threshold: 0
             };
 
@@ -308,14 +361,13 @@
             sections.forEach(section => observer.observe(section));
         });
 
-        // ==========================================
-        // Data Loading & Sync with LocalStorage / GAS
-        // ==========================================
         function loadUserData() {
             const savedUser = localStorage.getItem('foodOrder_user');
             if (savedUser) {
-                const parsed = JSON.parse(savedUser);
-                currentUser.name = parsed.name || '';
+                try {
+                    const parsed = JSON.parse(savedUser);
+                    currentUser.name = parsed.name || '';
+                } catch(e) {}
             }
         }
 
@@ -344,7 +396,7 @@
                 } catch (err) {
                     console.warn('GAS Fetch failed, fallback to local:', err);
                     loadLocalData();
-                    showToast("已從本機載入資料", "info");
+                    showToast("已載入預設資料", "info");
                 }
             } else {
                 loadLocalData();
@@ -359,17 +411,22 @@
             if (savedSchedules) {
                 schedules = JSON.parse(savedSchedules);
             } else {
-                const weds = getUpcomingWednesdays(4);
-                schedules[weds[0]] = { assignee: '王小明', status: 'claimed', foodName: '悟饕池上飯包', unavailables: [] };
-                schedules[weds[1]] = { status: 'unassigned', unavailables: [] }; 
-                schedules[weds[2]] = { assignee: '陳彥中', status: 'claimed', foodName: '', unavailables: [] };
-                schedules[weds[3]] = { status: 'unassigned', unavailables: ['黃利亞', '林大明'] };
+                const weds = getUpcomingWednesdays();
+                if (weds.length > 0) schedules[weds[0]] = { assignee: '王小明', status: 'claimed', foodName: '悟饕池上飯包', unavailables: [] };
+                if (weds.length > 1) schedules[weds[1]] = { status: 'unassigned', unavailables: [] }; 
+                if (weds.length > 2) schedules[weds[2]] = { assignee: '陳彥中', status: 'claimed', foodName: '', unavailables: [] };
                 saveSchedulesToLocal();
             }
 
             const savedRestaurants = localStorage.getItem('foodOrder_restaurants');
             if (savedRestaurants) {
                 restaurants = JSON.parse(savedRestaurants);
+            } else {
+                restaurants = [
+                    { id: 1, name: '八方雲集', category: '麵食', method: '店家自送', notes: '滿300元送，需提早訂', lineUrl: '', timestamp: Date.now() },
+                    { id: 2, name: '夏威夷波奇飯', category: '健康餐', method: '外送 (UberEats/Foodpanda)', notes: '', lineUrl: '', timestamp: Date.now() }
+                ];
+                saveRestaurantsToLocal();
             }
         }
 
@@ -381,157 +438,78 @@
             localStorage.setItem('foodOrder_restaurants', JSON.stringify(restaurants));
         }
 
-        async function syncSchedulesToGAS() {
-            saveSchedulesToLocal();
-            if (!GAS_API_URL || GAS_API_URL.trim() === '') return;
-
-            try {
-                await fetch(GAS_API_URL, {
-                    method: 'POST',
-                    mode: 'no-cors',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ action: 'saveSchedules', schedules: schedules })
-                });
-            } catch (err) {
-                console.error("Sync Schedules Error:", err);
-            }
-        }
-
-        async function syncRestaurantsToGAS() {
-            saveRestaurantsToLocal();
-            if (!GAS_API_URL || GAS_API_URL.trim() === '') return;
-
-            try {
-                await fetch(GAS_API_URL, {
-                    method: 'POST',
-                    mode: 'no-cors',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ action: 'saveRestaurants', restaurants: restaurants })
-                });
-            } catch (err) {
-                console.error("Sync Restaurants Error:", err);
-            }
-        }
-
         function renderAll() {
             renderSchedule();
             renderRestaurants();
         }
 
-        // ==========================================
-        // Password Logic
-        // ==========================================
-        function openPasswordModal(callback) {
-            passwordSuccessCallback = callback;
-            document.getElementById('actionPassword').value = '';
-            document.getElementById('passwordModal').classList.remove('hidden');
-        }
+        /**
+         * 取得：當月剩餘的所有週三 + 下個月前 2 個週三
+         */
+        function getUpcomingWednesdays() {
+            let dates = [];
+            let d = new Date();
+            d.setHours(0, 0, 0, 0);
+            
+            // 找到距離今天最近的週三
+            let day = d.getDay();
+            let diff = (3 - day + 7) % 7; 
+            d.setDate(d.getDate() + diff);
 
-        function closePasswordModal() {
-            document.getElementById('passwordModal').classList.add('hidden');
-            passwordSuccessCallback = null;
-        }
+            const currentMonth = d.getMonth();
+            const nextMonth = (currentMonth + 1) % 12;
+            let nextMonthWedCount = 0;
 
-        function submitPassword() {
-            const pwd = document.getElementById('actionPassword').value;
-            if (pwd === 'YSA2026') {
-                closePasswordModal();
-                if (passwordSuccessCallback) passwordSuccessCallback();
-            } else {
-                showToast("密碼錯誤，請重新輸入", "error");
-            }
-        }
-
-        // ==========================================
-        // Identity Logic
-        // ==========================================
-        function openIdentityModal() {
-            document.getElementById('identityName').value = '';
-            document.getElementById('identityModal').classList.remove('hidden');
-        }
-
-        function closeIdentityModal() {
-            document.getElementById('identityModal').classList.add('hidden');
-            pendingDateStr = null;
-            pendingActionType = null;
-        }
-
-        function submitIdentity(e) {
-            e.preventDefault();
-            const name = document.getElementById('identityName').value.trim();
-            if (name) {
-                currentUser.name = name;
-                saveUser();
-                closeIdentityModal();
-                showToast("已記住您的身分！", "success");
-                
-                if (pendingDateStr && pendingActionType) {
-                    executeScheduleAction(pendingDateStr, pendingActionType);
-                    pendingDateStr = null;
-                    pendingActionType = null;
+            while (true) {
+                let m = d.getMonth();
+                if (m === currentMonth) {
+                    const yyyy = d.getFullYear();
+                    const mm = String(m + 1).padStart(2, '0');
+                    const dd = String(d.getDate()).padStart(2, '0');
+                    dates.push(`${yyyy}-${mm}-${dd}`);
+                } else if (m === nextMonth) {
+                    if (nextMonthWedCount < 2) {
+                        const yyyy = d.getFullYear();
+                        const mm = String(m + 1).padStart(2, '0');
+                        const dd = String(d.getDate()).padStart(2, '0');
+                        dates.push(`${yyyy}-${mm}-${dd}`);
+                        nextMonthWedCount++;
+                    } else {
+                        break;
+                    }
                 } else {
-                    renderAll();
+                    break;
                 }
+                d.setDate(d.getDate() + 7);
             }
+            return dates;
         }
 
-        // ==========================================
-        // UI Helpers
-        // ==========================================
-        function showToast(message, type = 'info', duration = 3000) {
-            const toast = document.getElementById('toastNotification');
-            const toastMessage = document.getElementById('toastMessage');
-            const toastIcon = document.getElementById('toastIcon');
-
-            toastMessage.textContent = message;
-            if (type === 'success') {
-                toastIcon.setAttribute('data-lucide', 'check-circle-2');
-                toastIcon.className = "w-5 h-5 shrink-0 text-emerald-400";
-            } else if (type === 'error') {
-                toastIcon.setAttribute('data-lucide', 'alert-circle');
-                toastIcon.className = "w-5 h-5 shrink-0 text-rose-400";
-            } else {
-                toastIcon.setAttribute('data-lucide', 'info');
-                toastIcon.className = "w-5 h-5 shrink-0 text-purple-400";
-            }
-            lucide.createIcons();
-
-            toast.classList.remove('-translate-y-24', 'opacity-0');
-            toast.classList.add('translate-y-0', 'opacity-100');
-
-            clearTimeout(toastTimeout);
-            toastTimeout = setTimeout(() => {
-                toast.classList.remove('translate-y-0', 'opacity-100');
-                toast.classList.add('-translate-y-24', 'opacity-0');
-            }, duration);
-        }
-
-        function getUpcomingWednesdays(weeks = 8) {
+        function getPastWednesdays(weeks = 4) {
             let dates = [];
             let d = new Date();
             d.setHours(0, 0, 0, 0);
             
             let day = d.getDay();
             let diff = (3 - day + 7) % 7; 
-            d.setDate(d.getDate() + diff);
+            d.setDate(d.getDate() + diff - 7); // 上週三
 
             for (let i = 0; i < weeks; i++) {
                 const yyyy = d.getFullYear();
                 const mm = String(d.getMonth() + 1).padStart(2, '0');
                 const dd = String(d.getDate()).padStart(2, '0');
                 dates.push(`${yyyy}-${mm}-${dd}`);
-                d.setDate(d.getDate() + 7);
+                d.setDate(d.getDate() - 7);
             }
             return dates;
         }
 
-        // ==========================================
-        // Schedule Rendering & Actions
-        // ==========================================
         function renderSchedule() {
             const container = document.getElementById('schedule-list');
+            if (!container) return;
             container.innerHTML = '';
-            const wednesdays = getUpcomingWednesdays(8); 
+
+            const wednesdays = getUpcomingWednesdays(); 
 
             wednesdays.forEach(dateStr => {
                 const dateObj = new Date(dateStr);
@@ -542,44 +520,46 @@
                 const unavailables = slot.unavailables || [];
                 const isUnavailable = unavailables.includes(currentUser.name);
 
-                let cardClass = "glass p-5 rounded-2xl shadow-sm transition-all relative overflow-hidden group";
+                let cardClass = "glass p-4 rounded-2xl shadow-sm transition-all relative overflow-hidden group flex flex-col justify-between";
                 let contentHtml = '';
 
                 let unavailablesHtml = '';
                 if (unavailables.length > 0) {
-                    const names = unavailables.map(n => `<span class="line-through decoration-slate-400 opacity-70">${n}</span>`).join('<span class="text-slate-300 mx-1">,</span>');
-                    unavailablesHtml = `<div class="mt-4 text-xs text-slate-500 bg-slate-50/80 px-3 py-2 rounded-xl border border-slate-100 flex flex-wrap items-center gap-1.5"><i data-lucide="user-x" class="w-3.5 h-3.5 opacity-70"></i> <span>無法幫忙：</span><div class="flex flex-wrap items-center gap-1 font-medium">${names}</div></div>`;
+                    const names = unavailables.map(n => `<span class="line-through decoration-slate-400 opacity-75">${n}</span>`).join('<span class="text-slate-300 mx-1">,</span>');
+                    unavailablesHtml = `<div class="mt-2.5 text-[11px] text-slate-500 bg-slate-100/70 px-2.5 py-1.5 rounded-xl border border-slate-200/50 flex flex-wrap items-center gap-1"><i data-lucide="user-x" class="w-3.5 h-3.5 text-slate-400 shrink-0"></i> <span>無法幫忙：</span><div class="flex flex-wrap items-center font-medium">${names}</div></div>`;
                 }
 
                 if (slot.status === 'unassigned') {
-                    cardClass += " border border-slate-200 hover:border-purple-300";
+                    cardClass += " border border-slate-200/80 hover:border-purple-300";
                     contentHtml = `
-                        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mt-2 sm:mt-0">
-                            <div class="flex items-center gap-3">
-                                <div class="bg-slate-100 text-slate-500 rounded-xl p-2.5 flex flex-col items-center justify-center min-w-[60px]">
-                                    <span class="text-[10px] font-medium">週三</span>
-                                    <span class="text-lg font-bold leading-none mt-0.5">${displayDate}</span>
+                        <div>
+                            <div class="flex items-center gap-3 mb-2.5">
+                                <div class="bg-slate-100 text-slate-600 rounded-xl p-2 flex flex-col items-center justify-center min-w-[50px]">
+                                    <span class="text-[9px] font-bold text-slate-400">週三</span>
+                                    <span class="text-base font-bold leading-none mt-0.5">${displayDate}</span>
                                 </div>
                                 <div>
-                                    <h3 class="font-bold text-slate-700 text-lg">等待認領中</h3>
-                                    <p class="text-xs text-slate-400 mt-1">目前無人負責</p>
+                                    <h3 class="font-bold text-slate-700 text-sm">等待認領中</h3>
+                                    <p class="text-[11px] text-slate-400 mt-0.5">目前無人負責訂餐</p>
                                 </div>
                             </div>
-                            <div class="flex gap-2 w-full sm:w-auto">
+                        </div>
+                        <div>
+                            <div class="flex gap-1.5 w-full pt-2 border-t border-slate-100">
                                 ${isUnavailable 
-                                    ? `<button onclick="actionSchedule('${dateStr}', 'available')" class="flex-1 sm:flex-none px-4 py-2 bg-slate-100/50 text-slate-400 rounded-xl text-sm font-bold text-center border border-slate-200 hover:bg-slate-200 transition-colors active:scale-95">取消標記</button>`
-                                    : `<button onclick="actionSchedule('${dateStr}', 'unavailable')" class="flex-1 sm:flex-none px-4 py-2 bg-slate-100 text-slate-500 rounded-xl text-sm font-bold hover:bg-slate-200 transition-colors active:scale-95 text-center border border-slate-200">無法幫忙</button>`
+                                    ? `<button onclick="actionSchedule('${dateStr}', 'available')" class="flex-1 py-1.5 bg-slate-100 text-slate-400 rounded-xl text-xs font-bold border border-slate-200 hover:bg-slate-200 transition-colors">取消無法</button>`
+                                    : `<button onclick="actionSchedule('${dateStr}', 'unavailable')" class="flex-1 py-1.5 bg-slate-100 text-slate-500 rounded-xl text-xs font-bold hover:bg-slate-200 transition-colors border border-slate-200">無法幫忙</button>`
                                 }
-                                <button onclick="actionSchedule('${dateStr}', 'claim')" class="flex-1 sm:flex-none px-4 py-2 bg-purple-500 text-white rounded-xl text-sm font-bold shadow-md hover:bg-purple-600 transition-colors active:scale-95 text-center flex items-center justify-center gap-1">
-                                    <i data-lucide="hand" class="w-4 h-4"></i> 我來認領
+                                <button onclick="actionSchedule('${dateStr}', 'claim')" class="flex-1 py-1.5 bg-purple-500 text-white rounded-xl text-xs font-bold shadow-sm hover:bg-purple-600 transition-colors active:scale-95 flex items-center justify-center gap-1">
+                                    <i data-lucide="hand" class="w-3.5 h-3.5"></i> 我來認領
                                 </button>
                             </div>
+                            ${unavailablesHtml}
                         </div>
-                        ${unavailablesHtml}
                     `;
                 } else if (slot.status === 'claimed') {
                     if (isMe) {
-                        cardClass += " border border-purple-300 bg-gradient-to-br from-white to-purple-50/30 ring-2 ring-purple-100 ring-offset-1";
+                        cardClass += " border border-purple-300 bg-gradient-to-br from-white to-purple-50/40 ring-2 ring-purple-100";
                         
                         let showEditForm = false;
                         if (foodEditState[dateStr] === true) {
@@ -591,62 +571,64 @@
                         let foodInputHtml = '';
                         if (showEditForm) {
                             foodInputHtml = `
-                                <div class="space-y-3 mt-4 animate-[fadeIn_0.3s_ease-out]">
-                                    <div class="flex-1">
-                                        <label class="block text-[10px] font-bold text-slate-500 mb-1 ml-1">餐點名稱/餐廳</label>
-                                        <div class="space-y-2">
-                                            <select id="food-select-${dateStr}" onchange="handleFoodSelectChange('${dateStr}')" class="w-full px-3 py-2 rounded-lg bg-white border border-slate-200 focus:ring-2 focus:ring-purple-300 outline-none text-sm appearance-none">
-                                                <option value="">從口袋名單選擇...</option>
-                                            </select>
-                                            <input type="text" id="food-${dateStr}" value="${slot.foodName || ''}" placeholder="或直接輸入其他餐點名稱..." class="w-full px-3 py-2 rounded-lg bg-white border border-slate-200 focus:ring-2 focus:ring-purple-300 outline-none text-sm">
-                                        </div>
+                                <div class="space-y-2 mt-2.5 animate-fade-in">
+                                    <div>
+                                        <label class="block text-[10px] font-bold text-slate-500 mb-1">口袋名單 / 自訂餐點</label>
+                                        <select id="food-select-${dateStr}" onchange="handleFoodSelectChange('${dateStr}')" class="w-full px-2.5 py-1.5 rounded-lg bg-white border border-slate-200 focus:ring-2 focus:ring-purple-300 outline-none text-xs appearance-none mb-1.5">
+                                            <option value="">選擇口袋名單...</option>
+                                        </select>
+                                        <input type="text" id="food-${dateStr}" value="${slot.foodName || ''}" placeholder="或直接輸入餐點..." class="w-full px-2.5 py-1.5 rounded-lg bg-white border border-slate-200 focus:ring-2 focus:ring-purple-300 outline-none text-xs">
                                     </div>
-                                    <button onclick="saveFoodInfo('${dateStr}')" class="w-full py-2.5 bg-slate-800 text-white rounded-lg text-sm font-bold shadow-sm active:scale-[0.98] transition-transform">儲存餐點資訊</button>
+                                    <button onclick="openConfirmFoodModal('${dateStr}')" class="w-full py-1.5 bg-purple-600 text-white rounded-lg text-xs font-bold shadow-sm active:scale-95 transition-transform flex items-center justify-center gap-1">
+                                        <i data-lucide="save" class="w-3.5 h-3.5"></i> 儲存餐點資訊
+                                    </button>
                                 </div>
                             `;
                         } else {
                             foodInputHtml = `
-                                <div class="bg-white/80 p-3 rounded-xl flex justify-between items-center border border-purple-100 shadow-sm mt-4 animate-[fadeIn_0.3s_ease-out]">
-                                    <div>
-                                        <p class="text-[10px] text-purple-400 font-bold mb-0.5">預計訂購</p>
-                                        <p class="text-base font-bold text-slate-800 leading-tight">${slot.foodName}</p>
+                                <div class="bg-white/90 p-2.5 rounded-xl flex justify-between items-center border border-purple-100 shadow-sm mt-2.5 animate-fade-in">
+                                    <div class="overflow-hidden pr-2">
+                                        <p class="text-[9px] text-purple-500 font-bold">預計訂購</p>
+                                        <p class="text-xs font-bold text-slate-800 truncate leading-snug">${slot.foodName}</p>
                                     </div>
-                                    <button onclick="toggleFoodEdit('${dateStr}')" class="p-2.5 bg-purple-50 text-purple-600 rounded-lg hover:bg-purple-100 transition-colors border border-purple-100 active:scale-95">
-                                        <i data-lucide="edit-3" class="w-4 h-4"></i>
+                                    <button onclick="toggleFoodEdit('${dateStr}')" class="p-1.5 bg-purple-50 text-purple-600 rounded-lg hover:bg-purple-100 transition-colors border border-purple-100 shrink-0">
+                                        <i data-lucide="edit-3" class="w-3.5 h-3.5"></i>
                                     </button>
                                 </div>
                             `;
                         }
 
                         contentHtml = `
-                            <div class="flex items-start gap-3 border-b border-purple-100/50 pb-3">
-                                <div class="bg-purple-500 text-white rounded-xl p-2.5 flex flex-col items-center justify-center min-w-[60px] shadow-sm">
-                                    <span class="text-[10px] font-medium opacity-90">週三</span>
-                                    <span class="text-lg font-bold leading-none mt-0.5">${displayDate}</span>
-                                </div>
-                                <div class="flex-1">
-                                    <div class="flex items-center justify-between">
-                                        <h3 class="font-bold text-purple-700 text-lg">由我負責</h3>
-                                        <button onclick="actionSchedule('${dateStr}', 'reset')" class="text-[10px] font-bold text-slate-400 hover:text-rose-500 transition-colors">取消認領</button>
+                            <div>
+                                <div class="flex items-start gap-2.5 border-b border-purple-100 pb-2">
+                                    <div class="bg-purple-500 text-white rounded-xl p-2 flex flex-col items-center justify-center min-w-[50px] shadow-sm">
+                                        <span class="text-[9px] font-bold opacity-80">週三</span>
+                                        <span class="text-base font-bold leading-none mt-0.5">${displayDate}</span>
                                     </div>
-                                    <p class="text-xs text-slate-500 mt-0.5">請填寫預計購買的餐點，方便大家了解。</p>
+                                    <div class="flex-1 min-w-0">
+                                        <div class="flex items-center justify-between">
+                                            <h3 class="font-bold text-purple-700 text-sm truncate">由我負責</h3>
+                                            <button onclick="actionSchedule('${dateStr}', 'reset')" class="text-[10px] font-bold text-slate-400 hover:text-rose-500 transition-colors ml-1 shrink-0">取消認領</button>
+                                        </div>
+                                        <p class="text-[11px] text-slate-500 mt-0.5">請選取或填寫預計餐點</p>
+                                    </div>
                                 </div>
+                                ${foodInputHtml}
                             </div>
-                            ${foodInputHtml}
                             ${unavailablesHtml}
                         `;
                     } else {
                         cardClass += " border border-indigo-100 bg-white/80";
                         contentHtml = `
-                            <div class="flex items-center justify-between gap-4">
+                            <div>
                                 <div class="flex items-center gap-3">
-                                    <div class="bg-indigo-50 text-indigo-600 rounded-xl p-2.5 flex flex-col items-center justify-center min-w-[60px] border border-indigo-100">
-                                        <span class="text-[10px] font-medium">週三</span>
-                                        <span class="text-lg font-bold leading-none mt-0.5">${displayDate}</span>
+                                    <div class="bg-indigo-50 text-indigo-600 rounded-xl p-2 flex flex-col items-center justify-center min-w-[50px] border border-indigo-100">
+                                        <span class="text-[9px] font-bold">週三</span>
+                                        <span class="text-base font-bold leading-none mt-0.5">${displayDate}</span>
                                     </div>
-                                    <div>
-                                        <h3 class="font-bold text-slate-700">${slot.assignee}</h3>
-                                        <p class="text-sm font-bold text-indigo-600 mt-1">${slot.foodName || '尚未決定餐點'}</p>
+                                    <div class="min-w-0 flex-1">
+                                        <h3 class="font-bold text-slate-800 text-sm truncate">${slot.assignee} 負責</h3>
+                                        <p class="text-xs font-bold text-indigo-600 mt-0.5 truncate">${slot.foodName || '尚未決定餐點'}</p>
                                     </div>
                                 </div>
                             </div>
@@ -658,20 +640,40 @@
                 container.innerHTML += `<div class="${cardClass}">${contentHtml}</div>`;
             });
             
-            // 填入所有餐廳下拉式選單選項
+            // 填入選單選項
             wednesdays.forEach(dateStr => {
-                const selectEl = document.getElementById(`food-select-${dateStr}`);
-                if (selectEl) {
-                    restaurants.forEach(res => {
-                        const opt = document.createElement('option');
-                        opt.value = res.name;
-                        opt.textContent = `${res.name} (${res.items})`;
-                        selectEl.appendChild(opt);
-                    });
-                }
+                populateGroupedFoodSelect(dateStr);
             });
 
             lucide.createIcons();
+        }
+
+        function populateGroupedFoodSelect(dateStr) {
+            const selectEl = document.getElementById(`food-select-${dateStr}`);
+            if (!selectEl) return;
+
+            selectEl.innerHTML = '<option value="">從口袋名單選擇...</option>';
+            
+            const grouped = {};
+            restaurants.forEach(res => {
+                const cat = res.category || '其他';
+                if (!grouped[cat]) grouped[cat] = [];
+                grouped[cat].push(res);
+            });
+
+            Object.keys(grouped).forEach(catName => {
+                const optGroup = document.createElement('optgroup');
+                optGroup.label = catName;
+                
+                grouped[catName].forEach(res => {
+                    const opt = document.createElement('option');
+                    opt.value = res.name;
+                    opt.textContent = `${res.name} (${res.method})`;
+                    optGroup.appendChild(opt);
+                });
+
+                selectEl.appendChild(optGroup);
+            });
         }
 
         function handleFoodSelectChange(dateStr) {
@@ -689,7 +691,6 @@
                 openIdentityModal();
                 return;
             }
-            
             executeScheduleAction(dateStr, action);
         }
 
@@ -701,10 +702,9 @@
                 schedules[dateStr].assignee = currentUser.name;
                 schedules[dateStr].status = 'claimed';
                 schedules[dateStr].foodName = '';
-                
                 schedules[dateStr].unavailables = schedules[dateStr].unavailables.filter(n => n !== currentUser.name);
                 foodEditState[dateStr] = true; 
-                showToast("認領成功！請填寫餐點資訊。", "success");
+                showToast("成功認領該週！", "success");
             } else if (action === 'unavailable') {
                 if (!schedules[dateStr].unavailables.includes(currentUser.name)) {
                     schedules[dateStr].unavailables.push(currentUser.name);
@@ -717,7 +717,7 @@
                 schedules[dateStr].status = 'unassigned';
                 schedules[dateStr].assignee = '';
                 schedules[dateStr].foodName = '';
-                showToast("已取消認領該週", "info");
+                showToast("已取消認領", "info");
             }
 
             syncSchedulesToGAS();
@@ -729,79 +729,116 @@
             renderSchedule();
         }
 
-        function saveFoodInfo(dateStr) {
-            const food = document.getElementById(`food-${dateStr}`).value.trim();
-            
+        function openConfirmFoodModal(dateStr) {
+            const foodInput = document.getElementById(`food-${dateStr}`);
+            const food = foodInput ? foodInput.value.trim() : '';
             if (!food) {
-                showToast("請填寫餐點名稱！", "error");
+                showToast("請輸入餐點名稱！", "error");
                 return;
             }
 
-            if(schedules[dateStr] && schedules[dateStr].assignee === currentUser.name) {
+            pendingFoodSaveDateStr = dateStr;
+            const dateObj = new Date(dateStr);
+            
+            document.getElementById('confirmFoodDate').textContent = `${dateObj.getMonth()+1}/${dateObj.getDate()} (週三)`;
+            document.getElementById('confirmFoodAssignee').textContent = currentUser.name;
+            document.getElementById('confirmFoodName').textContent = food;
+
+            document.getElementById('confirmFoodModal').classList.remove('hidden');
+            lucide.createIcons();
+        }
+
+        function closeConfirmFoodModal() {
+            document.getElementById('confirmFoodModal').classList.add('hidden');
+            pendingFoodSaveDateStr = null;
+        }
+
+        function executeSaveFoodInfo() {
+            const dateStr = pendingFoodSaveDateStr;
+            if (!dateStr) return;
+
+            const foodInput = document.getElementById(`food-${dateStr}`);
+            const food = foodInput ? foodInput.value.trim() : '';
+            if (schedules[dateStr] && schedules[dateStr].assignee === currentUser.name) {
                 schedules[dateStr].foodName = food;
-                delete schedules[dateStr].qty; 
                 foodEditState[dateStr] = false; 
-                syncSchedulesToGAS();
-                showToast("餐點資訊已儲存！", "success");
+
+                syncSchedulesToGAS(true, {
+                    dateStr: dateStr,
+                    assignee: currentUser.name,
+                    foodName: food
+                });
+
+                closeConfirmFoodModal();
+                showToast("餐點資訊已儲存並同步推播！", "success");
                 renderAll(); 
             }
         }
 
-        // ==========================================
-        // Restaurants Rendering & Logic
-        // ==========================================
+        async function syncSchedulesToGAS(notifyLine = false, notifyData = null) {
+            saveSchedulesToLocal();
+            if (!GAS_API_URL || GAS_API_URL.trim() === '') return;
+
+            try {
+                await fetch(GAS_API_URL, {
+                    method: 'POST',
+                    mode: 'no-cors',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ 
+                        action: 'saveSchedules', 
+                        schedules: schedules,
+                        notifyLine: notifyLine,
+                        notifyData: notifyData
+                    })
+                });
+            } catch (err) {
+                console.error("Sync Schedules Error:", err);
+            }
+        }
+
         function renderRestaurants() {
             const container = document.getElementById('restaurant-list');
+            if (!container) return;
             container.innerHTML = '';
 
             if (restaurants.length === 0) {
-                container.innerHTML = '<p class="text-center text-slate-400 text-sm py-8">目前還沒有推薦餐廳，快來新增吧！</p>';
+                container.innerHTML = '<p class="col-span-1 sm:col-span-2 text-center text-slate-400 text-xs py-8">目前尚無推薦餐廳，點選右上角新增！</p>';
                 return;
             }
 
             restaurants.forEach(res => {
                 const html = `
-                    <div class="glass p-5 rounded-2xl shadow-sm border border-pink-100 flex flex-col gap-3 relative overflow-hidden group">
-                        <div class="absolute -right-4 -bottom-4 opacity-[0.03] group-hover:scale-110 transition-transform duration-500 pointer-events-none">
-                            <i data-lucide="utensils" class="w-32 h-32 text-pink-900"></i>
+                    <div class="glass p-3.5 rounded-2xl shadow-sm border border-pink-100 flex flex-col justify-between gap-2.5 relative overflow-hidden group">
+                        <div class="flex justify-between items-start pr-12">
+                            <div>
+                                <h3 class="font-bold text-slate-800 text-sm leading-snug">${res.name}</h3>
+                                <span class="inline-block mt-1 text-[10px] font-bold text-pink-600 bg-pink-50 px-2 py-0.5 rounded-md border border-pink-100">${res.category || '其他'}</span>
+                            </div>
                         </div>
-                        <div class="flex justify-between items-start">
-                            <h3 class="font-bold text-slate-800 text-lg">${res.name}</h3>
-                            <span class="text-xs font-bold text-pink-600 bg-pink-50 px-2 py-1 rounded-md border border-pink-100">${res.price}</span>
-                        </div>
-                        <div class="space-y-1.5 text-sm relative z-10">
-                            <p class="flex items-start gap-2 text-slate-600">
-                                <i data-lucide="check-circle" class="w-4 h-4 text-emerald-500 shrink-0 mt-0.5"></i>
-                                <span><span class="font-bold text-slate-500 mr-1">推薦:</span>${res.items}</span>
+                        <div class="space-y-1.5 text-xs relative z-10">
+                            <p class="flex items-center gap-1 text-slate-600 text-[11px]">
+                                <i data-lucide="truck" class="w-3.5 h-3.5 text-blue-500 shrink-0"></i>
+                                <span>${res.method}</span>
                             </p>
-                            <p class="flex items-start gap-2 text-slate-600">
-                                <i data-lucide="truck" class="w-4 h-4 text-blue-500 shrink-0 mt-0.5"></i>
-                                <span><span class="font-bold text-slate-500 mr-1">方式:</span>${res.method}</span>
-                            </p>
-                            ${res.phone ? `
-                            <p class="flex items-start gap-2 text-slate-600 mt-1">
-                                <i data-lucide="phone" class="w-4 h-4 text-slate-400 shrink-0 mt-0.5"></i>
-                                <span>${res.phone}</span>
-                            </p>` : ''}
 
                             ${res.notes ? `
-                            <p class="flex items-start gap-2 text-slate-600 bg-white/50 p-2 rounded-lg border border-slate-100 mt-2 text-xs">
+                            <p class="flex items-start gap-1 text-slate-600 bg-white/60 p-1.5 rounded-lg border border-slate-100 text-[11px]">
                                 <i data-lucide="info" class="w-3.5 h-3.5 text-amber-500 shrink-0 mt-0.5"></i>
-                                <span>${res.notes}</span>
+                                <span class="break-words">${res.notes}</span>
                             </p>
                             ` : ''}
 
-                            <div class="flex gap-2 mt-3 pt-2 border-t border-slate-100/50">
-                                <a href="https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(res.name)}" target="_blank" class="flex-1 flex justify-center items-center gap-1 bg-green-50 text-green-600 py-2 rounded-lg text-xs font-bold border border-green-100 hover:bg-green-100 transition shadow-sm active:scale-95"><i data-lucide="map" class="w-3.5 h-3.5"></i> Google Map</a>
-                                ${res.lineUrl ? `<a href="${res.lineUrl}" target="_blank" class="flex-1 flex justify-center items-center gap-1 bg-[#06C755]/10 text-[#06C755] py-2 rounded-lg text-xs font-bold border border-[#06C755]/20 hover:bg-[#06C755]/20 transition shadow-sm active:scale-95"><i data-lucide="message-circle" class="w-3.5 h-3.5"></i> LINE@</a>` : ''}
+                            <div class="flex gap-1.5 mt-2 pt-2 border-t border-slate-100">
+                                <a href="https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(res.name)}" target="_blank" class="flex-1 flex justify-center items-center gap-1 bg-emerald-50 text-emerald-600 py-1 rounded-lg text-xs font-bold border border-emerald-100 hover:bg-emerald-100 transition shadow-sm active:scale-95"><i data-lucide="map-pin" class="w-3.5 h-3.5"></i> 地圖</a>
+                                ${res.lineUrl ? `<a href="${res.lineUrl}" target="_blank" class="flex-1 flex justify-center items-center gap-1 bg-[#06C755]/10 text-[#06C755] py-1 rounded-lg text-xs font-bold border border-[#06C755]/20 hover:bg-[#06C755]/20 transition shadow-sm active:scale-95"><i data-lucide="message-circle" class="w-3.5 h-3.5"></i> LINE@</a>` : ''}
                             </div>
                         </div>
-                        <div class="absolute top-3 right-3 flex flex-col gap-1.5 z-20">
-                            <button onclick="attemptEditRestaurant(${res.id})" class="p-1.5 bg-white/90 text-slate-500 rounded-md hover:bg-slate-100 hover:text-purple-600 border border-slate-200 shadow-sm transition-colors opacity-70 hover:opacity-100">
-                                <i data-lucide="edit-2" class="w-3.5 h-3.5"></i>
+                        <div class="absolute top-2.5 right-2.5 flex gap-1 z-20">
+                            <button onclick="attemptEditRestaurant(${res.id})" class="p-1 bg-white/90 text-slate-500 rounded-md hover:bg-slate-100 hover:text-purple-600 border border-slate-200 shadow-sm transition-colors opacity-80 hover:opacity-100">
+                                <i data-lucide="edit-2" class="w-3 h-3"></i>
                             </button>
-                            <button onclick="deleteRestaurant(${res.id})" class="p-1.5 bg-rose-50/90 text-rose-400 rounded-md hover:bg-rose-100 hover:text-rose-600 border border-rose-100 shadow-sm transition-colors opacity-70 hover:opacity-100">
-                                <i data-lucide="trash-2" class="w-3.5 h-3.5"></i>
+                            <button onclick="deleteRestaurant(${res.id})" class="p-1 bg-rose-50/90 text-rose-400 rounded-md hover:bg-rose-100 hover:text-rose-600 border border-rose-100 shadow-sm transition-colors opacity-80 hover:opacity-100">
+                                <i data-lucide="trash-2" class="w-3 h-3"></i>
                             </button>
                         </div>
                     </div>
@@ -811,27 +848,47 @@
             lucide.createIcons();
         }
 
+        function handleCategoryChange() {
+            const select = document.getElementById('resCategory');
+            const customInput = document.getElementById('resCustomCategory');
+            if (select.value === '__custom__') {
+                customInput.classList.remove('hidden');
+                customInput.focus();
+            } else {
+                customInput.classList.add('hidden');
+            }
+        }
+
         function openRestaurantModal(isEdit = false, resData = null) {
             const form = document.getElementById('addRestaurantForm');
             const titleText = document.getElementById('modalTitleText');
+            const customCatInput = document.getElementById('resCustomCategory');
+            customCatInput.classList.add('hidden');
             
             if (isEdit && resData) {
                 editingRestaurantId = resData.id;
                 titleText.textContent = "編輯推薦餐廳";
                 document.getElementById('resName').value = resData.name || '';
-                document.getElementById('resPrice').value = resData.price || '';
-                document.getElementById('resPhone').value = resData.phone || '';
+                
+                const catSelect = document.getElementById('resCategory');
+                if (['麵食', '健康餐', '火鍋', '便當'].includes(resData.category)) {
+                    catSelect.value = resData.category;
+                } else {
+                    catSelect.value = '__custom__';
+                    customCatInput.value = resData.category || '';
+                    customCatInput.classList.remove('hidden');
+                }
+
                 document.getElementById('resLineUrl').value = resData.lineUrl || '';
-                document.getElementById('resItems').value = resData.items || '';
                 document.getElementById('resMethod').value = resData.method || '店家自送';
                 document.getElementById('resNotes').value = resData.notes || '';
                 
-                document.getElementById('btnSubmitRestaurant').innerHTML = '<i data-lucide="check-circle" class="w-5 h-5"></i> 儲存修改';
+                document.getElementById('btnSubmitRestaurant').innerHTML = '<i data-lucide="check-circle" class="w-4 h-4"></i> 儲存修改';
             } else {
                 editingRestaurantId = null;
                 titleText.textContent = "新增推薦餐廳";
                 form.reset();
-                document.getElementById('btnSubmitRestaurant').innerHTML = '<i data-lucide="plus-circle" class="w-5 h-5"></i> 新增至口袋名單';
+                document.getElementById('btnSubmitRestaurant').innerHTML = '<i data-lucide="plus-circle" class="w-4 h-4"></i> 新增至口袋名單';
             }
             
             document.getElementById('restaurantModal').classList.remove('hidden');
@@ -861,13 +918,17 @@
 
         function submitRestaurant(e) {
             e.preventDefault();
+
+            let categoryVal = document.getElementById('resCategory').value;
+            if (categoryVal === '__custom__') {
+                categoryVal = document.getElementById('resCustomCategory').value.trim() || '其他';
+            }
+
             const newRes = {
                 id: editingRestaurantId || Date.now(),
                 name: document.getElementById('resName').value.trim(),
-                price: document.getElementById('resPrice').value.trim(),
-                phone: document.getElementById('resPhone').value.trim(),
+                category: categoryVal,
                 lineUrl: document.getElementById('resLineUrl').value.trim(),
-                items: document.getElementById('resItems').value.trim(),
                 method: document.getElementById('resMethod').value,
                 notes: document.getElementById('resNotes').value.trim(),
                 timestamp: Date.now()
@@ -881,7 +942,7 @@
                 }
             } else {
                 restaurants.unshift(newRes);
-                showToast("已成功新增推薦餐廳！", "success");
+                showToast("已新增至口袋名單！", "success");
             }
 
             syncRestaurantsToGAS();
@@ -893,7 +954,145 @@
             restaurants = restaurants.filter(r => r.id !== id);
             syncRestaurantsToGAS();
             renderRestaurants();
-            showToast("已刪除餐廳", "info");
+            showToast("已刪除該餐廳", "info");
+        }
+
+        async function syncRestaurantsToGAS() {
+            saveRestaurantsToLocal();
+            if (!GAS_API_URL || GAS_API_URL.trim() === '') return;
+
+            try {
+                await fetch(GAS_API_URL, {
+                    method: 'POST',
+                    mode: 'no-cors',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ action: 'saveRestaurants', restaurants: restaurants })
+                });
+            } catch (err) {
+                console.error("Sync Restaurants Error:", err);
+            }
+        }
+
+        function openPastSchedulesModal() {
+            const list = document.getElementById('past-schedule-list');
+            if (!list) return;
+            list.innerHTML = '';
+
+            const pastWeds = getPastWednesdays(4);
+            pastWeds.forEach(dateStr => {
+                const dateObj = new Date(dateStr);
+                const displayDate = `${dateObj.getMonth()+1}/${dateObj.getDate()}`;
+                const slot = schedules[dateStr] || { status: 'unassigned' };
+
+                const html = `
+                    <div class="glass p-3 rounded-2xl border border-slate-200/80 flex justify-between items-center bg-white/70">
+                        <div class="flex items-center gap-2.5">
+                            <div class="bg-slate-100 text-slate-600 rounded-xl p-1.5 flex flex-col items-center justify-center min-w-[45px]">
+                                <span class="text-[9px] font-bold text-slate-400">週三</span>
+                                <span class="text-xs font-bold leading-none mt-0.5">${displayDate}</span>
+                            </div>
+                            <div>
+                                <h4 class="text-xs font-bold text-slate-800">${slot.assignee || '無人認領'}</h4>
+                                <p class="text-[11px] text-purple-600 font-bold mt-0.5">${slot.foodName || '未紀錄餐點'}</p>
+                            </div>
+                        </div>
+                        <span class="text-[10px] font-bold px-2 py-0.5 rounded-md ${slot.status === 'claimed' ? 'bg-emerald-50 text-emerald-600 border border-emerald-100' : 'bg-slate-100 text-slate-400'}">
+                            ${slot.status === 'claimed' ? '已完成' : '未認領'}
+                        </span>
+                    </div>
+                `;
+                list.innerHTML += html;
+            });
+
+            document.getElementById('pastSchedulesModal').classList.remove('hidden');
+            document.body.style.overflow = 'hidden';
+            lucide.createIcons();
+        }
+
+        function closePastSchedulesModal() {
+            document.getElementById('pastSchedulesModal').classList.add('hidden');
+            document.body.style.overflow = '';
+        }
+
+        function openPasswordModal(callback) {
+            passwordSuccessCallback = callback;
+            document.getElementById('actionPassword').value = '';
+            document.getElementById('passwordModal').classList.remove('hidden');
+        }
+
+        function closePasswordModal() {
+            document.getElementById('passwordModal').classList.add('hidden');
+            passwordSuccessCallback = null;
+        }
+
+        function submitPassword() {
+            const pwd = document.getElementById('actionPassword').value;
+            if (pwd === 'YSA2026') {
+                closePasswordModal();
+                if (passwordSuccessCallback) passwordSuccessCallback();
+            } else {
+                showToast("密碼錯誤，請重新輸入", "error");
+            }
+        }
+
+        function openIdentityModal() {
+            document.getElementById('identityName').value = '';
+            document.getElementById('identityModal').classList.remove('hidden');
+        }
+
+        function closeIdentityModal() {
+            document.getElementById('identityModal').classList.add('hidden');
+            pendingDateStr = null;
+            pendingActionType = null;
+        }
+
+        function submitIdentity(e) {
+            e.preventDefault();
+            const name = document.getElementById('identityName').value.trim();
+            if (name) {
+                currentUser.name = name;
+                saveUser();
+                closeIdentityModal();
+                showToast("已認領您的姓名！", "success");
+                
+                if (pendingDateStr && pendingActionType) {
+                    executeScheduleAction(pendingDateStr, pendingActionType);
+                    pendingDateStr = null;
+                    pendingActionType = null;
+                } else {
+                    renderAll();
+                }
+            }
+        }
+
+        function showToast(message, type = 'info', duration = 3000) {
+            const toast = document.getElementById('toastNotification');
+            const toastMessage = document.getElementById('toastMessage');
+            const toastIcon = document.getElementById('toastIcon');
+
+            if (!toast) return;
+
+            toastMessage.textContent = message;
+            if (type === 'success') {
+                toastIcon.setAttribute('data-lucide', 'check-circle-2');
+                toastIcon.className = "w-5 h-5 shrink-0 text-emerald-400";
+            } else if (type === 'error') {
+                toastIcon.setAttribute('data-lucide', 'alert-circle');
+                toastIcon.className = "w-5 h-5 shrink-0 text-rose-400";
+            } else {
+                toastIcon.setAttribute('data-lucide', 'info');
+                toastIcon.className = "w-5 h-5 shrink-0 text-purple-400";
+            }
+            lucide.createIcons();
+
+            toast.classList.remove('-translate-y-24', 'opacity-0');
+            toast.classList.add('translate-y-0', 'opacity-100');
+
+            clearTimeout(toastTimeout);
+            toastTimeout = setTimeout(() => {
+                toast.classList.remove('translate-y-0', 'opacity-100');
+                toast.classList.add('-translate-y-24', 'opacity-0');
+            }, duration);
         }
     </script>
 </body>
