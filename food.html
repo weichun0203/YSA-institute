@@ -97,7 +97,9 @@
 
             <!-- 重新整理功能 -->
             <button id="refreshBtn" onclick="loadDataFromGASOrLocal();" class="p-2 bg-white hover:bg-purple-50 text-purple-600 rounded-full shadow-sm border border-purple-100 transition-all active:scale-90 shrink-0 flex items-center justify-center">
-                <i data-lucide="refresh-cw" id="refreshIcon" class="w-4 h-4"></i>
+                <span id="refreshSpinner" class="inline-flex items-center justify-center">
+                    <i data-lucide="refresh-cw" class="w-4 h-4"></i>
+                </span>
             </button>
         </div>
     </div>
@@ -181,8 +183,8 @@
 
                     <div class="grid grid-cols-2 gap-3">
                         <div>
-                            <label class="block text-xs font-bold text-slate-600 mb-1">LINE@ 連結 (選填)</label>
-                            <input type="url" id="resLineUrl" placeholder="https://lin.ee/..." class="w-full px-3.5 py-2.5 rounded-xl bg-white border border-slate-200 focus:ring-2 focus:ring-pink-300 outline-none text-sm shadow-sm">
+                            <label class="block text-xs font-bold text-slate-600 mb-1">訂餐連結 (選填)</label>
+                            <input type="url" id="resLineUrl" placeholder="https://..." class="w-full px-3.5 py-2.5 rounded-xl bg-white border border-slate-200 focus:ring-2 focus:ring-pink-300 outline-none text-sm shadow-sm">
                         </div>
                         <div>
                             <label class="block text-xs font-bold text-slate-600 mb-1">購買方式</label>
@@ -260,26 +262,6 @@
         </div>
     </div>
 
-    <!-- 密碼驗證 Modal -->
-    <div id="passwordModal" class="fixed inset-0 z-50 hidden flex items-center justify-center bg-slate-900/60 backdrop-blur-sm transition-opacity p-4">
-        <div class="glass-strong w-full max-w-xs rounded-3xl p-5 relative shadow-2xl animate-fade-in">
-            <div class="flex flex-col items-center text-center mb-4 mt-1">
-                <div class="w-10 h-10 bg-rose-100 text-rose-500 rounded-full flex items-center justify-center mb-2">
-                    <i data-lucide="lock" class="w-5 h-5"></i>
-                </div>
-                <h3 class="text-base font-bold text-slate-800">需要權限密碼</h3>
-                <p class="text-xs text-slate-500 mt-0.5">請輸入通行密碼以執行此操作</p>
-            </div>
-            
-            <input type="password" id="actionPassword" placeholder="輸入密碼..." class="w-full px-3.5 py-2.5 rounded-xl bg-white border border-slate-200 focus:ring-2 focus:ring-rose-300 outline-none text-center font-bold tracking-widest text-slate-700 text-sm mb-3">
-            
-            <div class="flex gap-2">
-                <button onclick="closePasswordModal()" class="flex-1 py-2 bg-slate-100 text-slate-500 font-bold text-xs rounded-xl hover:bg-slate-200 transition-colors">取消</button>
-                <button onclick="submitPassword()" class="flex-1 py-2 bg-rose-500 text-white font-bold text-xs rounded-xl shadow-md hover:bg-rose-600 active:scale-95 transition-transform">確認</button>
-            </div>
-        </div>
-    </div>
-
     <!-- 身分認領 Modal -->
     <div id="identityModal" class="fixed inset-0 z-50 hidden flex items-center justify-center bg-slate-900/60 backdrop-blur-sm transition-opacity p-4">
         <div class="glass-strong w-full max-w-xs rounded-3xl p-5 relative shadow-2xl animate-fade-in">
@@ -305,7 +287,7 @@
     <!-- ==================== JAVASCRIPT ==================== -->
     <script>
         // 後端 GAS API 網址
-        const GAS_API_URL = 'https://script.google.com/macros/s/AKfycbwl4-pD1TlRe6OTdxJ3V1QrrBGSUCiA5mHeC7YbMn94AgYgyERmmHBr6XJSV0KVBEWbWg/exec'; 
+        const GAS_API_URL = 'https://script.google.com/macros/s/AKfycbxtDV9WVgQwAMd5FsEPUzCCvjHNzw9d0vPqAfk0aif_lTLWziZn2m_zpFbMRFuG0A7Xog/exec'; 
         
         let currentUser = { name: '' };
         let schedules = {}; 
@@ -314,7 +296,6 @@
         
         let editingRestaurantId = null;
         let foodEditState = {}; 
-        let passwordSuccessCallback = null;
         let pendingDateStr = null;
         let pendingActionType = null;
         let pendingFoodSaveDateStr = null;
@@ -376,8 +357,8 @@
         }
 
         async function loadDataFromGASOrLocal() {
-            const refreshIcon = document.getElementById('refreshIcon');
-            if (refreshIcon) refreshIcon.classList.add('animate-spin');
+            const spinner = document.getElementById('refreshSpinner');
+            if (spinner) spinner.classList.add('animate-spin');
 
             try {
                 if (GAS_API_URL && GAS_API_URL.trim() !== '') {
@@ -401,8 +382,7 @@
                 loadLocalData();
                 showToast("連線失敗，已載入本機預設資料", "error");
             } finally {
-                // 確保無論成功或失敗，更新結束後一定會停止轉動
-                if (refreshIcon) refreshIcon.classList.remove('animate-spin');
+                if (spinner) spinner.classList.remove('animate-spin');
                 renderAll();
             }
         }
@@ -831,7 +811,7 @@
 
                             <div class="flex gap-1.5 mt-2 pt-2 border-t border-slate-100">
                                 <a href="https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(res.name)}" target="_blank" class="flex-1 flex justify-center items-center gap-1 bg-emerald-50 text-emerald-600 py-1 rounded-lg text-xs font-bold border border-emerald-100 hover:bg-emerald-100 transition shadow-sm active:scale-95"><i data-lucide="map-pin" class="w-3.5 h-3.5"></i> 地圖</a>
-                                ${res.lineUrl ? `<a href="${res.lineUrl}" target="_blank" class="flex-1 flex justify-center items-center gap-1 bg-[#06C755]/10 text-[#06C755] py-1 rounded-lg text-xs font-bold border border-[#06C755]/20 hover:bg-[#06C755]/20 transition shadow-sm active:scale-95"><i data-lucide="message-circle" class="w-3.5 h-3.5"></i> LINE@</a>` : ''}
+                                ${res.lineUrl ? `<a href="${res.lineUrl}" target="_blank" class="flex-1 flex justify-center items-center gap-1 bg-[#06C755]/10 text-[#06C755] py-1 rounded-lg text-xs font-bold border border-[#06C755]/20 hover:bg-[#06C755]/20 transition shadow-sm active:scale-95"><i data-lucide="external-link" class="w-3.5 h-3.5"></i> 訂餐連結</a>` : ''}
                             </div>
                         </div>
                         <div class="absolute top-2.5 right-2.5 flex gap-1 z-20">
@@ -906,15 +886,7 @@
         function attemptEditRestaurant(id) {
             const res = restaurants.find(r => r.id === id);
             if (!res) return;
-            
-            const timePassed = Date.now() - (res.timestamp || 0);
-            if (timePassed > 600000) {
-                openPasswordModal(() => {
-                    openRestaurantModal(true, res);
-                });
-            } else {
-                openRestaurantModal(true, res);
-            }
+            openRestaurantModal(true, res);
         }
 
         function submitRestaurant(e) {
@@ -1013,29 +985,6 @@
         function closePastSchedulesModal() {
             document.getElementById('pastSchedulesModal').classList.add('hidden');
             document.body.style.overflow = '';
-        }
-
-        function openPasswordModal(callback) {
-            passwordSuccessCallback = callback;
-            document.getElementById('actionPassword').value = '';
-            document.getElementById('passwordModal').classList.remove('hidden');
-        }
-
-        function closePasswordModal() {
-            document.getElementById('passwordModal').classList.add('hidden');
-            passwordSuccessCallback = null;
-        }
-
-        function submitPassword() {
-            const pwd = document.getElementById('actionPassword').value;
-            if (pwd === 'YSA2026') {
-                // 先把要執行的函式存起來，再關閉視窗 (關閉視窗會清空變數)
-                const callback = passwordSuccessCallback;
-                closePasswordModal();
-                if (callback) callback();
-            } else {
-                showToast("密碼錯誤，請重新輸入", "error");
-            }
         }
 
         function openIdentityModal() {
